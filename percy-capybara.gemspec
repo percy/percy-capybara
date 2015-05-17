@@ -22,4 +22,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler', '~> 1.7'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.2'
+  spec.add_development_dependency 'capybara', '~> 2.4'
+  spec.add_development_dependency 'selenium-webdriver', '~> 2.45'
 end
