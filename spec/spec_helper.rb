@@ -1,6 +1,7 @@
 require 'capybara/rspec'
+require 'capybara/webkit'
+require 'webmock/rspec'
 require 'support/test_helpers'
-
 require 'percy'
 require 'percy/capybara'
 
@@ -31,5 +32,11 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 
-  Capybara.run_server = false
+  Capybara.javascript_driver = :webkit
+
+  config.around(:each) do |example|
+    WebMock.reset!
+    WebMock.disable_net_connect!(allow_localhost: true)
+    example.run
+  end
 end

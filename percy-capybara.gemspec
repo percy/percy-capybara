@@ -23,5 +23,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.2'
   spec.add_development_dependency 'capybara', '~> 2.4'
-  spec.add_development_dependency 'selenium-webdriver', '~> 2.45'
+  spec.add_development_dependency 'capybara-webkit', '~> 1.5'
+  spec.add_development_dependency 'webmock', '~> 1'
 end

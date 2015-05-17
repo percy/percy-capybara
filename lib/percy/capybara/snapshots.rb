@@ -6,12 +6,18 @@ module Percy
       def snapshot(page, options = {})
         name = options[:name]
         current_build_id = current_build['data']['id']
-        resources = _find_resources(page)
-        client.create_snapshot(build['data']['id'], resources, name: name)
+        resource_map = _find_resources(page)
+        snapshot = client.create_snapshot(current_build_id, resource_map.values, name: name)
+
+        # Upload the content for any missing resources.
+        snapshot['data']['links']['missing-resources']['linkage'].each do |missing_resource|
+          sha = missing_resource['id']
+          client.upload_resource(current_build_id, resource_map[sha].content)
+        end
       end
 
       def _find_resources(page)
-        resources = []
+        resource_map = {}
 
         # Main HTML resource.
         script = <<-JS
@@ -21,12 +27,12 @@ module Percy
         html = _evaluate_script(page, script)
         sha = Digest::SHA256.hexdigest(html)
         resource_url = page.current_url
-        resources << Percy::Client::Resource.new(
+        resource_map[sha] = Percy::Client::Resource.new(
           sha, resource_url, is_root: true, mimetype: 'text/html', content: html)
 
         # ...
 
-        resources
+        resource_map
       end
       private :_find_resources
 
