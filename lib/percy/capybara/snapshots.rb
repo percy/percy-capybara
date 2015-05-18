@@ -47,7 +47,7 @@ module Percy
       def _get_css_resources(page)
         resources = []
         # Find all CSS resources.
-
+        # http://www.quirksmode.org/dom/w3c_css.html#access
         script = <<-JS
           function findStylesRecursively(stylesheet, result_data) {
             result_data = result_data || {};
