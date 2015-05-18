@@ -18,7 +18,7 @@ RSpec.configure do |config|
   end
 
   config.disable_monkey_patching!
-  config.warnings = true
+  # config.warnings = true
 
   # Run specs in random order to surface order dependencies. If you find an
   # order dependency and want to debug it, you can fix the order by providing
@@ -34,9 +34,7 @@ RSpec.configure do |config|
 
   Capybara.javascript_driver = :webkit
 
-  config.around(:each) do |example|
-    WebMock.reset!
-    WebMock.disable_net_connect!(allow_localhost: true)
-    example.run
+  config.before(:all) do
+    WebMock.disable_net_connect!(allow_localhost: true, allow: [/maxcdn.bootstrapcdn.com/])
   end
 end

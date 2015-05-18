@@ -14,7 +14,7 @@ module TestHelpers
 
   def verify_server_up(host)
     http = HTTPClient.new
-    4.times do |_|
+    4.times do
       begin
         http.get(host)
         return true

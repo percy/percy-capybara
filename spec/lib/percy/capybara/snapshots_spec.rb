@@ -3,40 +3,101 @@ require 'digest'
 
 RSpec.describe Percy::Capybara::Snapshots do
   # Start a temp webserver that serves the testdata directory.
-  around(:each) do |example|
-    destination_dir = File.expand_path('../testdata/', __FILE__)
+  # You can test this server manually by running:
+  # ruby -run -e httpd spec/lib/percy/capybara/testdata -p 9090
+  before(:all) do
     port = get_random_open_port
-
     Capybara.app_host = "http://localhost:#{port}"
     Capybara.run_server = false
 
     # Note: using this form of popen to keep stdout and stderr silent and captured.
-    process = IO.popen([
-      'ruby', '-run', '-e', 'httpd', destination_dir, '-p', port.to_s, err: [:child, :out]
+    dir = File.expand_path('../testdata/', __FILE__)
+    @process = IO.popen([
+      'ruby', '-run', '-e', 'httpd', dir, '-p', port.to_s, err: [:child, :out]
     ].flatten)
 
     # Block until the server is up.
     verify_server_up(Capybara.app_host)
-
-    begin
-      example.run
-    ensure
-      Process.kill('INT', process.pid)
-    end
   end
+  after(:all) { Process.kill('INT', @process.pid) }
 
-  describe '#_find_resources', type: :feature, js: true do
+  describe '#_get_root_html_resource', type: :feature, js: true do
     it 'includes the root DOM HTML' do
       visit '/'
       percy_capybara = Percy::Capybara.new
-      resource_map = percy_capybara.send(:_find_resources, page)
+      resource = percy_capybara.send(:_get_root_html_resource, page)
 
-      root_resource = resource_map.values.first
-      expect(root_resource.is_root).to be_truthy
-      expect(root_resource.mimetype).to eq('text/html')
-      expect(root_resource.resource_url).to match(/http:\/\/localhost:\d+\//)
-      expect(root_resource.content).to include('Hello World!')
-      expect(root_resource.sha).to eq(Digest::SHA256.hexdigest(root_resource.content))
+      expect(resource.is_root).to be_truthy
+      expect(resource.mimetype).to eq('text/html')
+      expect(resource.resource_url).to match(/http:\/\/localhost:\d+\//)
+      expect(resource.content).to include('Hello World!')
+      expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
+    end
+  end
+  describe '#_get_css_resources', type: :feature, js: true do
+    it 'includes all linked and imported stylesheets' do
+      # For capybara-webkit.
+      page.driver.respond_to?(:allow_url) && page.driver.allow_url('maxcdn.bootstrapcdn.com')
+
+      visit '/test-css.html'
+      percy_capybara = Percy::Capybara.new
+      resources = percy_capybara.send(:_get_css_resources, page)
+
+      expect(resources.length).to eq(7)
+      expect(resources.collect(&:mimetype).uniq).to eq(['text/css'])
+
+      resource = resources.select do |resource|
+        resource.resource_url.match(/http:\/\/localhost:\d+\/css\/base\.css/)
+      end.fetch(0)
+      expect(resource.is_root).to be_falsey
+
+      expect(resource.content).to include('.colored-by-base { color: red; }')
+      expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
+
+      resource = resources.select do |resource|
+        resource.resource_url.match(/http:\/\/localhost:\d+\/css\/simple-imports\.css/)
+      end.fetch(0)
+      expect(resource.is_root).to be_falsey
+      expect(resource.content).to include('@import url("imports.css")')
+      expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
+
+      resource = resources.select do |resource|
+        resource.resource_url.match(/http:\/\/localhost:\d+\/css\/imports\.css/)
+      end.fetch(0)
+      expect(resource.is_root).to be_falsey
+      expect(resource.content).to include('.colored-by-imports { color: red; }')
+      expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
+
+      resource = resources.select do |resource|
+        resource.resource_url.match(/http:\/\/localhost:\d+\/css\/level0-imports\.css/)
+      end.fetch(0)
+      expect(resource.is_root).to be_falsey
+      expect(resource.content).to include('@import url("level1-imports.css")')
+      expect(resource.content).to include('.colored-by-level0-imports { color: red; }')
+      expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
+
+      resource = resources.select do |resource|
+        resource.resource_url.match(/http:\/\/localhost:\d+\/css\/level1-imports\.css/)
+      end.fetch(0)
+      expect(resource.is_root).to be_falsey
+      expect(resource.content).to include('@import url("level2-imports.css")')
+      expect(resource.content).to include('.colored-by-level1-imports { color: red; }')
+      expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
+
+      resource = resources.select do |resource|
+        resource.resource_url.match(/http:\/\/localhost:\d+\/css\/level2-imports\.css/)
+      end.fetch(0)
+      expect(resource.is_root).to be_falsey
+      expect(resource.content).to include(".colored-by-level2-imports { color: red; }")
+      expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
+
+      resource = resources.select do |resource|
+        resource.resource_url == (
+          'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css')
+      end.fetch(0)
+      expect(resource.is_root).to be_falsey
+      expect(resource.content).to include('Bootstrap v3.3.4 (http://getbootstrap.com)')
+      expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
     end
   end
   describe '#snapshot', type: :feature, js: true do
@@ -56,8 +117,7 @@ RSpec.describe Percy::Capybara::Snapshots do
         stub_request(:post, 'https://percy.io/api/v1/repos/percy/percy-capybara/builds/')
           .to_return(status: 201, body: mock_response.to_json)
 
-        resource_map = percy_capybara.send(:_find_resources, page)
-        sha = resource_map.keys.first
+        resource = percy_capybara.send(:_get_root_html_resource, page)
         mock_response = {
           'data' => {
             'id' => '256',
@@ -68,7 +128,7 @@ RSpec.describe Percy::Capybara::Snapshots do
                 'linkage' => [
                   {
                     'type' => 'resources',
-                    'id' => sha,
+                    'id' => resource.sha,
                   },
                 ],
               },
@@ -79,7 +139,7 @@ RSpec.describe Percy::Capybara::Snapshots do
           .to_return(status: 201, body: mock_response.to_json)
 
         stub_request(:post, "https://percy.io/api/v1/builds/123/resources/")
-          .with(body: /#{sha}/).to_return(status: 201, body: {success: true}.to_json)
+          .with(body: /#{resource.sha}/).to_return(status: 201, body: {success: true}.to_json)
 
         resource_map = percy_capybara.snapshot(page)
       end
