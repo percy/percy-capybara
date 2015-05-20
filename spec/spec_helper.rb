@@ -32,6 +32,7 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 
+  # Comment this out to test the default Selenium/Firefox flow:
   Capybara.javascript_driver = :webkit
 
   config.before(:all) do
