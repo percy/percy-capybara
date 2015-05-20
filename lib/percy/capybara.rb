@@ -11,6 +11,7 @@ module Percy
 
     # {include:Percy::Capybara::Client::Snapshots#snapshot}
     # @param (see Percy::Capybara::Client::Snapshots#snapshot)
+    # @option (see Percy::Capybara::Client::Snapshots#snapshot)
     # @see Percy::Capybara::Client::Snapshots#snapshot
     def self.snapshot(page, options = {})
       capybara_client.snapshot(page, options)
@@ -32,7 +33,7 @@ module Percy
     # This must be called to indicate that the build is complete after all snapshots have been
     # taken. It will silently return if no build or snapshots were created.
     #
-    # @see Percy::Capybara::Client::Builds#finalize_build
+    # @see Percy::Capybara::Client::Builds#finalize_current_build
     def self.finalize_build
       return if !capybara_client.build_initialized?
       capybara_client.finalize_current_build
