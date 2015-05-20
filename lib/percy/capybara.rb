@@ -1,4 +1,4 @@
-require 'percy/client'
+require 'percy'
 require 'percy/capybara/version'
 require 'percy/capybara/client'
 
