@@ -1,7 +1,9 @@
 require 'json'
 require 'digest'
 
-RSpec.describe Percy::Capybara::Snapshots do
+RSpec.describe Percy::Capybara::Client::Snapshots do
+  let(:capybara_client) { Percy::Capybara::Client.new }
+
   # Start a temp webserver that serves the testdata directory.
   # You can test this server manually by running:
   # ruby -run -e httpd spec/lib/percy/capybara/testdata -p 9090
@@ -24,8 +26,7 @@ RSpec.describe Percy::Capybara::Snapshots do
   describe '#_get_root_html_resource', type: :feature, js: true do
     it 'includes the root DOM HTML' do
       visit '/'
-      percy_capybara = Percy::Capybara.new
-      resource = percy_capybara.send(:_get_root_html_resource, page)
+      resource = capybara_client.send(:_get_root_html_resource, page)
 
       expect(resource.is_root).to be_truthy
       expect(resource.mimetype).to eq('text/html')
@@ -40,8 +41,7 @@ RSpec.describe Percy::Capybara::Snapshots do
       page.driver.respond_to?(:allow_url) && page.driver.allow_url('maxcdn.bootstrapcdn.com')
 
       visit '/test-css.html'
-      percy_capybara = Percy::Capybara.new
-      resources = percy_capybara.send(:_get_css_resources, page)
+      resources = capybara_client.send(:_get_css_resources, page)
 
       expect(resources.length).to eq(7)
       expect(resources.collect(&:mimetype).uniq).to eq(['text/css'])
@@ -106,7 +106,6 @@ RSpec.describe Percy::Capybara::Snapshots do
 
       it 'creates a snapshot and uploads missing resource' do
         visit '/'
-        percy_capybara = Percy::Capybara.new
 
         mock_response = {
           'data' => {
@@ -117,7 +116,7 @@ RSpec.describe Percy::Capybara::Snapshots do
         stub_request(:post, 'https://percy.io/api/v1/repos/percy/percy-capybara/builds/')
           .to_return(status: 201, body: mock_response.to_json)
 
-        resource = percy_capybara.send(:_get_root_html_resource, page)
+        resource = capybara_client.send(:_get_root_html_resource, page)
         mock_response = {
           'data' => {
             'id' => '256',
@@ -141,7 +140,7 @@ RSpec.describe Percy::Capybara::Snapshots do
         stub_request(:post, "https://percy.io/api/v1/builds/123/resources/")
           .with(body: /#{resource.sha}/).to_return(status: 201, body: {success: true}.to_json)
 
-        resource_map = percy_capybara.snapshot(page)
+        resource_map = capybara_client.snapshot(page)
       end
     end
   end
