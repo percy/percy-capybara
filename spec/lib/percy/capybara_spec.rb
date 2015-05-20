@@ -13,7 +13,7 @@ RSpec.describe Percy::Capybara do
     it 'passes all arguments through to the current capybara_client' do
       mock_page = double('page')
       capybara_client = Percy::Capybara.capybara_client
-      expect(capybara_client).to receive(:snapshot).with(mock_page).once
+      expect(capybara_client).to receive(:snapshot).with(mock_page, {}).once
       Percy::Capybara.snapshot(mock_page)
       expect(capybara_client).to receive(:snapshot).with(mock_page, name: '/foo.html (modal)').once
       Percy::Capybara.snapshot(mock_page, name: '/foo.html (modal)')
