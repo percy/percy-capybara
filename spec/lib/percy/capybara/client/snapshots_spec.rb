@@ -31,7 +31,11 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
   end
 
   def find_resource(resources, regex)
-    resources.select { |resource| resource.resource_url.match(regex) }.fetch(0)
+    begin
+      resources.select { |resource| resource.resource_url.match(regex) }.fetch(0)
+    rescue IndexError
+      raise "Missing expected image with resource_url that matches: #{regex}"
+    end
   end
 
   describe '#_get_root_html_resource', type: :feature, js: true do
@@ -111,8 +115,8 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
       expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
       expect(resource.sha).to eq(expected_sha)
 
-      resource = find_resource(resources, /https:\/\/percy.io\/images\/percy.svg/)
-      content = Faraday.get('https://percy.io/images/percy.svg').body
+      resource = find_resource(resources, /http:\/\/localhost:\d+\/images\/percy\.svg/)
+      content = File.read(File.expand_path('../testdata/images/percy.svg', __FILE__))
       expect(resource.mimetype).to eq('image/svg+xml')
       expected_sha = Digest::SHA256.hexdigest(content)
       expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
