@@ -1,3 +1,4 @@
+require 'set'
 require 'faraday'
 require 'httpclient'
 require 'digest'
@@ -121,8 +122,93 @@ module Percy
         private :_get_css_resources
 
         # @private
+        def _get_image_resources(page)
+          resources = []
+          image_urls = Set.new
+
+          # TODO: support for srcsets.
+
+          # Find all image tags on the page.
+          page.all('img').each do |image_element|
+            if !image_element[:src].nil?
+              src = image_element[:src]
+              # Skip data URIs.
+              next if src.match(/\Adata:/)
+              image_urls << src
+            end
+          end
+
+          # Find all CSS-loaded images which set a background-image.
+          script = <<-JS
+            var raw_image_urls = [];
+
+            var tags = document.getElementsByTagName('*');
+            var el;
+            var rawValue;
+
+            for (var i = 0; i < tags.length; i++) {
+              el = tags[i];
+              if (el.currentStyle) {
+                rawValue = el.currentStyle['backgroundImage'];
+              } else if (window.getComputedStyle) {
+                rawValue = window.getComputedStyle(el).getPropertyValue('background-image');
+              }
+              if (!rawValue || rawValue === "none") {
+                continue;
+              } else {
+                raw_image_urls.push(rawValue);
+              }
+            }
+            return raw_image_urls;
+          JS
+          raw_image_urls = _evaluate_script(page, script)
+          raw_image_urls.each do |raw_image_url|
+            temp_urls = raw_image_url.scan(/url\(["']?(.*?)["']?\)/)
+            if !temp_urls.empty?
+              # background-image can accept multiple url()s, so temp_urls is an array of URLs.
+              temp_urls.each do |temp_url|
+                # Skip data URIs.
+                next if temp_url[0].match(/\Adata:/)
+                image_urls << temp_url[0]
+              end
+            end
+          end
+
+          image_urls.each do |image_url|
+            # Make the resource URL absolute to the current page. If it is already absolute, this
+            # will have no effect.
+            resource_url = URI.join(page.current_url, image_url).to_s
+
+            # Fetch the images.
+            # TODO(fotinakis): this can be pretty inefficient for image-heavy pages because the
+            # browser has already loaded them once and this fetch cannot easily leverage the
+            # browser's cache. However, often these images are probably local resources served by a
+            # development server, so it may not be so bad. Re-evaluate if this becomes an issue.
+            response = _fetch_resource_url(resource_url)
+            next if !response
+
+            sha = Digest::SHA256.hexdigest(response.body)
+            resources << Percy::Client::Resource.new(
+              sha, resource_url, mimetype: response.headers['Content-Type'], content: response.body)
+          end
+          resources
+        end
+        private :_get_image_resources
+
+        # @private
         def _fetch_resource_url(url)
-          response = Faraday.get(url)
+          begin
+            response = Faraday.get(url)
+          rescue Exception => e
+            if defined?(WebMock) && e.is_a?(WebMock::NetConnectNotAllowedError)
+              raise Percy::Capybara::Client::WebMockBlockingConnectionsError.new(
+                "It looks like you're using WebMock! That's great, but in order to use\n" +
+                "Percy::Capybara you need to let connections through WebMock. For example:\n" +
+                "\n" +
+                "config.before(:each, type: :feature) { WebMock.allow_net_connect! }\n"
+              )
+            end
+          end
           content = response.body
           if response.status != 200
             STDERR.puts "[percy] Warning: failed to fetch page resource, this might be a bug: #{url}"
@@ -130,6 +216,7 @@ module Percy
           end
           response
         end
+        private :_fetch_resource_url
 
         # @private
         def _evaluate_script(page, script)

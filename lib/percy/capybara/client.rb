@@ -9,6 +9,7 @@ module Percy
 
       class Error < Exception; end
       class BuildNotInitializedError < Error; end
+      class WebMockBlockingConnectionsError < Error; end
 
       attr_reader :client
 

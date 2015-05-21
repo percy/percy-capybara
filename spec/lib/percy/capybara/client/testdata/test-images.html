@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <title>Test Percy::Capybara</title>
+  <h1>Test images</h1>
+
+  <h2>img local PNG (relative)</h2>
+  <img src="images/img-relative.png">
+
+  <h2>img local PNG (relative to root)</h2>
+  <img src="/images/img-relative-to-root.png">
+
+  <h2>img PNG (remote)</h2>
+  <img src="http://i.imgur.com/Umkjdao.png">
+
+  <h2>img SVG (remote)</h2>
+  <img src="https://percy.io/images/percy.svg" width="300">
+
+  <h2>CSS background-image (relative)</h2>
+  <div style="background-image: url(images/bg-relative.png); width: 200px; height: 200px;"></div>
+
+  <h2>CSS background-image (relative to root)</h2>
+  <div style="background-image: url(/images/bg-relative-to-root.png); width: 200px; height: 200px;"></div>
+
+  <h2>CSS background-image (remote)</h2>
+  <div style="background-image: url(http://i.imgur.com/5mLoBs1.png); width: 408px; height: 376px;"></div>
+
+  <h2>img data-uri (ignored)</h2>
+  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAMAAABHPGVmAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRFVyxjAAAAmU4baAAAACNJREFUeNrswYEAAAAAw6D5U1/hAFUBAAAAAAAAAAAAjwkwACd0AAGLtJfaAAAAAElFTkSuQmCC">
+
+  <h2>CSS background-image data-uri (ignored)</h2>
+  <div style="background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAMAAABHPGVmAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRFVyxjAAAAmU4baAAAACNJREFUeNrswYEAAAAAw6D5U1/hAFUBAAAAAAAAAAAAjwkwACd0AAGLtJfaAAAAAElFTkSuQmCC); width: 100px; height: 100px;"></div>
+
+  <h2>CSS background stacked (local and remote)</h2>
+  <div style="background: url(/images/bg-stacked.png) 200px 200px no-repeat, url('http://i.imgur.com/61AQuplb.jpg'); width: 100px; height: 100px;"></div>
+
+  <h2>Duplicates of some of the above images, to verify they are not duplicated in resources:</h2>
+  <img src="images/img-relative.png">
+  <img src="/images/img-relative-to-root.png">
+  <img src="http://i.imgur.com/Umkjdao.png">
+  <div style="background-image: url(/images/bg-relative-to-root.png); width: 200px; height: 200px;"></div>
+  <div style="background-image: url(http://i.imgur.com/5mLoBs1.png); width: 408px; height: 376px;"></div>
+
+  <!--
+  <h2>img srcset</h2>
+  <img width="300" srcset="/images/jellybeans.png 1200w, /images/lake.png 1300w">
+  -->
+</html>

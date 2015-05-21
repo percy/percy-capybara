@@ -20,7 +20,7 @@ RSpec.describe Percy::Capybara do
     end
   end
   describe '#snapshot' do
-    it 'delgates to Percy::Capybara::Client' do
+    it 'delegates to Percy::Capybara::Client' do
       capybara_client = Percy::Capybara.capybara_client
       expect(capybara_client).to receive(:initialize_build).once
       Percy::Capybara.initialize_build
@@ -30,7 +30,7 @@ RSpec.describe Percy::Capybara do
     it 'returns silently if no build is initialized' do
       expect { Percy::Capybara.finalize_build }.to_not raise_error
     end
-    it 'delgates to Percy::Capybara::Client' do
+    it 'delegates to Percy::Capybara::Client' do
       capybara_client = Percy::Capybara.capybara_client
       build_data = {'data' => {'id' => 123}}
       expect(capybara_client.client).to receive(:create_build).and_return(build_data).once

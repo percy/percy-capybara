@@ -35,7 +35,8 @@ RSpec.configure do |config|
   # Comment this out to test the default Selenium/Firefox flow:
   Capybara.javascript_driver = :webkit
 
-  config.before(:all) do
-    WebMock.disable_net_connect!(allow_localhost: true, allow: [/maxcdn.bootstrapcdn.com/])
+  config.before(:each) do
+    WebMock.disable_net_connect!(allow_localhost: true)
   end
+  config.before(:each, type: :feature) { WebMock.allow_net_connect! }
 end
