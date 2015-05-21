@@ -127,12 +127,18 @@ module Percy
           resources = []
           image_urls = Set.new
 
-          # TODO: support for srcsets.
-
           # Find all image tags on the page.
           page.all('img').each do |image_element|
-            if !image_element[:src].nil?
-              src = image_element[:src]
+            srcs = []
+            srcs << image_element[:src] if !image_element[:src].nil?
+
+            srcset_raw_urls = image_element[:srcset] || ''
+            temp_urls = srcset_raw_urls.split(',')
+            temp_urls.each do |temp_url|
+              srcs << temp_url.split(' ').first
+            end
+
+            srcs.each do |src|
               # Skip data URIs.
               next if src.match(/\Adata:/)
               image_urls << src
@@ -165,13 +171,11 @@ module Percy
           raw_image_urls = _evaluate_script(page, script)
           raw_image_urls.each do |raw_image_url|
             temp_urls = raw_image_url.scan(/url\(["']?(.*?)["']?\)/)
-            if !temp_urls.empty?
-              # background-image can accept multiple url()s, so temp_urls is an array of URLs.
-              temp_urls.each do |temp_url|
-                # Skip data URIs.
-                next if temp_url[0].match(/\Adata:/)
-                image_urls << temp_url[0]
-              end
+            # background-image can accept multiple url()s, so temp_urls is an array of URLs.
+            temp_urls.each do |temp_url|
+              # Skip data URIs.
+              next if temp_url[0].match(/\Adata:/)
+              image_urls << temp_url[0]
             end
           end
 

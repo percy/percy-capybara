@@ -55,10 +55,6 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
       visit '/test-css.html'
       resources = capybara_client.send(:_get_css_resources, page)
 
-      expect(resources.length).to eq(7)
-      expect(resources.collect(&:mimetype).uniq).to eq(['text/css'])
-      expect(resources.collect(&:is_root).uniq).to match_array([nil])
-
       resource = find_resource(resources, /http:\/\/localhost:\d+\/css\/base\.css/)
 
       expect(resource.content).to include('.colored-by-base { color: red; }')
@@ -86,12 +82,14 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
       expect(resource.content).to include(".colored-by-level2-imports { color: red; }")
       expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
 
-      resource = resources.select do |resource|
-        resource.resource_url == (
-          'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css')
-      end.fetch(0)
+      resource = find_resource(
+        resources, /https:\/\/maxcdn.bootstrapcdn.com\/bootstrap\/3.3.4\/css\/bootstrap.min.css/)
       expect(resource.content).to include('Bootstrap v3.3.4 (http://getbootstrap.com)')
       expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
+
+      expect(resources.length).to eq(7)
+      expect(resources.collect(&:mimetype).uniq).to eq(['text/css'])
+      expect(resources.collect(&:is_root).uniq).to match_array([nil])
     end
   end
   describe '#_get_image_resources', type: :feature, js: true do
@@ -164,7 +162,28 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
       expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
       expect(resource.sha).to eq(expected_sha)
 
-      expect(resources.length).to eq(9)
+      resource = find_resource(resources, /http:\/\/localhost:\d+\/images\/srcset-base\.png/)
+      content = File.read(File.expand_path('../testdata/images/srcset-base.png', __FILE__))
+      expect(resource.mimetype).to eq('image/png')
+      expected_sha = Digest::SHA256.hexdigest(content)
+      expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
+      expect(resource.sha).to eq(expected_sha)
+
+      resource = find_resource(resources, /http:\/\/localhost:\d+\/images\/srcset-first\.png/)
+      content = File.read(File.expand_path('../testdata/images/srcset-first.png', __FILE__))
+      expect(resource.mimetype).to eq('image/png')
+      expected_sha = Digest::SHA256.hexdigest(content)
+      expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
+      expect(resource.sha).to eq(expected_sha)
+
+      resource = find_resource(resources, /http:\/\/localhost:\d+\/images\/srcset-second\.png/)
+      content = File.read(File.expand_path('../testdata/images/srcset-second.png', __FILE__))
+      expect(resource.mimetype).to eq('image/png')
+      expected_sha = Digest::SHA256.hexdigest(content)
+      expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
+      expect(resource.sha).to eq(expected_sha)
+
+      expect(resources.length).to eq(12)
       expect(resources.collect(&:is_root).uniq).to match_array([nil])
     end
   end
