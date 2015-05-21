@@ -61,7 +61,7 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
       expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
 
       resource = find_resource(resources, /http:\/\/localhost:\d+\/css\/simple-imports\.css/)
-      expect(resource.content).to include('@import url("imports.css")')
+      expect(resource.content).to include("@import url('imports.css');")
       expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
 
       resource = find_resource(resources, /http:\/\/localhost:\d+\/css\/imports\.css/)
@@ -69,12 +69,12 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
       expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
 
       resource = find_resource(resources, /http:\/\/localhost:\d+\/css\/level0-imports\.css/)
-      expect(resource.content).to include('@import url("level1-imports.css")')
+      expect(resource.content).to include("@import url('level1-imports.css')")
       expect(resource.content).to include('.colored-by-level0-imports { color: red; }')
       expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
 
       resource = find_resource(resources, /http:\/\/localhost:\d+\/css\/level1-imports\.css/)
-      expect(resource.content).to include('@import url("level2-imports.css")')
+      expect(resource.content).to include("@import url('level2-imports.css')")
       expect(resource.content).to include('.colored-by-level1-imports { color: red; }')
       expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
 

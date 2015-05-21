@@ -63,60 +63,47 @@ module Percy
           # Find all CSS resources.
           # http://www.quirksmode.org/dom/w3c_css.html#access
           script = <<-JS
-            function findStylesRecursively(stylesheet, result_data) {
-              result_data = result_data || {};
-              if (stylesheet.href) {
-                result_data[stylesheet.href] = result_data[stylesheet.href] || '';
+            function findStylesRecursively(stylesheet, css_urls) {
+              if (stylesheet.href) {  // Skip stylesheet without hrefs (inline stylesheets).
+                css_urls.push(stylesheet.href);
 
                 // Remote stylesheet rules cannot be accessed because of the same-origin policy.
                 // Unfortunately, if you touch .cssRules in Selenium, it throws a JavascriptError
-                // with 'The operation is insecure'. To work around this, skip any remote stylesheets
-                // and mark them with a sentinel value so we can fetch them later.
+                // with 'The operation is insecure'. To work around this, skip reading rules of
+                // remote stylesheets but still include them for fetching.
+                //
+                // TODO: If a remote stylesheet has an @import, it will be missing because we don't
+                // notice it here. We could potentially recursively fetch remote imports in
+                // ruby-land below.
                 var parser = document.createElement('a');
                 parser.href = stylesheet.href;
                 if (parser.host != window.location.host) {
-                  result_data[stylesheet.href] = '#{FETCH_SENTINEL_VALUE}'; // Must be a string.
                   return;
                 }
               }
-
               for (var i = 0; i < stylesheet.cssRules.length; i++) {
                 var rule = stylesheet.cssRules[i];
-                // Skip stylesheet without hrefs (inline stylesheets).
-                // These will be present in the HTML snapshot.
-                if (stylesheet.href) {
-                  // Append current rule text.
-                  result_data[stylesheet.href] += rule.cssText + '\\n';
-                }
-
-                // Handle recursive @imports.
+                // Depth-first search, handle recursive @imports.
                 if (rule.styleSheet) {
-                  findStylesRecursively(rule.styleSheet, result_data);
+                  findStylesRecursively(rule.styleSheet, css_urls);
                 }
               }
             }
 
-            var percy_resources = {};
+            var css_urls = [];
             for (var i = 0; i < document.styleSheets.length; i++) {
-              findStylesRecursively(document.styleSheets[i], percy_resources);
+              findStylesRecursively(document.styleSheets[i], css_urls);
             }
-            return percy_resources;
+            return css_urls;
           JS
+          resource_urls = _evaluate_script(page, script)
 
-          # Returned datastructure: {"<absolute URL>" => "<CSS text>", ...}
-          resource_data = _evaluate_script(page, script)
-
-          resource_data.each do |resource_url, css|
-            if css == FETCH_SENTINEL_VALUE
-              # Handle sentinel value that indicates a remote CSS resource that must be fetched.
-              response = _fetch_resource_url(resource_url)
-              next if !response
-              css = response.body
-            end
-
-            sha = Digest::SHA256.hexdigest(css)
+          resource_urls.each do |resource_url|
+            response = _fetch_resource_url(resource_url)
+            next if !response
+            sha = Digest::SHA256.hexdigest(response.body)
             resources << Percy::Client::Resource.new(
-              sha, resource_url, mimetype: 'text/css', content: css)
+              sha, resource_url, mimetype: 'text/css', content: response.body)
           end
           resources
         end
