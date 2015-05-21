@@ -7,9 +7,6 @@ module Percy
   module Capybara
     class Client
       module Snapshots
-        # @private
-        FETCH_SENTINEL_VALUE = '[[FETCH]]'
-
         # Takes a snapshot of the given page HTML and its assets.
         #
         # @param [Capybara::Session] page The Capybara page to snapshot.
