@@ -36,6 +36,7 @@ module Percy
           resources = []
           resources << _get_root_html_resource(page)
           resources += _get_css_resources(page)
+          resources += _get_image_resources(page)
           resources.each { |resource| resource_map[resource.sha] = resource }
           resource_map
         end
@@ -189,7 +190,7 @@ module Percy
 
             sha = Digest::SHA256.hexdigest(response.body)
             resources << Percy::Client::Resource.new(
-              sha, resource_url, mimetype: response.headers['Content-Type'], content: response.body)
+              sha, resource_url, mimetype: response.content_type, content: response.body)
           end
           resources
         end
@@ -197,20 +198,8 @@ module Percy
 
         # @private
         def _fetch_resource_url(url)
-          begin
-            response = Faraday.get(url)
-          rescue Exception => e
-            if defined?(WebMock) && e.is_a?(WebMock::NetConnectNotAllowedError)
-              raise Percy::Capybara::Client::WebMockBlockingConnectionsError.new(
-                "It looks like you're using WebMock! That's great, but in order to use\n" +
-                "Percy::Capybara you need to let connections through WebMock. For example:\n" +
-                "\n" +
-                "config.before(:each, type: :feature) { WebMock.allow_net_connect! }\n"
-              )
-            end
-          end
-          content = response.body
-          if response.status != 200
+          response = Percy::Capybara::HttpFetcher.fetch(url)
+          if !response
             STDERR.puts "[percy] Warning: failed to fetch page resource, this might be a bug: #{url}"
             return nil
           end

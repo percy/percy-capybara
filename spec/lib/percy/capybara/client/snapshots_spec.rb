@@ -208,6 +208,12 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
         stub_request(:post, "https://percy.io/api/v1/builds/123/resources/")
           .with(body: /#{resource.sha}/).to_return(status: 201, body: {success: true}.to_json)
 
+        expect(capybara_client).to receive(:_get_root_html_resource)
+          .with(page).once.and_call_original
+        expect(capybara_client).to receive(:_get_css_resources)
+          .with(page).once.and_call_original
+        expect(capybara_client).to receive(:_get_image_resources)
+          .with(page).once.and_call_original
         resource_map = capybara_client.snapshot(page)
       end
     end

@@ -1,5 +1,6 @@
 require 'percy'
 require 'percy/capybara/version'
+require 'percy/capybara/httpfetcher'
 require 'percy/capybara/client'
 
 module Percy
