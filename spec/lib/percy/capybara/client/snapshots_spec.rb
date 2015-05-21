@@ -95,10 +95,7 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
       visit '/test-images.html'
       resources = capybara_client.send(:_get_image_resources, page)
 
-      expect(resources.length).to eq(9)
-      expect(resources.collect(&:is_root).uniq).to match_array([nil])
-
-      # The order of the following matches the order of their use in test-images.html.
+      # The order of these is just for convenience, they match the order in test-images.html.
 
       resource = find_resource(resources, /http:\/\/localhost:\d+\/images\/img-relative\.png/)
       content = File.read(File.expand_path('../testdata/images/img-relative.png', __FILE__))
@@ -162,6 +159,9 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
       expected_sha = Digest::SHA256.hexdigest(content)
       expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
       expect(resource.sha).to eq(expected_sha)
+
+      expect(resources.length).to eq(9)
+      expect(resources.collect(&:is_root).uniq).to match_array([nil])
     end
   end
   describe '#snapshot', type: :feature, js: true do
