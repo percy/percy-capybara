@@ -115,7 +115,9 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
 
       resource = find_resource(resources, /http:\/\/localhost:\d+\/images\/percy\.svg/)
       content = File.read(File.expand_path('../testdata/images/percy.svg', __FILE__))
-      expect(resource.mimetype).to eq('image/svg+xml')
+      # In Ruby 1.9.3 the SVG mimetype is not registered so our mini ruby webserver doesn't serve
+      # the correct content type. Allow either to work here so we can test older Rubies fully.
+      expect(resource.mimetype).to match(/image\/svg\+xml|application\/octet-stream/)
       expected_sha = Digest::SHA256.hexdigest(content)
       expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
       expect(resource.sha).to eq(expected_sha)
