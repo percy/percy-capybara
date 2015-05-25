@@ -47,10 +47,9 @@ module Percy
             return htmlElement.outerHTML;
           JS
           html = _evaluate_script(page, script)
-          sha = Digest::SHA256.hexdigest(html)
           resource_url = page.current_url
           Percy::Client::Resource.new(
-            sha, resource_url, is_root: true, mimetype: 'text/html', content: html)
+            resource_url, is_root: true, mimetype: 'text/html', content: html)
         end
         private :_get_root_html_resource
 
@@ -100,7 +99,7 @@ module Percy
             next if !response
             sha = Digest::SHA256.hexdigest(response.body)
             resources << Percy::Client::Resource.new(
-              sha, resource_url, mimetype: 'text/css', content: response.body)
+              resource_url, mimetype: 'text/css', content: response.body)
           end
           resources
         end
@@ -178,7 +177,7 @@ module Percy
 
             sha = Digest::SHA256.hexdigest(response.body)
             resources << Percy::Client::Resource.new(
-              sha, resource_url, mimetype: response.content_type, content: response.body)
+              resource_url, mimetype: response.content_type, content: response.body)
           end
           resources
         end
