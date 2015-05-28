@@ -5,7 +5,10 @@ RSpec.describe Percy::Capybara::Client do
     expect(capybara_client.client).to eq(client)
   end
   describe '#enabled?' do
-    before(:each) { @original_env = ENV['TRAVIS_BUILD_ID'] }
+    before(:each) do
+      @original_env = ENV['TRAVIS_BUILD_ID']
+      ENV['TRAVIS_BUILD_ID'] = nil
+    end
     after(:each) do
       ENV['TRAVIS_BUILD_ID'] = @original_env
       ENV['PERCY_ENABLE'] = nil

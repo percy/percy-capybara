@@ -1,11 +1,15 @@
 RSpec.describe Percy::Capybara do
   before(:each) do
     Percy::Capybara.reset
+    @original_env = ENV['TRAVIS_BUILD_ID']
     ENV['PERCY_ENABLE'] = '1'
+    ENV['TRAVIS_BUILD_ID'] = nil
   end
   after(:each) do
+    ENV['TRAVIS_BUILD_ID'] = @original_env
     ENV['PERCY_ENABLE'] = nil
   end
+
 
   describe '#capybara_client' do
     it 'returns the current client or creates a new one' do
