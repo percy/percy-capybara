@@ -16,6 +16,11 @@ module Percy
       def initialize(options = {})
         @client = options[:client] || Percy.client
       end
+
+      def enabled?
+        # Only enable if in supported CI environment or local dev with PERCY_ENABLE=1.
+        @enabled ||= !Percy::Client::Environment.current_ci.nil? || ENV['PERCY_ENABLE'] == '1'
+      end
     end
   end
 end
