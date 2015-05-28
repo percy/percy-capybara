@@ -15,6 +15,7 @@ module Percy
 
       def initialize(options = {})
         @client = options[:client] || Percy.client
+        @enabled = options[:enabled]
       end
 
       def enabled?

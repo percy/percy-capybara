@@ -15,6 +15,7 @@ module Percy
         #   builds. By default this is the URL of the page, but can be customized if the URL does not
         #   entirely identify the current state.
         def snapshot(page, options = {})
+          return if !enabled?  # Silently skip if the client is disabled.
           name = options[:name]
           current_build_id = current_build['data']['id']
           resource_map = _find_resources(page)

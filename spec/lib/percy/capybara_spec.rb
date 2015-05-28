@@ -1,5 +1,11 @@
 RSpec.describe Percy::Capybara do
-  before(:each) { Percy::Capybara.reset }
+  before(:each) do
+    Percy::Capybara.reset
+    ENV['PERCY_ENABLE'] = '1'
+  end
+  after(:each) do
+    ENV['PERCY_ENABLE'] = nil
+  end
 
   describe '#capybara_client' do
     it 'returns the current client or creates a new one' do
@@ -18,8 +24,13 @@ RSpec.describe Percy::Capybara do
       expect(capybara_client).to receive(:snapshot).with(mock_page, name: '/foo.html (modal)').once
       Percy::Capybara.snapshot(mock_page, name: '/foo.html (modal)')
     end
+    it 'silently skips if not enabled' do
+      ENV['PERCY_ENABLE'] = nil
+      mock_page = double('page')
+      Percy::Capybara.snapshot(mock_page)
+    end
   end
-  describe '#snapshot' do
+  describe '#initialize_build' do
     it 'delegates to Percy::Capybara::Client' do
       capybara_client = Percy::Capybara.capybara_client
       expect(capybara_client).to receive(:initialize_build).once
@@ -36,6 +47,14 @@ RSpec.describe Percy::Capybara do
       expect(capybara_client.client).to receive(:create_build).and_return(build_data).once
       Percy::Capybara.initialize_build
       expect(capybara_client).to receive(:finalize_current_build).once
+      Percy::Capybara.finalize_build
+    end
+    it 'silently skips if not enabled' do
+      ENV['PERCY_ENABLE'] = nil
+      capybara_client = Percy::Capybara.capybara_client
+      expect(capybara_client.client).to_not receive(:create_build)
+      Percy::Capybara.initialize_build
+      expect(capybara_client).to_not receive(:finalize_current_build)
       Percy::Capybara.finalize_build
     end
   end

@@ -2,7 +2,7 @@ require 'json'
 require 'digest'
 
 RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
-  let(:capybara_client) { Percy::Capybara::Client.new }
+  let(:capybara_client) { Percy::Capybara::Client.new(enabled: true) }
 
   # Start a temp webserver that serves the testdata directory.
   # You can test this server manually by running:
