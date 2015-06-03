@@ -210,10 +210,10 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
           'data' => {
             'id' => '256',
             'type' => 'snapshots',
-            'links' => {
+            'relationships' => {
               'self' => "/api/v1/snapshots/123",
               'missing-resources' => {
-                'linkage' => [
+                'data' => [
                   {
                     'type' => 'resources',
                     'id' => resource.sha,

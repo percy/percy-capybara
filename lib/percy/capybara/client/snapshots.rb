@@ -21,7 +21,7 @@ module Percy
           snapshot = client.create_snapshot(current_build_id, resource_map.values, name: name)
 
           # Upload the content for any missing resources.
-          snapshot['data']['links']['missing-resources']['linkage'].each do |missing_resource|
+          snapshot['data']['relationships']['missing-resources']['data'].each do |missing_resource|
             sha = missing_resource['id']
             client.upload_resource(current_build_id, resource_map[sha].content)
           end
