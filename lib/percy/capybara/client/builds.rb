@@ -3,6 +3,7 @@ module Percy
     class Client
       module Builds
         def current_build
+          return if !enabled?  # Silently skip if the client is disabled.
           @current_build ||= client.create_build(client.config.repo)
         end
         alias_method :initialize_build, :current_build
@@ -12,6 +13,7 @@ module Percy
         end
 
         def finalize_current_build
+          return if !enabled?  # Silently skip if the client is disabled.
           if !build_initialized?
             raise Percy::Capybara::Client::BuildNotInitializedError.new(
               'Failed to finalize build because no build has been initialized.')

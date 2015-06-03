@@ -1,5 +1,5 @@
 RSpec.describe Percy::Capybara::Client::Builds do
-  let(:capybara_client) { Percy::Capybara::Client.new }
+  let(:capybara_client) { Percy::Capybara::Client.new(enabled: true) }
 
   describe '#current_build' do
     it 'returns the current build or creates a new one' do
