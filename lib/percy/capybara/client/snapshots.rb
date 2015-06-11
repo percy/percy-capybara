@@ -26,6 +26,11 @@ module Percy
             sha = missing_resource['id']
             client.upload_resource(current_build_id, resource_map[sha].content)
           end
+
+          # Finalize the snapshot.
+          client.finalize_snapshot(snapshot['data']['id'])
+
+          true
         end
 
         # @private

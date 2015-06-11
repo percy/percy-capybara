@@ -235,7 +235,11 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
           .with(page).once.and_call_original
         expect(capybara_client).to receive(:_get_image_resources)
           .with(page).once.and_call_original
-        resource_map = capybara_client.snapshot(page)
+
+        stub_request(:post, "https://percy.io/api/v1/snapshots/256/finalize")
+          .to_return(status: 200, body: '{"success":true}')
+
+        expect(capybara_client.snapshot(page)).to eq(true)
       end
     end
   end

@@ -38,5 +38,7 @@ RSpec.configure do |config|
   config.before(:each) do
     WebMock.disable_net_connect!(allow_localhost: true)
   end
-  config.before(:each, type: :feature) { WebMock.allow_net_connect! }
+  config.before(:each, type: :feature) do
+    WebMock.disable_net_connect!(allow_localhost: true, allow: [/i.imgur.com/])
+  end
 end
