@@ -36,6 +36,12 @@
   <h2>img srcset</h2>
   <img width="200" src="/images/srcset-base.png" srcset="/images/srcset-first.png 200w, /images/srcset-second.png 400w">
 
+  <h2>blank image src (not included)</h2>
+  <img src=""></div>
+
+  <h2>empty background-image url (uses current page url, should not be included)</h2>
+  <div style="background: url() 200px 200px no-repeat"></div>
+
   <h2>Duplicates of some of the above images, to verify they are not duplicated in resources:</h2>
   <img src="images/img-relative.png">
   <img src="/images/img-relative-to-root.png">
