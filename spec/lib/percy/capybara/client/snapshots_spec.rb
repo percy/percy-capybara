@@ -24,7 +24,7 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
   end
   after(:all) { Process.kill('INT', @process.pid) }
 
-  before(:each) do
+  before(:each, js: true) do
     # Special setting for capybara-webkit. If clients are using capybara-webkit they would
     # also have to have this setting enabled since apparently all resources are blocked by default.
     page.driver.respond_to?(:allow_url) && page.driver.allow_url('*')
@@ -38,6 +38,40 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
     end
   end
 
+  describe '#_should_include_url?' do
+    it 'returns true for valid, local URLs' do
+      expect(capybara_client._should_include_url?('http://localhost/')).to eq(true)
+      expect(capybara_client._should_include_url?('http://localhost:123/')).to eq(true)
+      expect(capybara_client._should_include_url?('http://localhost/foo')).to eq(true)
+      expect(capybara_client._should_include_url?('http://localhost:123/foo')).to eq(true)
+      expect(capybara_client._should_include_url?('http://localhost/foo/test.html')).to eq(true)
+      expect(capybara_client._should_include_url?('http://127.0.0.1/')).to eq(true)
+      expect(capybara_client._should_include_url?('http://127.0.0.1:123/')).to eq(true)
+      expect(capybara_client._should_include_url?('http://127.0.0.1/foo')).to eq(true)
+      expect(capybara_client._should_include_url?('http://127.0.0.1:123/foo')).to eq(true)
+      expect(capybara_client._should_include_url?('http://127.0.0.1/foo/test.html')).to eq(true)
+      expect(capybara_client._should_include_url?('http://0.0.0.0/foo/test.html')).to eq(true)
+      # Also works for paths:
+      expect(capybara_client._should_include_url?('/')).to eq(true)
+      expect(capybara_client._should_include_url?('/foo')).to eq(true)
+      expect(capybara_client._should_include_url?('/foo/test.png')).to eq(true)
+    end
+    it 'returns false for invalid URLs' do
+      expect(capybara_client._should_include_url?('')).to eq(false)
+      expect(capybara_client._should_include_url?('http://local host/foo')).to eq(false)
+      expect(capybara_client._should_include_url?('bad-url/')).to eq(false)
+      expect(capybara_client._should_include_url?('bad-url/foo/test.html')).to eq(false)
+    end
+    it 'returns false for data URLs' do
+      expect(capybara_client._should_include_url?('data:image/gif;base64,R0')).to eq(false)
+    end
+    it 'returns false for remote URLs' do
+      expect(capybara_client._should_include_url?('http://foo/')).to eq(false)
+      expect(capybara_client._should_include_url?('http://example.com/')).to eq(false)
+      expect(capybara_client._should_include_url?('http://example.com/foo')).to eq(false)
+      expect(capybara_client._should_include_url?('https://example.com/foo')).to eq(false)
+    end
+  end
   describe '#_get_root_html_resource', type: :feature, js: true do
     it 'includes the root DOM HTML' do
       visit '/'
@@ -82,12 +116,7 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
       expect(resource.content).to include(".colored-by-level2-imports { color: red; }")
       expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
 
-      resource = find_resource(
-        resources, /https:\/\/maxcdn.bootstrapcdn.com\/bootstrap\/3.3.4\/css\/bootstrap.min.css/)
-      expect(resource.content).to include('Bootstrap v3.3.4 (http://getbootstrap.com)')
-      expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
-
-      expect(resources.length).to eq(7)
+      expect(resources.length).to eq(6)
       expect(resources.collect(&:mimetype).uniq).to eq(['text/css'])
       expect(resources.collect(&:is_root).uniq).to match_array([nil])
     end
@@ -122,13 +151,6 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
       expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
       expect(resource.sha).to eq(expected_sha)
 
-      resource = find_resource(resources, /http:\/\/i.imgur.com\/Umkjdao.png/)
-      content = Faraday.get('http://i.imgur.com/Umkjdao.png').body
-      expect(resource.mimetype).to eq('image/png')
-      expected_sha = Digest::SHA256.hexdigest(content)
-      expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
-      expect(resource.sha).to eq(expected_sha)
-
       resource = find_resource(resources, /http:\/\/localhost:\d+\/images\/bg-relative\.png/)
       content = File.read(File.expand_path('../testdata/images/bg-relative.png', __FILE__))
       expect(resource.mimetype).to eq('image/png')
@@ -143,23 +165,9 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
       expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
       expect(resource.sha).to eq(expected_sha)
 
-      resource = find_resource(resources, /http:\/\/i.imgur.com\/5mLoBs1.png/)
-      content = Faraday.get('http://i.imgur.com/5mLoBs1.png').body
-      expect(resource.mimetype).to eq('image/png')
-      expected_sha = Digest::SHA256.hexdigest(content)
-      expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
-      expect(resource.sha).to eq(expected_sha)
-
       resource = find_resource(resources, /http:\/\/localhost:\d+\/images\/bg-stacked\.png/)
       content = File.read(File.expand_path('../testdata/images/bg-stacked.png', __FILE__))
       expect(resource.mimetype).to eq('image/png')
-      expected_sha = Digest::SHA256.hexdigest(content)
-      expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
-      expect(resource.sha).to eq(expected_sha)
-
-      resource = find_resource(resources, /http:\/\/i.imgur.com\/61AQuplb.jpg/)
-      content = Faraday.get('http://i.imgur.com/61AQuplb.jpg').body
-      expect(resource.mimetype).to eq('image/jpeg')
       expected_sha = Digest::SHA256.hexdigest(content)
       expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
       expect(resource.sha).to eq(expected_sha)
@@ -185,7 +193,20 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
       expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
       expect(resource.sha).to eq(expected_sha)
 
-      expect(resources.length).to eq(12)
+      resource_urls = resources.collect(&:resource_url).map do |url|
+        url.gsub(/localhost:\d+/, 'localhost')
+      end
+      expect(resource_urls).to match_array([
+        "http://localhost/images/img-relative.png",
+        "http://localhost/images/img-relative-to-root.png",
+        "http://localhost/images/percy.svg",
+        "http://localhost/images/srcset-base.png",
+        "http://localhost/images/srcset-first.png",
+        "http://localhost/images/srcset-second.png",
+        "http://localhost/images/bg-relative.png",
+        "http://localhost/images/bg-relative-to-root.png",
+        "http://localhost/images/bg-stacked.png"
+      ])
       expect(resources.collect(&:is_root).uniq).to match_array([nil])
     end
   end

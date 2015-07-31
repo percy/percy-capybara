@@ -11,7 +11,7 @@ module Percy
         URL_REGEX = Regexp.new(
           # protocol identifier
           "(?:(?:https?:)?//)" +
-          "(?:" +
+          "(" +
             # IP address exclusion
             # private & local networks
             "(?!(?:10|127)(?:\\.\\d{1,3}){3})" +
@@ -30,16 +30,19 @@ module Percy
             "(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)" +
             # domain name
             "(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*" +
-            # TLD identifier
-            "(?:\\.(?:[a-z\\u00a1-\\uffff]{2,}))" +
           ")" +
           # port number
           "(?::\\d{2,5})?" +
           # resource path
           "(?:/[^\\s\"']*)?"
         )
-        PATH_REGEX = /\/[^\\s\"']*/
+        PATH_REGEX = /\A\/[^\\s\"']*/
         DATA_URL_REGEX = /\Adata:/
+        LOCAL_HOSTNAMES = [
+          'localhost',
+          '127.0.0.1',
+          '0.0.0.0',
+        ].freeze
 
         # Takes a snapshot of the given page HTML and its assets.
         #
@@ -135,7 +138,7 @@ module Percy
           resource_urls = _evaluate_script(page, script)
 
           resource_urls.each do |url|
-            next if !_is_valid_url?(url)
+            next if !_should_include_url?(url)
             response = _fetch_resource_url(url)
             next if !response
             sha = Digest::SHA256.hexdigest(response.body)
@@ -201,15 +204,15 @@ module Percy
           end
 
           image_urls.each do |image_url|
-            next if !_is_valid_url?(image_url)
-
             # If url references are blank, browsers will often fill them with the current page's
             # URL, which makes no sense and will never be renderable. Strip these.
-            next if image_url == page.current_url
+            next if image_url == page.current_url || image_url.strip.empty?
 
             # Make the resource URL absolute to the current page. If it is already absolute, this
             # will have no effect.
             resource_url = URI.join(page.current_url, image_url).to_s
+
+            next if !_should_include_url?(resource_url)
 
             # Fetch the images.
             # TODO(fotinakis): this can be pretty inefficient for image-heavy pages because the
@@ -228,9 +231,19 @@ module Percy
         private :_get_image_resources
 
         # @private
-        def _is_valid_url?(url)
+        def _should_include_url?(url)
           # It is a URL or a path, but not a data URI.
-          (URL_REGEX.match(url) || PATH_REGEX.match(url)) && !DATA_URL_REGEX.match(url)
+          url_match = URL_REGEX.match(url)
+          data_url_match = DATA_URL_REGEX.match(url)
+          result = (url_match || PATH_REGEX.match(url)) && !data_url_match
+
+          # Is not a remote URL.
+          if url_match && !data_url_match
+            host = url_match[1]
+            result = LOCAL_HOSTNAMES.include?(host)
+          end
+
+          !!result
         end
 
         # @private
