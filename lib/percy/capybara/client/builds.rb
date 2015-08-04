@@ -8,7 +8,7 @@ module Percy
         end
         alias_method :initialize_build, :current_build
 
-        def upload_build_resources(build_resources)
+        def upload_missing_build_resources(build_resources)
           # Upload any missing build resources.
           new_build_resources = current_build['data'] &&
             current_build['data']['relationships'] &&

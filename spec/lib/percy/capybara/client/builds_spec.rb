@@ -15,7 +15,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
       expect(current_build).to eq(mock_double)
     end
   end
-  describe '#upload_build_resources', type: :feature, js: true do
+  describe '#upload_missing_build_resources', type: :feature, js: true do
     before(:each) { setup_sprockets(capybara_client) }
 
     it 'returns 0 if there are no missing build resources to upload' do
@@ -29,7 +29,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
         .to_return(status: 201, body: mock_response.to_json)
 
       loader = capybara_client.initialize_loader
-      expect(capybara_client.upload_build_resources(loader.build_resources)).to eq(0)
+      expect(capybara_client.upload_missing_build_resources(loader.build_resources)).to eq(0)
     end
     it 'uploads missing resources and returns the number uploaded' do
       visit '/'
@@ -60,7 +60,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
       # Stub resource upload.
       stub_request(:post, "https://percy.io/api/v1/builds/123/resources/")
         .to_return(status: 201, body: {success: true}.to_json)
-      result = capybara_client.upload_build_resources(loader.build_resources)
+      result = capybara_client.upload_missing_build_resources(loader.build_resources)
       expect(result).to eq(1)
     end
   end

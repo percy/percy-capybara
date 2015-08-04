@@ -23,8 +23,9 @@ module Percy
 
           # If this is the first snapshot, create the build and upload build resources.
           if !build_initialized?
-            initialize_build
-            upload_build_resources(loader.build_resources)
+            build_resources = loader.build_resources
+            initialize_build(resources: build_resources)
+            upload_missing_build_resources(build_resources)
           end
 
           current_build_id = current_build['data']['id']
