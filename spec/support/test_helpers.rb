@@ -1,5 +1,6 @@
 require 'socket'
 require 'timeout'
+require 'sprockets'
 
 module TestHelpers
   class ServerDown < Exception; end
@@ -23,5 +24,25 @@ module TestHelpers
       end
     end
     raise ServerDown, "Server failed to start: #{host}"
+  end
+
+  def find_resource(resources, regex)
+    begin
+      resources.select { |resource| resource.resource_url.match(regex) }.fetch(0)
+    rescue IndexError
+      raise "Missing expected image with resource_url that matches: #{regex}"
+    end
+  end
+
+  def setup_sprockets(capybara_client)
+    root = File.expand_path("../../lib/percy/capybara/client/testdata", __FILE__)
+    environment = Sprockets::Environment.new(root)
+    environment.append_path '.'
+
+    sprockets_options = double('sprockets_options')
+    allow(sprockets_options).to receive(:precompile).and_return([/(?:\/|\\|\A)base\.(css|js)$/])
+
+    capybara_client.sprockets_environment = environment
+    capybara_client.sprockets_options = sprockets_options
   end
 end

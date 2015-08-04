@@ -5,6 +5,11 @@ require 'support/test_helpers'
 require 'percy'
 require 'percy/capybara'
 
+Capybara::Webkit.configure do |config|
+  # config.allow_url("*")
+  config.block_unknown_urls
+end
+
 RSpec.configure do |config|
   config.include TestHelpers
 
@@ -41,4 +46,25 @@ RSpec.configure do |config|
   config.before(:each, type: :feature) do
     WebMock.disable_net_connect!(allow_localhost: true, allow: [/i.imgur.com/])
   end
+
+  # Start a temp webserver that serves the testdata directory.
+  # You can test this server manually by running:
+  # ruby -run -e httpd spec/lib/percy/capybara/client/testdata/ -p 9090
+  config.before(:all, type: :feature) do
+    port = get_random_open_port
+    Capybara.app = nil
+    Capybara.app_host = "http://localhost:#{port}"
+    Capybara.run_server = false
+
+    # Note: using this form of popen to keep stdout and stderr silent and captured.
+    dir = File.expand_path('../lib/percy/capybara/client/testdata/', __FILE__)
+    @process = IO.popen([
+      'ruby', '-run', '-e', 'httpd', dir, '-p', port.to_s, err: [:child, :out]
+    ].flatten)
+
+    # Block until the server is up.
+    WebMock.disable_net_connect!(allow_localhost: true)
+    verify_server_up(Capybara.app_host)
+  end
+  config.after(:all, type: :feature) { Process.kill('INT', @process.pid) }
 end

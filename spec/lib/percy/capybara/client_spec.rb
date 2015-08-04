@@ -28,5 +28,18 @@ RSpec.describe Percy::Capybara::Client do
       expect(Percy::Capybara::Client.new.enabled?).to be_truthy
     end
   end
+  describe '#initialize_loader' do
+    let(:capybara_client) { Percy::Capybara::Client.new }
+
+    it 'returns a NativeLoader if no sprockets config' do
+      expect(capybara_client.initialize_loader.class).to eq(Percy::Capybara::Loaders::NativeLoader)
+    end
+    it 'returns a SprocketsLoader if sprockets is configured' do
+      capybara_client.sprockets_environment = double('sprockets_environment')
+      capybara_client.sprockets_options = double('sprockets_options')
+      loader = capybara_client.initialize_loader
+      expect(loader.class).to eq(Percy::Capybara::Loaders::SprocketsLoader)
+    end
+  end
 end
 

@@ -10,7 +10,6 @@ RSpec.describe Percy::Capybara do
     ENV['PERCY_ENABLE'] = nil
   end
 
-
   describe '#capybara_client' do
     it 'returns the current client or creates a new one' do
       capybara_client = Percy::Capybara.capybara_client

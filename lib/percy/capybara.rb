@@ -25,8 +25,8 @@ module Percy
     # multi-process tests where a single build must be created before forking.
     #
     # @see Percy::Capybara::Client::Builds#initialize_build
-    def self.initialize_build
-      capybara_client.initialize_build
+    def self.initialize_build(options = {})
+      capybara_client.initialize_build(options)
     end
 
     # Finalize the current build.
