@@ -16,14 +16,14 @@ module Percy
             current_build['data']['relationships']['missing-resources']['data']
           return 0 if !new_build_resources
 
-          if !new_build_resources.empty?
-            puts "[percy] Uploading #{new_build_resources.length} new resources..."
-          end
-          new_build_resources.each do |missing_resource|
+          new_build_resources.each_with_index do |missing_resource, i|
             sha = missing_resource['id']
             resource = build_resources.find { |r| r.sha == sha }
             content = resource.content || File.read(resource.path)
             client.upload_resource(current_build['data']['id'], content)
+            if i % 50 == 0
+              puts "[percy] Uploading #{i+1} of #{new_build_resources.length} new resources..."
+            end
           end
           new_build_resources.length
         end
