@@ -55,6 +55,7 @@ module Percy
           logical_paths += precompile_list.flatten.select do |filename|
             Pathname.new(filename).absolute? if filename.is_a?(String)
           end
+          logical_paths.uniq
         end
       end
     end
