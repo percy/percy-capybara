@@ -11,6 +11,10 @@ module Percy
         attr_reader :sprockets_environment
         attr_reader :sprockets_options
 
+        SKIP_RESOURCE_EXTENSIONS = [
+          '.js',
+        ]
+
         def initialize(options = {})
           @sprockets_environment = options[:sprockets_environment]
           @sprockets_options = options[:sprockets_options]
@@ -39,6 +43,8 @@ module Percy
               path = sprockets_options.digest ? asset.digest_path : logical_path
               resource_url = URI.escape("/assets/#{path}")
             end
+
+            next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(resource_url))
 
             resources << Percy::Client::Resource.new(resource_url, sha: sha, content: content)
           end
