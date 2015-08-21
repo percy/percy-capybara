@@ -26,6 +26,7 @@ module Percy
           response = Percy::Capybara::HttpFetcher::Response.new(File.read(temppath), content_type)
           # We've broken the tempfile so it won't get deleted when garbage collected. Delete!
           File.delete(temppath)
+          return if response.body == ''
           response
         end
       end
