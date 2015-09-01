@@ -29,8 +29,13 @@ module Percy
       end
 
       def enabled?
-        # Only enable if in supported CI environment or local dev with PERCY_ENABLE=1.
-        @enabled ||= !Percy::Client::Environment.current_ci.nil? || ENV['PERCY_ENABLE'] == '1'
+        return @enabled if !@enabled.nil?
+
+        # Enable if PERCY_ENABLE=1 in local dev (allow disabling if 0).
+        return @enabled ||= ENV['PERCY_ENABLE'] == '1' if ENV['PERCY_ENABLE']
+
+        # If in supported CI environment.
+        @enabled ||= !Percy::Client::Environment.current_ci.nil?
       end
 
       def initialize_loader(options = {})
