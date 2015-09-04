@@ -30,6 +30,8 @@ module Percy
         def build_resources
           resources = []
           _asset_logical_paths.each do |logical_path|
+            next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(logical_path))
+            
             asset = sprockets_environment.find_asset(logical_path)
             content = asset.to_s
             sha = Digest::SHA256.hexdigest(content)
