@@ -10,6 +10,7 @@ RSpec.describe Percy::Capybara::HttpFetcher do
   it 'returns nil if fetch failed' do
     expect(Percy::Capybara::HttpFetcher.fetch('bad-url')).to be_nil
     expect(Percy::Capybara::HttpFetcher.fetch('http://i.imgur.com/fake-image.png')).to be_nil
+    expect(Percy::Capybara::HttpFetcher.fetch('http://i.imgur.com/fake image.png')).to be_nil
   end
 end
 
