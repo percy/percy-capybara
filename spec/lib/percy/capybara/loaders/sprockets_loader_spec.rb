@@ -22,7 +22,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
   end
   let(:sprockets_options) do
     options = double('options')
-    allow(options).to receive(:precompile).and_return([/(?:\/|\\|\A)base\.(css|js)$/])
+    allow(options).to receive(:precompile).and_return([/(?:\/|\\|\A)base\.(css|js)$|\.map/])
     allow(options).to receive(:digest).and_return(false)
     options
   end
