@@ -148,6 +148,9 @@ module Percy
             # will have no effect.
             resource_url = URI.join(page.current_url, image_url).to_s
 
+            # Skip duplicates.
+            next if resources.find { |r| r.resource_url == resource_url }
+
             next if !_should_include_url?(resource_url)
 
             # Fetch the images.
