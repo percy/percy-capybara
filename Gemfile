@@ -6,4 +6,4 @@ gemspec
 gem 'guard-rspec', require: false
 
 # (for development)
-# gem 'percy-client', path: '~/src/percy-client'
+gem 'percy-client', path: '~/src/percy-client'

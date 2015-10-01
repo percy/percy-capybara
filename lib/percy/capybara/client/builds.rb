@@ -5,6 +5,7 @@ module Percy
         def current_build(options = {})
           return if !enabled?  # Silently skip if the client is disabled.
           @current_build ||= client.create_build(client.config.repo, options)
+          @current_build
         end
         alias_method :initialize_build, :current_build
 
