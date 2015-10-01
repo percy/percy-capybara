@@ -47,9 +47,6 @@ RSpec.configure do |config|
     WebMock.disable_net_connect!(allow_localhost: true, allow: [/i.imgur.com/])
   end
 
-  # Enable all debugging.
-  Percy.config.debug = true
-
   # Start a temp webserver that serves the testdata directory.
   # You can test this server manually by running:
   # ruby -run -e httpd spec/lib/percy/capybara/client/testdata/ -p 9090

@@ -29,14 +29,14 @@ module Percy
           if !build_initialized?
             start = Time.now
             build_resources = loader.build_resources
-            initialize_build(resources: build_resources)
-            upload_missing_build_resources(build_resources)
             if Percy.config.debug
               build_resources.each do |build_resource|
-                Percy.logger.debug { "Build resource found: #{build_resource.resource_url}" }
+                Percy.logger.debug { "Build resource: #{build_resource.resource_url}" }
               end
             end
-            Percy.logger.debug { "Build resources uploaded (#{Time.now - start}s)" }
+            Percy.logger.debug { "All build resources loaded (#{Time.now - start}s)" }
+            initialize_build(resources: build_resources)
+            upload_missing_build_resources(build_resources)
           end
 
           start = Time.now
@@ -45,9 +45,9 @@ module Percy
           resource_map = {}
           resources.each do |r|
             resource_map[r.sha] = r
-            Percy.logger.debug { "Snapshot resource found: #{r.resource_url}" }
+            Percy.logger.debug { "Snapshot resource: #{r.resource_url}" }
           end
-          Percy.logger.debug { "Snapshot resources loaded (#{Time.now - start}s)" }
+          Percy.logger.debug { "All snapshot resources loaded (#{Time.now - start}s)" }
 
           # Create the snapshot and upload any missing snapshot resources.
           start = Time.now
@@ -56,7 +56,7 @@ module Percy
             sha = missing_resource['id']
             client.upload_resource(current_build_id, resource_map[sha].content)
           end
-          Percy.logger.debug { "Snapshot resources uploaded (#{Time.now - start}s)" }
+          Percy.logger.debug { "All snapshot resources uploaded (#{Time.now - start}s)" }
 
           # Finalize the snapshot.
           client.finalize_snapshot(snapshot['data']['id'])
