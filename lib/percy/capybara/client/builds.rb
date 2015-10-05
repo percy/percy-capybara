@@ -2,14 +2,44 @@ module Percy
   module Capybara
     class Client
       module Builds
-        def current_build(options = {})
+        def initialize_build(options = {})
           return if !enabled?  # Silently skip if the client is disabled.
-          @current_build ||= client.create_build(client.config.repo, options)
+          return @current_build if build_initialized?
+
+          # Gather build resources to upload with build.
+          start = Time.now
+          build_resources = options[:build_resources] || initialize_loader.build_resources
+          options[:resources] = build_resources if !build_resources.empty?
+
+          # Extra debug info.
+          build_resources.each { |br| Percy.logger.debug { "Build resource: #{br.resource_url}" } }
+          Percy.logger.debug { "All build resources loaded (#{Time.now - start}s)" }
+
+          @current_build = client.create_build(client.config.repo, options)
+          _upload_missing_build_resources(build_resources) if !build_resources.empty?
           @current_build
         end
-        alias_method :initialize_build, :current_build
 
-        def upload_missing_build_resources(build_resources)
+        def current_build
+          return if !enabled?  # Silently skip if the client is disabled.
+          @current_build
+        end
+
+        def build_initialized?
+          !!@current_build
+        end
+
+        def finalize_current_build
+          return if !enabled?  # Silently skip if the client is disabled.
+          if !build_initialized?
+            raise Percy::Capybara::Client::BuildNotInitializedError.new(
+              'Failed to finalize build because no build has been initialized.')
+          end
+          client.finalize_build(current_build['data']['id'])
+        end
+
+        # @private
+        def _upload_missing_build_resources(build_resources)
           # Upload any missing build resources.
           new_build_resources = current_build['data'] &&
             current_build['data']['relationships'] &&
@@ -28,19 +58,7 @@ module Percy
           end
           new_build_resources.length
         end
-
-        def build_initialized?
-          !!@current_build
-        end
-
-        def finalize_current_build
-          return if !enabled?  # Silently skip if the client is disabled.
-          if !build_initialized?
-            raise Percy::Capybara::Client::BuildNotInitializedError.new(
-              'Failed to finalize build because no build has been initialized.')
-          end
-          client.finalize_build(current_build['data']['id'])
-        end
+        private :_upload_missing_build_resources
       end
     end
   end

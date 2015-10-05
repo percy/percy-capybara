@@ -26,7 +26,14 @@ module Percy
           Percy.logger.debug { "Snapshot started (name: #{name.inspect})" }
 
           # If this is the first snapshot, create the build and upload build resources.
+          # DEPRECATED: this flow is for the pre-parallel world.
           if !build_initialized?
+            Percy.logger.warn do
+              "DEPRECATED: percy-capybara will remove implicitly created builds. You should " +
+              "update your usage to call initialize_build explicitly at the start of a test " +
+              "suite, or to use the Percy RSpec setup to do it for you."
+            end
+
             start = Time.now
             build_resources = loader.build_resources
             if Percy.config.debug
@@ -36,7 +43,7 @@ module Percy
             end
             Percy.logger.debug { "All build resources loaded (#{Time.now - start}s)" }
             initialize_build(resources: build_resources)
-            upload_missing_build_resources(build_resources)
+            _upload_missing_build_resources(build_resources)
           end
 
           start = Time.now

@@ -1,67 +1,42 @@
 RSpec.describe Percy::Capybara::Client::Builds do
-  let(:capybara_client) { Percy::Capybara::Client.new(enabled: true) }
+  let(:enabled) { true }
+  let(:capybara_client) { Percy::Capybara::Client.new(enabled: enabled) }
 
+  describe '#initialize_build' do
+    context 'percy is not enabled' do
+      let(:enabled) { false }
+      it 'returns nil if not enabled' do
+        expect(capybara_client.initialize_build).to be_nil
+      end
+    end
+    it 'initializes and returns a build' do
+      mock_response = {
+        'data' => {
+          'id' => '123',
+          'type' => 'builds',
+        },
+      }
+      stub_request(:post, 'https://percy.io/api/v1/repos/percy/percy-capybara/builds/')
+        .to_return(status: 201, body: mock_response.to_json)
+      expect(capybara_client.initialize_build).to eq(mock_response)
+    end
+  end
   describe '#current_build' do
-    it 'returns the current build or creates a new one' do
+    it 'returns nil if no build has been initialized' do
+      expect(capybara_client.current_build).to be_nil
+    end
+    it 'returns the current build' do
       mock_double = double('build')
       expect(capybara_client.client).to receive(:create_build)
         .with(capybara_client.client.config.repo, {})
         .and_return(mock_double)
         .once
+      capybara_client.initialize_build
 
       current_build = capybara_client.current_build
       expect(current_build).to eq(mock_double)
       # Verify that it memoizes the current build by calling it again:
       expect(current_build).to eq(mock_double)
-    end
-  end
-  describe '#upload_missing_build_resources', type: :feature, js: true do
-    before(:each) { setup_sprockets(capybara_client) }
-
-    it 'returns 0 if there are no missing build resources to upload' do
-      mock_response = {
-        'data' => {
-          'id' => '123',
-          'type' => 'builds',
-        },
-      }
-      stub_request(:post, 'https://percy.io/api/v1/repos/percy/percy-capybara/builds/')
-        .to_return(status: 201, body: mock_response.to_json)
-
-      loader = capybara_client.initialize_loader
-      expect(capybara_client.upload_missing_build_resources(loader.build_resources)).to eq(0)
-    end
-    it 'uploads missing resources and returns the number uploaded' do
-      visit '/'
-      loader = capybara_client.initialize_loader(page: page)
-
-      mock_response = {
-        'data' => {
-          'id' => '123',
-          'type' => 'builds',
-          'relationships' => {
-            'self' => "/api/v1/snapshots/123",
-            'missing-resources' => {
-              'data' => [
-                {
-                  'type' => 'resources',
-                  'id' => loader.build_resources.first.sha,
-                },
-              ],
-            },
-          },
-        },
-      }
-      # Stub create build.
-      stub_request(:post, 'https://percy.io/api/v1/repos/percy/percy-capybara/builds/')
-        .to_return(status: 201, body: mock_response.to_json)
-      capybara_client.initialize_build
-
-      # Stub resource upload.
-      stub_request(:post, "https://percy.io/api/v1/builds/123/resources/")
-        .to_return(status: 201, body: {success: true}.to_json)
-      result = capybara_client.upload_missing_build_resources(loader.build_resources)
-      expect(result).to eq(1)
     end
   end
   describe '#build_initialized?' do
@@ -88,4 +63,55 @@ RSpec.describe Percy::Capybara::Client::Builds do
       end.to raise_error(Percy::Capybara::Client::BuildNotInitializedError)
     end
   end
+  describe '#_upload_missing_build_resources', type: :feature, js: true do
+    before(:each) { setup_sprockets(capybara_client) }
+
+    it 'returns 0 if there are no missing build resources to upload' do
+      mock_response = {
+        'data' => {
+          'id' => '123',
+          'type' => 'builds',
+        },
+      }
+      stub_request(:post, 'https://percy.io/api/v1/repos/percy/percy-capybara/builds/')
+        .to_return(status: 201, body: mock_response.to_json)
+      capybara_client.initialize_build
+
+      loader = capybara_client.initialize_loader
+      expect(capybara_client.send(:_upload_missing_build_resources, loader.build_resources)).to eq(0)
+    end
+    it 'uploads missing resources and returns the number uploaded' do
+      visit '/'
+      loader = capybara_client.initialize_loader(page: page)
+
+      mock_response = {
+        'data' => {
+          'id' => '123',
+          'type' => 'builds',
+          'relationships' => {
+            'self' => "/api/v1/snapshots/123",
+            'missing-resources' => {
+              'data' => [
+                {
+                  'type' => 'resources',
+                  'id' => loader.build_resources.first.sha,
+                },
+              ],
+            },
+          },
+        },
+      }
+      # Stub create build.
+      stub_request(:post, 'https://percy.io/api/v1/repos/percy/percy-capybara/builds/')
+        .to_return(status: 201, body: mock_response.to_json)
+
+      # Stub resource upload.
+      stub_request(:post, "https://percy.io/api/v1/builds/123/resources/")
+        .to_return(status: 201, body: {success: true}.to_json)
+      capybara_client.initialize_build
+      result = capybara_client.send(:_upload_missing_build_resources, loader.build_resources)
+      expect(result).to eq(1)
+    end
+  end
+
 end
