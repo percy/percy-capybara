@@ -63,6 +63,11 @@ module Percy
           current_url = page.current_url
           url_match = URL_REGEX.match(current_url)
           return url_match[4] if url_match
+
+          # Special case: prepend a slash to the path to force a valid URL for things like
+          # "about:srcdoc" iframe srcdoc pages.
+          current_url = "/#{current_url}" if current_url[0] != '/'
+
           current_url
         end
       end

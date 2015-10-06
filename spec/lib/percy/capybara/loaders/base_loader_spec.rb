@@ -45,6 +45,10 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
       expect(page_double).to receive(:current_url).and_return('http://www.example.com/')
       loader = described_class.new(page: page_double)
       expect(loader.current_path).to eq('/')
+
+      expect(page_double).to receive(:current_url).and_return('about:srcdoc')
+      loader = described_class.new(page: page_double)
+      expect(loader.current_path).to eq('/about:srcdoc')
     end
   end
 end
