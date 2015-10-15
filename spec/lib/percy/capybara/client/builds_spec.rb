@@ -115,10 +115,10 @@ RSpec.describe Percy::Capybara::Client::Builds do
   describe '#build_initialized?' do
     it 'is false before a build is initialized and true afterward' do
       expect(capybara_client.client).to receive(:create_build).and_return(double('build'))
-      expect(capybara_client.build_initialized?).to be_falsey
+      expect(capybara_client.build_initialized?).to eq(false)
 
       capybara_client.initialize_build
-      expect(capybara_client.build_initialized?).to be_truthy
+      expect(capybara_client.build_initialized?).to eq(true)
     end
   end
   describe '#finalize_current_build' do
@@ -143,6 +143,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
       expect(capybara_client.client).to receive(:finalize_build)
         .and_raise(Percy::Client::ConnectionFailed)
       expect(capybara_client.finalize_current_build).to eq(nil)
+      expect(capybara_client.failed?).to eq(true)
     end
   end
   describe '#_upload_missing_build_resources', type: :feature, js: true do

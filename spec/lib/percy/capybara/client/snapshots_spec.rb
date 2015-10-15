@@ -73,6 +73,17 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
         remove_request_stub(build_resource_stub)
         expect(capybara_client.snapshot(page)).to eq(true)
       end
+      it 'safely handles connection errors' do
+        visit '/'
+        build_data = {'data' => {'id' => 123}}
+        expect(capybara_client.client).to receive(:create_build).and_return(build_data)
+        capybara_client.initialize_build
+
+        expect(capybara_client.client).to receive(:create_snapshot)
+          .and_raise(Percy::Client::ConnectionFailed)
+        expect(capybara_client.snapshot(page)).to eq(nil)
+        expect(capybara_client.failed?).to eq(true)
+      end
     end
   end
 end

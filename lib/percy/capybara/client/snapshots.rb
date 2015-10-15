@@ -58,16 +58,21 @@ module Percy
 
           # Create the snapshot and upload any missing snapshot resources.
           start = Time.now
-          snapshot = client.create_snapshot(current_build_id, resources, name: name)
-          snapshot['data']['relationships']['missing-resources']['data'].each do |missing_resource|
-            sha = missing_resource['id']
-            client.upload_resource(current_build_id, resource_map[sha].content)
+          rescue_connection_failures do
+            snapshot = client.create_snapshot(current_build_id, resources, name: name)
+            snapshot['data']['relationships']['missing-resources']['data'].each do |missing_resource|
+              sha = missing_resource['id']
+              client.upload_resource(current_build_id, resource_map[sha].content)
+            end
+            Percy.logger.debug { "All snapshot resources uploaded (#{Time.now - start}s)" }
+
+            # Finalize the snapshot.
+            client.finalize_snapshot(snapshot['data']['id'])
           end
-          Percy.logger.debug { "All snapshot resources uploaded (#{Time.now - start}s)" }
-
-          # Finalize the snapshot.
-          client.finalize_snapshot(snapshot['data']['id'])
-
+          if failed?
+            Percy.logger.error { "Build failed due to connection errors." }
+            return
+          end
           true
         end
       end
