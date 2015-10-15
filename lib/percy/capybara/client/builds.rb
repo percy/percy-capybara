@@ -20,7 +20,7 @@ module Percy
             _upload_missing_build_resources(build_resources) if !build_resources.empty?
           end
           if failed?
-            Percy.logger.error { "Build failed due to connection errors." }
+            Percy.logger.error { "Percy build failed! Check log above for errors." }
             return
           end
           @current_build
@@ -45,7 +45,7 @@ module Percy
             client.finalize_build(current_build['data']['id'])
           end
           if failed?
-            Percy.logger.error { "Build failed due to connection errors." }
+            Percy.logger.error { "Percy build failed! Check log above for errors." }
             return
           end
           result

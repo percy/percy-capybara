@@ -44,7 +44,8 @@ module Percy
           block.call
         rescue Percy::Client::HttpError,
             Percy::Client::ConnectionFailed,
-            Percy::Client::TimeoutError
+            Percy::Client::TimeoutError => e
+          Percy.logger.error(e)
           @enabled = false
           @failed = true
           nil

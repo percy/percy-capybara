@@ -70,7 +70,7 @@ module Percy
             client.finalize_snapshot(snapshot['data']['id'])
           end
           if failed?
-            Percy.logger.error { "Build failed due to connection errors." }
+            Percy.logger.error { "Percy build failed! Check log above for errors." }
             return
           end
           true
