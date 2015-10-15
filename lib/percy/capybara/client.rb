@@ -38,6 +38,23 @@ module Percy
         @enabled ||= !Percy::Client::Environment.current_ci.nil?
       end
 
+      def rescue_connection_failures(&block)
+        raise ArgumentError.new('block is requried') if !block_given?
+        begin
+          block.call
+        rescue Percy::Client::HttpError,
+            Percy::Client::ConnectionFailed,
+            Percy::Client::TimeoutError
+          @enabled = false
+          @failed = true
+          nil
+        end
+      end
+
+      def failed?
+        return !!@failed
+      end
+
       def initialize_loader(options = {})
         if sprockets_environment && sprockets_options
           Percy.logger.debug { 'Using sprockets_loader to discover assets.' }

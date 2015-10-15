@@ -17,15 +17,58 @@ RSpec.describe Percy::Capybara::Client do
     context 'in supported CI environment' do
       it 'is true' do
         ENV['TRAVIS_BUILD_ID'] = '123'
-        expect(Percy::Capybara::Client.new.enabled?).to be_truthy
+        expect(Percy::Capybara::Client.new.enabled?).to eq(true)
       end
     end
     it 'is false by default for local dev environments or unknown CI environments' do
-      expect(Percy::Capybara::Client.new.enabled?).to be_falsey
+      expect(Percy::Capybara::Client.new.enabled?).to eq(false)
     end
     it 'is true if PERCY_ENABLE=1 is set' do
       ENV['PERCY_ENABLE'] = '1'
-      expect(Percy::Capybara::Client.new.enabled?).to be_truthy
+      expect(Percy::Capybara::Client.new.enabled?).to eq(true)
+    end
+  end
+  describe '#failed?' do
+    it 'is false by default' do
+      expect(Percy::Capybara::Client.new.enabled?).to eq(false)
+    end
+  end
+  describe '#rescue_connection_failures' do
+    let(:capybara_client) { Percy::Capybara::Client.new(enabled: true) }
+    it 'returns block result on success' do
+      result = capybara_client.rescue_connection_failures do
+        true
+      end
+      expect(result).to eq(true)
+      expect(capybara_client.enabled?).to eq(true)
+      expect(capybara_client.failed?).to eq(false)
+    end
+    it 'makes block safe from HttpError' do
+      result = capybara_client.rescue_connection_failures do
+        raise Percy::Client::HttpError.new(500, 'POST', '', '')
+      end
+      expect(result).to eq(nil)
+      expect(capybara_client.enabled?).to eq(false)
+      expect(capybara_client.failed?).to eq(true)
+    end
+    it 'makes block safe from ConnectionFailed' do
+      result = capybara_client.rescue_connection_failures do
+        raise Percy::Client::ConnectionFailed
+      end
+      expect(result).to eq(nil)
+      expect(capybara_client.enabled?).to eq(false)
+      expect(capybara_client.failed?).to eq(true)
+    end
+    it 'makes block safe from TimeoutError' do
+      result = capybara_client.rescue_connection_failures do
+        raise Percy::Client::TimeoutError
+      end
+      expect(result).to eq(nil)
+      expect(capybara_client.enabled?).to eq(false)
+      expect(capybara_client.failed?).to eq(true)
+    end
+    it 'requires a block' do
+      expect { capybara_client.rescue_connection_failures }.to raise_error(ArgumentError)
     end
   end
   describe '#initialize_loader' do
