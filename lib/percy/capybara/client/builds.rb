@@ -15,8 +15,14 @@ module Percy
           build_resources.each { |br| Percy.logger.debug { "Build resource: #{br.resource_url}" } }
           Percy.logger.debug { "All build resources loaded (#{Time.now - start}s)" }
 
-          @current_build = client.create_build(client.config.repo, options)
-          _upload_missing_build_resources(build_resources) if !build_resources.empty?
+          rescue_connection_failures do
+            @current_build = client.create_build(client.config.repo, options)
+            _upload_missing_build_resources(build_resources) if !build_resources.empty?
+          end
+          if failed?
+            Percy.logger.error { "Build failed due to connection errors." }
+            return
+          end
           @current_build
         end
 
@@ -35,7 +41,14 @@ module Percy
             raise Percy::Capybara::Client::BuildNotInitializedError.new(
               'Failed to finalize build because no build has been initialized.')
           end
-          client.finalize_build(current_build['data']['id'])
+          result = rescue_connection_failures do
+            client.finalize_build(current_build['data']['id'])
+          end
+          if failed?
+            Percy.logger.error { "Build failed due to connection errors." }
+            return
+          end
+          result
         end
 
         # @private
