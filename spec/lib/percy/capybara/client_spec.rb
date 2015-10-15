@@ -30,7 +30,7 @@ RSpec.describe Percy::Capybara::Client do
   end
   describe '#failed?' do
     it 'is false by default' do
-      expect(Percy::Capybara::Client.new.enabled?).to eq(false)
+      expect(Percy::Capybara::Client.new.failed?).to eq(false)
     end
   end
   describe '#rescue_connection_failures' do
