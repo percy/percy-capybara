@@ -1,5 +1,6 @@
 require 'percy/capybara/loaders/base_loader'
 require 'digest'
+require 'find'
 require 'uri'
 
 module Percy
@@ -30,6 +31,8 @@ module Percy
 
         def build_resources
           resources = []
+
+          # Load resources from the asset pipeline.
           _asset_logical_paths.each do |logical_path|
             next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(logical_path))
 
@@ -48,10 +51,35 @@ module Percy
             end
 
             next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(resource_url))
-
             resources << Percy::Client::Resource.new(resource_url, sha: sha, content: content)
           end
+
+          # Load resources from the public/ directory, if a Rails app.
+          if _rails
+            public_path = _rails.public_path.to_s
+            Find.find(public_path).each do |path|
+              # Skip directories.
+              next if !FileTest.file?(path)
+              # Skip certain extensions.
+              next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(path))
+
+              # Strip the public_path from the beginning of the resource_url.
+              # This assumes that everything in the Rails public/ directory is served at the root
+              # of the app.
+              resource_url = path.sub(public_path, '')
+
+              sha = Digest::SHA256.hexdigest(File.read(path))
+
+              resources << Percy::Client::Resource.new(resource_url, sha: sha, path: path)
+            end
+
+          end
+
           resources
+        end
+
+        def _rails
+          return Rails if defined?(Rails)
         end
 
         def _asset_logical_paths
