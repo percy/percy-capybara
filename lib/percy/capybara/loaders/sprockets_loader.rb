@@ -79,7 +79,7 @@ module Percy
         end
 
         def _rails
-          return Rails if defined?(Rails)
+          Rails if defined?(Rails)
         end
 
         def _asset_logical_paths
