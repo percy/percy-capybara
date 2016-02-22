@@ -43,9 +43,17 @@ RSpec.describe Percy::Capybara::Client do
       expect(capybara_client.enabled?).to eq(true)
       expect(capybara_client.failed?).to eq(false)
     end
-    it 'makes block safe from HttpError' do
+    it 'makes block safe from server errors' do
       result = capybara_client.rescue_connection_failures do
-        raise Percy::Client::HttpError.new(500, 'POST', '', '')
+        raise Percy::Client::ServerError.new(500, 'POST', '', '')
+      end
+      expect(result).to eq(nil)
+      expect(capybara_client.enabled?).to eq(false)
+      expect(capybara_client.failed?).to eq(true)
+    end
+    it 'makes block safe from quota exceeded errors' do
+      result = capybara_client.rescue_connection_failures do
+        raise Percy::Client::PaymentRequiredError.new(409, 'POST', '', '')
       end
       expect(result).to eq(nil)
       expect(capybara_client.enabled?).to eq(false)

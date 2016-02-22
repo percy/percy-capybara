@@ -42,8 +42,9 @@ module Percy
         raise ArgumentError.new('block is requried') if !block_given?
         begin
           block.call
-        rescue Percy::Client::HttpError,
-            Percy::Client::ConnectionFailed,
+        rescue Percy::Client::ServerError,  # Rescue server errors.
+            Percy::Client::PaymentRequiredError,  # Rescue quota exceeded errors.
+            Percy::Client::ConnectionFailed,  # Rescue some networking errors.
             Percy::Client::TimeoutError => e
           Percy.logger.error(e)
           @enabled = false
