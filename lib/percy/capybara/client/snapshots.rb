@@ -14,11 +14,9 @@ module Percy
         def snapshot(page, options = {})
           return if !enabled?  # Silently skip if the client is disabled.
 
-          name = options[:name]
-          widths = options[:widths]
           loader = initialize_loader(page: page)
 
-          Percy.logger.debug { "Snapshot started (name: #{name.inspect})" }
+          Percy.logger.debug { "Snapshot started (name: #{options[:name].inspect})" }
           start = Time.now
           current_build_id = current_build['data']['id']
           resources = loader.snapshot_resources
@@ -32,12 +30,7 @@ module Percy
           # Create the snapshot and upload any missing snapshot resources.
           start = Time.now
           rescue_connection_failures do
-            snapshot = client.create_snapshot(
-              current_build_id,
-              resources,
-              name: name,
-              widths: widths,
-            )
+            snapshot = client.create_snapshot(current_build_id, resources, options)
             snapshot['data']['relationships']['missing-resources']['data'].each do |missing_resource|
               sha = missing_resource['id']
               client.upload_resource(current_build_id, resource_map[sha].content)
