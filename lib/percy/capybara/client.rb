@@ -38,6 +38,10 @@ module Percy
         @enabled ||= !Percy::Client::Environment.current_ci.nil?
       end
 
+      def disable!
+        @enabled = false
+      end
+
       def rescue_connection_failures(&block)
         raise ArgumentError.new('block is requried') if !block_given?
         begin

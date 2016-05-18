@@ -41,8 +41,16 @@ module Percy
     end
 
     # Reset the global Percy::Capybara module state.
-    def self.reset
+    def self.reset!
       @capybara_client = nil
+    end
+    # The 'reset' method is deprecated and will be removed: use the reset! method instead.
+    class << self; alias_method :reset, :reset!; end;
+
+    # Manually disable Percy for the current capybara client. This can also be done with the
+    # PERCY_ENABLE=0 environment variable.
+    def self.disable!
+      capybara_client.disable!
     end
   end
 end

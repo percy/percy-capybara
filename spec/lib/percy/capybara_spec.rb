@@ -1,6 +1,6 @@
 RSpec.describe Percy::Capybara do
   before(:each) do
-    Percy::Capybara.reset
+    Percy::Capybara.reset!
     @original_env = ENV['TRAVIS_BUILD_ID']
     ENV['PERCY_ENABLE'] = '1'
     ENV['TRAVIS_BUILD_ID'] = nil
@@ -61,11 +61,19 @@ RSpec.describe Percy::Capybara do
       Percy::Capybara.finalize_build
     end
   end
-  describe '#reset' do
+  describe '#reset!' do
     it 'clears the current capybara_client' do
       capybara_client = Percy::Capybara.capybara_client
-      Percy::Capybara.reset
+      Percy::Capybara.reset!
       expect(Percy::Capybara.capybara_client).to_not eq(capybara_client)
+    end
+  end
+  describe '#disable!' do
+    it 'sets the current capybara_client to disabled' do
+      capybara_client = Percy::Capybara.capybara_client
+      expect(Percy::Capybara.capybara_client.enabled?).to eq(true)
+      Percy::Capybara.disable!
+      expect(Percy::Capybara.capybara_client.enabled?).to eq(false)
     end
   end
 end
