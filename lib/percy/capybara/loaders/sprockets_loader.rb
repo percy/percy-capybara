@@ -1,6 +1,7 @@
 require 'percy/capybara/loaders/base_loader'
 require 'digest'
 require 'find'
+require 'set'
 require 'uri'
 
 module Percy
@@ -30,6 +31,7 @@ module Percy
 
         def build_resources
           resources = []
+          loaded_resource_urls = Set.new
 
           # Load resources from the asset pipeline.
           _asset_logical_paths.each do |logical_path|
@@ -50,6 +52,8 @@ module Percy
             end
 
             next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(resource_url))
+
+            loaded_resource_urls.add(resource_url)
             resources << Percy::Client::Resource.new(resource_url, sha: sha, content: content)
           end
 
@@ -67,11 +71,12 @@ module Percy
               # of the app.
               resource_url = path.sub(public_path, '')
 
-              sha = Digest::SHA256.hexdigest(File.read(path))
+              # Skip precompiled files already included via the asset pipeline.
+              next if loaded_resource_urls.include?(resource_url)
 
+              sha = Digest::SHA256.hexdigest(File.read(path))
               resources << Percy::Client::Resource.new(resource_url, sha: sha, path: path)
             end
-
           end
 
           resources
