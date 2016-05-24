@@ -52,7 +52,8 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
   describe '#build_resources', type: :feature do
     it 'returns "build resources" from filtered sprockets paths' do
       resources = loader.build_resources
-      expect(resources.map { |r| r.resource_url }).to eq(["/assets/css/base.css"])
+      expected_resources = ['/assets/css/base.css', '/assets/js/base.js']
+      expect(resources.map { |r| r.resource_url }).to eq(expected_resources)
       expect(resources.first.content).to include('.colored-by-base')
     end
     context 'Rails app' do

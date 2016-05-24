@@ -13,7 +13,6 @@ module Percy
         attr_reader :sprockets_options
 
         SKIP_RESOURCE_EXTENSIONS = [
-          '.js',  # Ignore JavaScript.
           '.map',  # Ignore source maps.
         ]
 
