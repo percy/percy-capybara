@@ -79,11 +79,11 @@ RSpec.describe Percy::Capybara do
   describe '#use_loader' do
     class DummyLoader < Percy::Capybara::Loaders::NativeLoader; end
 
-    it 'sets the current capybara clients custom loader flag' do
+    it 'sets the current capybara clients custom loader' do
       capybara_client = Percy::Capybara::Client
-      expect(Percy::Capybara.capybara_client.custom_loader?).to eq(false)
-      Percy::Capybara.use_loader DummyLoader
-      expect(Percy::Capybara.capybara_client.custom_loader?).to eq(true)
+      expect(Percy::Capybara.capybara_client.custom_loader).to be nil
+      Percy::Capybara.use_loader(DummyLoader)
+      expect(Percy::Capybara.capybara_client.custom_loader).not_to be nil
     end
   end
 end

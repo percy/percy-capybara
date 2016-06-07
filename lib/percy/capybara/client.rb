@@ -43,10 +43,6 @@ module Percy
         @enabled = false
       end
 
-      def custom_loader?
-        !@custom_loader.nil?
-      end
-
       def rescue_connection_failures(&block)
         raise ArgumentError.new('block is required') if !block_given?
         begin
@@ -67,9 +63,9 @@ module Percy
       end
 
       def initialize_loader(options = {})
-        if custom_loader?
+        if custom_loader
           Percy.logger.debug { 'Using a custom loader to discover assets.' }
-          @custom_loader.new(options)
+          custom_loader.new(options)
         elsif sprockets_environment && sprockets_options
           Percy.logger.debug { 'Using sprockets_loader to discover assets.' }
           options[:sprockets_environment] = sprockets_environment
