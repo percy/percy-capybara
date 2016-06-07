@@ -48,7 +48,7 @@ module Percy
       end
 
       def rescue_connection_failures(&block)
-        raise ArgumentError.new('block is requried') if !block_given?
+        raise ArgumentError.new('block is required') if !block_given?
         begin
           block.call
         rescue Percy::Client::ServerError,  # Rescue server errors.
