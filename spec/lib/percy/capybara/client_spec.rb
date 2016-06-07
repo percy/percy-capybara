@@ -91,6 +91,12 @@ RSpec.describe Percy::Capybara::Client do
       loader = capybara_client.initialize_loader
       expect(loader.class).to eq(Percy::Capybara::Loaders::SprocketsLoader)
     end
+    it 'returns a custom loader if a custom loader has been set' do
+      class DummyLoader < Percy::Capybara::Loaders::NativeLoader; end
+      capybara_client.custom_loader = DummyLoader
+      loader = capybara_client.initialize_loader
+      expect(loader.class).to eq(DummyLoader)
+    end
   end
 end
 

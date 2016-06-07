@@ -52,5 +52,9 @@ module Percy
     def self.disable!
       capybara_client.disable!
     end
+
+    def self.use_loader(loader)
+      capybara_client.custom_loader = loader
+    end
   end
 end
