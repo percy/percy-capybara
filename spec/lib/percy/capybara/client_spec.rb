@@ -82,20 +82,28 @@ RSpec.describe Percy::Capybara::Client do
   describe '#initialize_loader' do
     let(:capybara_client) { Percy::Capybara::Client.new }
 
-    it 'returns a NativeLoader if no sprockets config' do
-      expect(capybara_client.initialize_loader.class).to eq(Percy::Capybara::Loaders::NativeLoader)
+    context 'when a custom loader has been set' do
+      it 'returns an instance of the clients custom loader' do
+        class DummyLoader < Percy::Capybara::Loaders::NativeLoader; end
+        capybara_client.custom_loader = DummyLoader
+        loader = capybara_client.initialize_loader
+        expect(loader.class).to eq(DummyLoader)
+      end
     end
-    it 'returns a SprocketsLoader if sprockets is configured' do
-      capybara_client.sprockets_environment = double('sprockets_environment')
-      capybara_client.sprockets_options = double('sprockets_options')
-      loader = capybara_client.initialize_loader
-      expect(loader.class).to eq(Percy::Capybara::Loaders::SprocketsLoader)
+
+    context 'when sprockets is configured' do
+      it 'returns a SprocketsLoader' do
+        capybara_client.sprockets_environment = double('sprockets_environment')
+        capybara_client.sprockets_options = double('sprockets_options')
+        loader = capybara_client.initialize_loader
+        expect(loader.class).to eq(Percy::Capybara::Loaders::SprocketsLoader)
+      end
     end
-    it 'returns a custom loader if a custom loader has been set' do
-      class DummyLoader < Percy::Capybara::Loaders::NativeLoader; end
-      capybara_client.custom_loader = DummyLoader
-      loader = capybara_client.initialize_loader
-      expect(loader.class).to eq(DummyLoader)
+
+    context 'when no configuration has been set' do
+      it 'returns a NativeLoader' do
+        expect(capybara_client.initialize_loader.class).to eq(Percy::Capybara::Loaders::NativeLoader)
+      end
     end
   end
 end
