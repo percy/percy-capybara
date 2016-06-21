@@ -16,6 +16,7 @@ module Percy
         SKIP_RESOURCE_EXTENSIONS = [
           '.map',  # Ignore source maps.
         ]
+        MAX_FILESIZE_BYTES = 15 * 1024**2  # 15 MB.
 
         def initialize(options = {})
           @sprockets_environment = options[:sprockets_environment]
@@ -65,6 +66,8 @@ module Percy
               next if !FileTest.file?(path)
               # Skip certain extensions.
               next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(path))
+              # Skip large files, these are hopefully downloads and not used in page rendering.
+              next if File.size(path) > MAX_FILESIZE_BYTES
 
               # Strip the public_path from the beginning of the resource_url.
               # This assumes that everything in the Rails public/ directory is served at the root
