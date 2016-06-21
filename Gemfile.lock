@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    percy-capybara (2.2.0)
+    percy-capybara (2.2.1)
       percy-client (~> 1.4)
 
 GEM
@@ -61,7 +61,7 @@ GEM
     notiffany (0.0.8)
       nenv (~> 0.1)
       shellany (~> 0.0)
-    percy-client (1.4.1)
+    percy-client (1.4.2)
       faraday (>= 0.9)
       httpclient (>= 2.6)
     pry (0.10.3)
