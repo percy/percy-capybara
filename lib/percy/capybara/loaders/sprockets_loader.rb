@@ -27,20 +27,7 @@ module Percy
         def snapshot_resources
           resources = []
           resources << root_html_resource
-
-          _get_iframes_data.each do |iframe_data|
-            content = iframe_data['content']
-            sha = Digest::SHA256.hexdigest(content)
-
-            resources <<
-              Percy::Client::Resource.new(
-                iframe_data['url'],
-                sha: sha,
-                content: content,
-                mimetype: 'text/html'
-              )
-          end
-
+          resources += _get_iframes_resources
           resources
         end
 
@@ -117,34 +104,26 @@ module Percy
         end
 
         # NOTES:
-        # - Potentially slow
-        # - Requires the test to be run with `js: true`
-        # - Doesn't handle several different iframes with the same URL (`src` attribute)
-        def _get_iframes_data
-          # Do a fast search for iframes in the page, before calling slow `_evaluate_script`
-          return [] unless page.body.include?('<iframe ')
+        # - Doesn't handle multiple iframes with the same URL (`src` attribute)
+        def _get_iframes_resources
+          resources = []
 
-          # Get frames URLs and full HTML content, via javascript
-          script = <<-JS.strip.gsub(/\n+|\s+/, ' ')
-            (function () {
-              var data = [];
-              var tags = document.getElementsByTagName('iframe');
-              var el;
+          page.all(:css, 'iframe').each do |iframe_element|
+            url = iframe_element[:src]
+            page.within_frame(iframe_element) do
+              content = page.body
+              sha = Digest::SHA256.hexdigest(content)
+              resources <<
+                Percy::Client::Resource.new(
+                  url,
+                  sha: sha,
+                  content: content,
+                  mimetype: 'text/html'
+                )
+            end
+          end
 
-              for (var i = 0; i < tags.length; i++) {
-                el = tags[i];
-                data.push({
-                  'url': el.attributes['src'].value,
-                  'content': el.contentWindow.document.getElementsByTagName('html')[0].outerHTML
-                });
-              }
-
-              return JSON.stringify(data);
-            })()
-          JS
-
-          # Execute and convert JS to get iframes data
-          JSON(page.evaluate_script(script))
+          resources
         end
       end
     end

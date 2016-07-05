@@ -50,7 +50,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
         expect(resources.first.is_root).to eq(true)
         expect(resources.first.content).to include('Hello World!</body></html>')
       end
-      it 'includes a new iframe resource' do
+      it 'includes a iframe resource' do
         visit('/test-iframe.html')
         last_resource = loader.snapshot_resources.last
         expect(last_resource.resource_url).to eq('iframe.html')
