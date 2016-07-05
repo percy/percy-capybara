@@ -70,6 +70,32 @@ module Percy
 
           current_url
         end
+
+        # NOTES:
+        # - Doesn't handle multiple iframes with the same URL (`src` attribute)
+        # @private
+        def get_iframes_resources
+          resources = []
+
+          page.all(:css, 'iframe').each do |iframe_element|
+            url = iframe_element[:src]
+            root_page_host = page.current_host
+            page.within_frame(iframe_element) do
+              next unless page.current_host == root_page_host
+              content = page.body
+              sha = Digest::SHA256.hexdigest(content)
+              resources <<
+                Percy::Client::Resource.new(
+                  url,
+                  sha: sha,
+                  content: content,
+                  mimetype: 'text/html'
+                )
+            end
+          end
+
+          resources
+        end
       end
     end
   end

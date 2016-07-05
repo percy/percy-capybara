@@ -14,6 +14,18 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
       expect(resource.content).to include('Hello World!')
       expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
     end
+    it 'includes an iframe resource' do
+      visit '/test-iframe.html'
+
+      loader = described_class.new(page: page)
+      resources = loader.get_iframes_resources
+
+      expect(resources.size).to eq(1) # doesn't include iframe to remote host
+      last_resource = resources.last
+      expect(last_resource.resource_url).to eq('iframe.html')
+      expect(last_resource.mimetype).to eq('text/html')
+      expect(last_resource.content).to include('Inside iframe')
+    end
   end
   describe '#build_resources' do
     it 'raises a NotImplementedError' do
