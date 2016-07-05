@@ -97,6 +97,8 @@ module Percy
           end
 
           resources
+        rescue ::Capybara::NotSupportedByDriverError
+          []
         end
       end
     end

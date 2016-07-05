@@ -1,3 +1,11 @@
+IFRAME_PATH = File.expand_path('../../client/testdata/test-iframe.html', __FILE__)
+
+class RackAppWithIframe
+  def self.call(env)
+    [200, {}, File.read(IFRAME_PATH)]
+  end
+end
+
 RSpec.describe Percy::Capybara::Loaders::BaseLoader do
   let(:loader) { described_class.new }
 
@@ -63,6 +71,19 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
       expect(page_double).to receive(:current_url).and_return('about:srcdoc')
       loader = described_class.new(page: page_double)
       expect(loader.current_path).to eq('/about:srcdoc')
+    end
+  end
+
+  context 'Rack::Test', type: :feature do
+    before(:each) { Capybara.app = RackAppWithIframe }
+    after(:each) { Capybara.app = nil }
+
+    describe '#iframes_resources' do
+      it 'is silently ignored' do
+        visit '/test-iframe.html'
+        loader = described_class.new(page: page)
+        expect(loader.iframes_resources).to eq([])
+      end
     end
   end
 end
