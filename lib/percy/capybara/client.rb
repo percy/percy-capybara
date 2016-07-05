@@ -63,14 +63,13 @@ module Percy
       end
 
       def initialize_loader(options = {})
-        options[:sprockets_environment] ||= sprockets_environment
-        options[:sprockets_options] ||= sprockets_options
-
         if custom_loader
           Percy.logger.debug { 'Using a custom loader to discover assets.' }
           custom_loader.new(options)
         elsif sprockets_environment && sprockets_options
           Percy.logger.debug { 'Using sprockets_loader to discover assets.' }
+          options[:sprockets_environment] = sprockets_environment
+          options[:sprockets_options] = sprockets_options
           Percy::Capybara::Loaders::SprocketsLoader.new(options)
         else
           Percy.logger.debug { 'Using native_loader to discover assets (slower).' }
