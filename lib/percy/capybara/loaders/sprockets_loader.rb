@@ -110,7 +110,9 @@ module Percy
 
           page.all(:css, 'iframe').each do |iframe_element|
             url = iframe_element[:src]
+            root_page_host = page.current_host
             page.within_frame(iframe_element) do
+              next unless page.current_host == root_page_host
               content = page.body
               sha = Digest::SHA256.hexdigest(content)
               resources <<
