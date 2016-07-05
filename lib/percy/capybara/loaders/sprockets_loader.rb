@@ -25,10 +25,7 @@ module Percy
         end
 
         def snapshot_resources
-          resources = []
-          resources << root_html_resource
-          resources += get_iframes_resources
-          resources
+          [root_html_resource] + iframes_resources
         end
 
         def build_resources

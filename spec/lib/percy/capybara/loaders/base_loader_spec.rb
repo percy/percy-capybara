@@ -18,7 +18,7 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
       visit '/test-iframe.html'
 
       loader = described_class.new(page: page)
-      resources = loader.get_iframes_resources
+      resources = loader.iframes_resources
 
       expect(resources.size).to eq(1) # doesn't include iframe to remote host
       last_resource = resources.last

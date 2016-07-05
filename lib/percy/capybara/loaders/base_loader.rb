@@ -74,7 +74,7 @@ module Percy
         # NOTES:
         # - Doesn't handle multiple iframes with the same URL (`src` attribute)
         # @private
-        def get_iframes_resources
+        def iframes_resources
           resources = []
 
           page.all(:css, 'iframe').each do |iframe_element|
