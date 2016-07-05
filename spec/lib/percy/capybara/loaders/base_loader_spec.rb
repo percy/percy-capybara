@@ -14,7 +14,9 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
       expect(resource.content).to include('Hello World!')
       expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
     end
-    it 'includes an iframe resource' do
+  end
+  describe '#iframes_resources', type: :feature, js: true do
+    it 'includes the iframe DOM HTML' do
       visit '/test-iframe.html'
 
       loader = described_class.new(page: page)
