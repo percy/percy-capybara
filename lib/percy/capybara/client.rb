@@ -2,7 +2,6 @@ require 'percy/capybara/client/builds'
 require 'percy/capybara/client/snapshots'
 require 'percy/capybara/loaders/native_loader'
 require 'percy/capybara/loaders/sprockets_loader'
-require 'percy/capybara/loaders/sprockets_with_iframes_loader'
 
 module Percy
   module Capybara
