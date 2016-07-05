@@ -1,3 +1,11 @@
+IFRAME_PATH = File.expand_path('../../client/testdata/test-iframe.html', __FILE__)
+
+class RackAppWithIframe
+  def self.call(env)
+    [200, {}, File.read(IFRAME_PATH)]
+  end
+end
+
 RSpec.describe Percy::Capybara::Loaders::BaseLoader do
   let(:loader) { described_class.new }
 
@@ -13,6 +21,20 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
       expect(resource.resource_url).to match('/')
       expect(resource.content).to include('Hello World!')
       expect(resource.sha).to eq(Digest::SHA256.hexdigest(resource.content))
+    end
+  end
+  describe '#iframes_resources', type: :feature, js: true do
+    it 'includes the iframe DOM HTML' do
+      visit '/test-iframe.html'
+
+      loader = described_class.new(page: page)
+      resources = loader.iframes_resources
+
+      expect(resources.size).to eq(1) # doesn't include iframe to remote host
+      last_resource = resources.last
+      expect(last_resource.resource_url).to eq('iframe.html')
+      expect(last_resource.mimetype).to eq('text/html')
+      expect(last_resource.content).to include('Inside iframe')
     end
   end
   describe '#build_resources' do
@@ -49,6 +71,19 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
       expect(page_double).to receive(:current_url).and_return('about:srcdoc')
       loader = described_class.new(page: page_double)
       expect(loader.current_path).to eq('/about:srcdoc')
+    end
+  end
+
+  context 'Rack::Test', type: :feature do
+    before(:each) { Capybara.app = RackAppWithIframe }
+    after(:each) { Capybara.app = nil }
+
+    describe '#iframes_resources' do
+      it 'is silently ignored' do
+        visit '/test-iframe.html'
+        loader = described_class.new(page: page)
+        expect(loader.iframes_resources).to eq([])
+      end
     end
   end
 end

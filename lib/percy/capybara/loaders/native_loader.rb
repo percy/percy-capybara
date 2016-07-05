@@ -23,6 +23,7 @@ module Percy
           resources << root_html_resource
           resources += _get_css_resources
           resources += _get_image_resources
+          resources += iframes_resources
           resources
         end
 

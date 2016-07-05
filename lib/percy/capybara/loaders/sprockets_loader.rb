@@ -25,9 +25,7 @@ module Percy
         end
 
         def snapshot_resources
-          # When loading via Sprockets, all other resources are associated to the build, so the only
-          # snapshot resource to upload is the root HTML.
-          [root_html_resource]
+          [root_html_resource] + iframes_resources
         end
 
         def build_resources
