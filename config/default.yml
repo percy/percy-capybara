@@ -1,0 +1,6 @@
+# This is the default configuration file.
+# A custom configuration file will completely override this one.
+
+sprockets_loader:
+  ignore_paths:
+    - '.*\.map\z'
