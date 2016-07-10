@@ -13,14 +13,12 @@ module Percy
         attr_reader :sprockets_environment
         attr_reader :sprockets_options
 
-        SKIP_RESOURCE_EXTENSIONS = [
-          '.map',  # Ignore source maps.
-        ]
         MAX_FILESIZE_BYTES = 15 * 1024**2  # 15 MB.
 
         def initialize(options = {})
           @sprockets_environment = options[:sprockets_environment]
           @sprockets_options = options[:sprockets_options]
+          @config = options[:config] || {}
           super
         end
 
@@ -34,8 +32,6 @@ module Percy
 
           # Load resources from the asset pipeline.
           _asset_logical_paths.each do |logical_path|
-            next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(logical_path))
-
             asset = sprockets_environment.find_asset(logical_path)
             content = asset.to_s
             sha = Digest::SHA256.hexdigest(content)
@@ -50,7 +46,8 @@ module Percy
               resource_url = URI.escape("/assets/#{path}")
             end
 
-            next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(resource_url))
+            # Skip ignored paths.
+            next if ignored_paths_regex =~ resource_url
 
             loaded_resource_urls.add(resource_url)
             resources << Percy::Client::Resource.new(resource_url, sha: sha, content: content)
@@ -62,8 +59,6 @@ module Percy
             Find.find(public_path).each do |path|
               # Skip directories.
               next if !FileTest.file?(path)
-              # Skip certain extensions.
-              next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(path))
               # Skip large files, these are hopefully downloads and not used in page rendering.
               next if File.size(path) > MAX_FILESIZE_BYTES
 
@@ -71,6 +66,9 @@ module Percy
               # This assumes that everything in the Rails public/ directory is served at the root
               # of the app.
               resource_url = path.sub(public_path, '')
+
+              # Skip ignored paths.
+              next if ignored_paths_regex =~ resource_url
 
               # Skip precompiled files already included via the asset pipeline.
               next if loaded_resource_urls.include?(resource_url)
@@ -98,6 +96,17 @@ module Percy
             Pathname.new(filename).absolute? if filename.is_a?(String)
           end
           logical_paths.uniq
+        end
+
+        # Config
+        def ignored_paths_regex
+          return @ignored_paths_regex if defined?(@ignored_paths_regex)
+
+          sprockets_loader_config = @config['sprockets_loader'] || {}
+          ignored_paths = sprockets_loader_config['ignore_paths'] || []
+          ignored_paths_compiled = ignored_paths.map { |path| "(?:#{path})" }.join('|')
+          unmatchable_regex = /\/\A/
+          @ignored_paths_regex = ignored_paths.size > 0 ? Regexp.new(ignored_paths_compiled) : unmatchable_regex
         end
       end
     end

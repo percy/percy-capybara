@@ -2,6 +2,7 @@ require 'percy/capybara/client/builds'
 require 'percy/capybara/client/snapshots'
 require 'percy/capybara/loaders/native_loader'
 require 'percy/capybara/loaders/sprockets_loader'
+require 'percy/capybara/config_loader'
 
 module Percy
   module Capybara
@@ -22,11 +23,15 @@ module Percy
       def initialize(options = {})
         @client = options[:client] || Percy.client
         @enabled = options[:enabled]
+        config_loader = Percy::Capybara::ConfigLoader
 
         if defined?(Rails)
           @sprockets_environment = options[:sprockets_environment] || Rails.application.assets
           @sprockets_options = options[:sprockets_options] || Rails.application.config.assets
+          @config = config_loader.load_rails_dotfile
         end
+
+        @config ||= config_loader.load_default
       end
 
       def enabled?
@@ -63,6 +68,8 @@ module Percy
       end
 
       def initialize_loader(options = {})
+        options[:config] ||= @config
+
         if custom_loader
           Percy.logger.debug { 'Using a custom loader to discover assets.' }
           custom_loader.new(options)

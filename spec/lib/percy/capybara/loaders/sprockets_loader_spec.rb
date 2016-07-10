@@ -12,6 +12,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
       page: page,
       sprockets_environment: environment,
       sprockets_options: sprockets_options,
+      config: Percy::Capybara::ConfigLoader.load_default
     )
   end
   let(:environment) do
@@ -88,6 +89,32 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
             '/assets/css/digested-f3420c6aee71c137a3ca39727052811bae84b2f37d898f4db242e20656a1579e.css'
           digested_resources = resources.select { |r| r.resource_url == expected_digest_url }
           expect(digested_resources.length).to eq(1)
+        end
+      end
+      context 'with config set ignored paths' do
+        let(:loader) do
+          described_class.new(
+            page: page,
+            sprockets_environment: environment,
+            sprockets_options: sprockets_options,
+            config: config
+          )
+        end
+        let(:config) do
+          {
+            'sprockets_loader' => {
+              'ignore_paths' => [
+                '/images',
+                'test-.*\.html'
+              ]
+            }
+          }
+        end
+        it 'returns "build resources" from filtered sprockets paths' do
+          resources = loader.build_resources
+          resources_urls = resources.map(&:resource_url)
+          expect(resources_urls).not_to include('/images/percy.svg')
+          expect(resources_urls).not_to include('/test-images.html')
         end
       end
     end
