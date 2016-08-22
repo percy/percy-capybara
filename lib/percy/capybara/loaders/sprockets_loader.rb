@@ -37,6 +37,10 @@ module Percy
             next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(logical_path))
 
             asset = sprockets_environment.find_asset(logical_path)
+
+            # Skip large files, these are hopefully downloads and not used in page rendering.
+            next if asset.length > MAX_FILESIZE_BYTES
+
             content = asset.to_s
             sha = Digest::SHA256.hexdigest(content)
 

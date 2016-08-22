@@ -23,8 +23,8 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
   let(:digest_enabled) { false }
   let(:sprockets_options) do
     options = double('options')
-    # Set specific files we want to compile. In normal use, this would be all CSS and JS files.
-    precompile_list = [/(?:\/|\\|\A)(base|digested)\.(css|js)$|\.map/]
+    # Set specific files we want to compile. In normal use, this would be all asset files.
+    precompile_list = [/(?:\/|\\|\A)(base|digested)\.(css|js)$|\.map|\.png/]
     allow(options).to receive(:precompile).and_return(precompile_list)
     allow(options).to receive(:digest).and_return(digest_enabled)
     options
@@ -58,6 +58,15 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
       expected_resources = [
         '/assets/css/base.css',
         '/assets/css/digested.css',
+        '/assets/images/bg-relative-to-root.png',
+        '/assets/images/bg-relative.png',
+        '/assets/images/bg-stacked.png',
+        '/assets/images/img-relative-to-root.png',
+        '/assets/images/img-relative.png',
+        # '/assets/images/large-file-skipped.png',  # Note: intentionally missing.
+        '/assets/images/srcset-base.png',
+        '/assets/images/srcset-first.png',
+        '/assets/images/srcset-second.png',
         '/assets/js/base.js',
       ]
       expect(resources.map { |r| r.resource_url }).to eq(expected_resources)
@@ -68,13 +77,18 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
         # Pretend like we're in a Rails app right now, all we care about is Rails.public_path.
         rails_double = double('Rails')
         # Pretend like the entire testdata directory is the public/ folder.
-        expect(rails_double).to receive(:public_path).and_return(environment.root)
+        expect(rails_double).to receive(:public_path).and_return(environment.root + '/public')
         expect(loader).to receive(:_rails).at_least(:once).and_return(rails_double)
       end
       it 'includes files from the public folder (non-asset-pipeline)' do
         resources = loader.build_resources
-        expect(resources.length).to be > 5  # Weak test that more things are in this list.
-        expect(resources.map { |r| r.resource_url }).to include('/images/percy.svg')
+        # Weak test that more things are in this list, because it merges asset pipeline with public.
+        expect(resources.length).to be > 5
+
+        resource_urls = resources.map { |r| r.resource_url }
+        expect(resource_urls).to include('/assets/images/bg-relative.png')  # From asset pipeline.
+        expect(resource_urls).to include('/percy-from-public.svg')  # Public merged into root.
+        expect(resource_urls).to_not include('/large-file-skipped.png')  # Public merged into root.
       end
       context 'digest enabled' do
         let(:digest_enabled) { true }
