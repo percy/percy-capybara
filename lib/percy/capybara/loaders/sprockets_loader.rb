@@ -15,6 +15,7 @@ module Percy
 
         SKIP_RESOURCE_EXTENSIONS = [
           '.map',  # Ignore source maps.
+          '.gz',  # Ignore gzipped files.
         ]
         MAX_FILESIZE_BYTES = 15 * 1024**2  # 15 MB.
 
