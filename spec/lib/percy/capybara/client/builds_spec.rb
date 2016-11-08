@@ -1,6 +1,7 @@
 RSpec.describe Percy::Capybara::Client::Builds do
   let(:enabled) { true }
   let(:capybara_client) { Percy::Capybara::Client.new(enabled: enabled) }
+  let(:builds_api_url) { "https://percy.io/api/v1/repos/#{Percy::Client::Environment.repo}/builds/" }
 
   describe '#initialize_build', type: :feature, js: true do
     before(:each) { setup_sprockets(capybara_client) }
@@ -18,7 +19,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
           'type' => 'builds',
         },
       }
-      stub_request(:post, 'https://percy.io/api/v1/repos/percy/percy-capybara/builds/')
+      stub_request(:post, builds_api_url)
         .to_return(status: 201, body: mock_response.to_json)
       expect(capybara_client.initialize_build).to eq(mock_response)
     end
@@ -43,7 +44,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
         },
       }
       # Stub create build.
-      build_stub = stub_request(:post, 'https://percy.io/api/v1/repos/percy/percy-capybara/builds/')
+      build_stub = stub_request(:post, builds_api_url)
         .to_return(status: 201, body: mock_response.to_json)
 
       # Stub resource upload.
@@ -81,7 +82,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
         },
       }
       # Stub create build.
-      build_stub = stub_request(:post, 'https://percy.io/api/v1/repos/percy/percy-capybara/builds/')
+      build_stub = stub_request(:post, builds_api_url)
         .to_return(status: 201, body: mock_response.to_json)
 
       # Stub resource upload.
@@ -156,7 +157,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
           'type' => 'builds',
         },
       }
-      stub_request(:post, 'https://percy.io/api/v1/repos/percy/percy-capybara/builds/')
+      stub_request(:post, builds_api_url)
         .to_return(status: 201, body: mock_response.to_json)
       capybara_client.initialize_build
 
