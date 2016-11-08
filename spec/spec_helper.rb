@@ -7,6 +7,7 @@ require 'percy/capybara'
 
 Capybara::Webkit.configure do |config|
   # config.allow_url("*")
+  config.allow_url('localtest.me')
   config.block_unknown_urls
 end
 

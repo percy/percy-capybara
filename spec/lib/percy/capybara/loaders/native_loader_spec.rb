@@ -1,5 +1,6 @@
 RSpec.describe Percy::Capybara::Loaders::NativeLoader do
-  let(:loader) { described_class.new(page: nil) }
+  let(:fake_page) { OpenStruct.new(current_url: "http://localhost/foo")}
+  let(:loader) { described_class.new(page: fake_page) }
 
   describe '#build_resources' do
     it 'returns an empty list' do
@@ -15,37 +16,52 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
     it 'returns the root HTML and CSS resources' do
       visit '/test-css.html'
       loader = described_class.new(page: page)
-      resource_urls = loader.snapshot_resources.collect(&:resource_url).map do |url|
-        url.gsub(/localhost:\d+/, 'localhost')
-      end
+      resource_urls = loader.snapshot_resources.collect(&:resource_url)
       expect(resource_urls).to match_array([
         "/test-css.html",
-        "http://localhost/css/base.css",
-        "http://localhost/css/imports.css",
-        "http://localhost/css/level0-imports.css",
-        "http://localhost/css/level1-imports.css",
-        "http://localhost/css/level2-imports.css",
-        "http://localhost/css/simple-imports.css",
+        "/css/base.css",
+        "/css/imports.css",
+        "/css/level0-imports.css",
+        "/css/level1-imports.css",
+        "/css/level2-imports.css",
+        "/css/simple-imports.css",
       ])
     end
     it 'returns the root HTML and image resources' do
       visit '/test-images.html'
       loader = described_class.new(page: page)
-      resource_urls = loader.snapshot_resources.collect(&:resource_url).map do |url|
-        url.gsub(/localhost:\d+/, 'localhost')
-      end
+      resource_urls = loader.snapshot_resources.collect(&:resource_url)
       expect(resource_urls).to match_array([
         "/test-images.html",
-        "http://localhost/images/img-relative.png",
-        "http://localhost/images/img-relative-to-root.png",
-        "http://localhost/images/percy.svg",
-        "http://localhost/images/srcset-base.png",
-        "http://localhost/images/srcset-first.png",
-        "http://localhost/images/srcset-second.png",
-        "http://localhost/images/bg-relative.png",
-        "http://localhost/images/bg-relative-to-root.png",
-        "http://localhost/images/bg-stacked.png"
+        "/images/img-relative.png",
+        "/images/img-relative-to-root.png",
+        "/images/percy.svg",
+        "/images/srcset-base.png",
+        "/images/srcset-first.png",
+        "/images/srcset-second.png",
+        "/images/bg-relative.png",
+        "/images/bg-relative-to-root.png",
+        "/images/bg-stacked.png"
       ])
+    end
+  end
+  describe "nonlocal.me", type: :feature, js: true do
+    before :each do
+      @orig_app_host = Capybara.app_host
+      Capybara.app_host = Capybara.app_host.gsub('http://localhost:', 'http://localtest.me:')
+    end
+    after :each do
+      Capybara.app_host = @orig_app_host
+    end
+    it 'returns the root HTML and image resources' do
+      visit '/test-localtest-me-images.html'
+      loader = described_class.new(page: page)
+      resource_urls = loader.snapshot_resources.collect(&:resource_url)
+      expect(resource_urls).to eq([
+        "/test-localtest-me-images.html",
+        "/images/img-relative.png"
+      ])
+      expect(loader.snapshot_resources.collect(&:is_root)).to eq([true,nil])
     end
   end
   describe '#_should_include_url?' do
@@ -80,6 +96,23 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
       expect(loader._should_include_url?('http://example.com/')).to eq(false)
       expect(loader._should_include_url?('http://example.com/foo')).to eq(false)
       expect(loader._should_include_url?('https://example.com/foo')).to eq(false)
+    end
+    context "for nonlocal hosts" do
+      let(:fake_page) { OpenStruct.new(current_url: "http://foo:123/") }
+      it "returns true for the same host port" do
+        expect(loader._should_include_url?('http://foo:123/')).to eq(true)
+        expect(loader._should_include_url?('http://foo:123/bar')).to eq(true)
+      end
+      it "returns false for different port" do
+        expect(loader._should_include_url?('http://foo/')).to eq(false)
+        expect(loader._should_include_url?('http://foo/bar')).to eq(false)
+        expect(loader._should_include_url?('http://foo:1234/')).to eq(false)
+        expect(loader._should_include_url?('http://foo:1234/bar')).to eq(false)
+      end
+      it "returns false for different host" do
+        expect(loader._should_include_url?('http://afoo:123/')).to eq(false)
+        expect(loader._should_include_url?('http://afoo:123/bar')).to eq(false)
+      end
     end
   end
   describe '#_get_css_resources', type: :feature, js: true do
@@ -204,19 +237,17 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
       expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
       expect(resource.sha).to eq(expected_sha)
 
-      resource_urls = resources.collect(&:resource_url).map do |url|
-        url.gsub(/localhost:\d+/, 'localhost')
-      end
+      resource_urls = resources.collect(&:resource_url)
       expect(resource_urls).to match_array([
-        "http://localhost/images/img-relative.png",
-        "http://localhost/images/img-relative-to-root.png",
-        "http://localhost/images/percy.svg",
-        "http://localhost/images/srcset-base.png",
-        "http://localhost/images/srcset-first.png",
-        "http://localhost/images/srcset-second.png",
-        "http://localhost/images/bg-relative.png",
-        "http://localhost/images/bg-relative-to-root.png",
-        "http://localhost/images/bg-stacked.png"
+        "/images/img-relative.png",
+        "/images/img-relative-to-root.png",
+        "/images/percy.svg",
+        "/images/srcset-base.png",
+        "/images/srcset-first.png",
+        "/images/srcset-second.png",
+        "/images/bg-relative.png",
+        "/images/bg-relative-to-root.png",
+        "/images/bg-stacked.png"
       ])
       expect(resources.collect(&:is_root).uniq).to match_array([nil])
     end
