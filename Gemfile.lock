@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    percy-capybara (2.3.1)
-      percy-client (~> 1.4)
+    percy-capybara (2.3.2)
+      percy-client (~> 1.9)
 
 GEM
   remote: https://rubygems.org/
@@ -44,7 +44,7 @@ GEM
       guard-compat (~> 1.1)
       rspec (>= 2.99.0, < 4.0)
     hashdiff (0.2.3)
-    httpclient (2.8.2.2)
+    httpclient (2.8.2.4)
     json (1.8.3)
     listen (3.0.6)
       rb-fsevent (>= 0.9.3)
@@ -61,7 +61,7 @@ GEM
     notiffany (0.0.8)
       nenv (~> 0.1)
       shellany (~> 0.0)
-    percy-client (1.6.0)
+    percy-client (1.9.0)
       faraday (>= 0.9)
       httpclient (>= 2.6)
     pry (0.10.3)
