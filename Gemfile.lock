@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    percy-capybara (2.3.2)
+    percy-capybara (2.3.3)
       percy-client (~> 1.9)
 
 GEM
