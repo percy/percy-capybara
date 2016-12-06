@@ -14,6 +14,14 @@ module Percy
         def snapshot(page, options = {})
           return if !enabled?  # Silently skip if the client is disabled.
 
+          if current_build.nil?
+            raise RuntimeError.new(
+              'Whoops! Percy is enabled, but Percy::Capybara.initialize_build was never called. ' +
+              'Did you forget to setup Percy in your spec_helper.rb? ' +
+              'See: https://percy.io/docs/clients/ruby/capybara'
+            )
+          end
+
           loader = initialize_loader(page: page)
 
           Percy.logger.debug { "Snapshot started (name: #{options[:name].inspect})" }

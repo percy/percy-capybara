@@ -65,6 +65,10 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
           .and_call_original
         expect(capybara_client.snapshot(page)).to eq(true)
       end
+      it 'errors if build is not created' do
+        capybara_client = Percy::Capybara::Client.new(enabled: true)
+        expect { capybara_client.snapshot(page) }.to raise_error(RuntimeError)
+      end
       it 'passes through options to the percy client if given' do
         expect(capybara_client.client).to receive(:create_snapshot)
           .with(anything, anything, {name: 'foo', widths: [320, 1024], enable_javascript: true})
