@@ -75,6 +75,7 @@ module Percy
           resource_urls.each do |url|
             next if !_should_include_url?(url)
             response = _fetch_resource_url(url)
+            _absolute_url_to_relative!(url, _current_host_port)
             next if !response
             sha = Digest::SHA256.hexdigest(response.body)
             resources << Percy::Client::Resource.new(
@@ -160,6 +161,7 @@ module Percy
             # browser's cache. However, often these images are probably local resources served by a
             # development server, so it may not be so bad. Re-evaluate if this becomes an issue.
             response = _fetch_resource_url(resource_url)
+            _absolute_url_to_relative!(resource_url, _current_host_port)
             next if !response
 
             sha = Digest::SHA256.hexdigest(response.body)
@@ -202,11 +204,29 @@ module Percy
           # Is not a remote URL.
           if url_match && !data_url_match
             host = url_match[2]
-            result = LOCAL_HOSTNAMES.include?(host)
+            result = LOCAL_HOSTNAMES.include?(host) || _same_server?(url, _current_host_port)
           end
 
           !!result
         end
+
+        # @priivate
+        def _current_host_port
+          url_match = URL_REGEX.match(page.current_url)
+          host_port = url_match[1] + url_match[2] + (url_match[3] || '')
+        end
+
+        # @private
+        def _same_server?(url, host_port)
+          url.start_with?(host_port + "/") || url == host_port
+        end
+
+        # @private
+        def _absolute_url_to_relative!(url, host_port)
+          url.gsub!(host_port + '/','/') if url.start_with?(host_port + "/")
+        end
+        private :_absolute_url_to_relative!
+
       end
     end
   end
