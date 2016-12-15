@@ -49,6 +49,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
           '/assets/css/digested-f3420c6aee71c137a3ca39727052811ba' \
             'e84b2f37d898f4db242e20656a1579e.css',
           '/css/base.css',
+          '/css/font.css',
           '/css/digested.css',
           '/css/imports.css',
           '/css/level0-imports.css',
@@ -69,11 +70,12 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
           '/js/base.js',
           '/public/percy-from-public.svg',
           '/test-css.html',
+          '/test-font.html',
           '/test-iframe.html',
           '/test-images.html',
           '/test-localtest-me-images.html',
         ]
-        expect(actual_paths).to eq(expected_paths)
+        expect(actual_paths).to match_array(expected_paths)
 
         expected_urls = loader.build_resources.collect(&:resource_url)
         actual_urls = [
@@ -86,6 +88,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
           '/url-prefix/css/level1-imports.css',
           '/url-prefix/css/level2-imports.css',
           '/url-prefix/css/simple-imports.css',
+          '/url-prefix/css/font.css',
           '/url-prefix/iframe.html',
           '/url-prefix/images/bg-relative-to-root.png',
           '/url-prefix/images/bg-relative.png',
@@ -100,11 +103,12 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
           '/url-prefix/js/base.js',
           '/url-prefix/public/percy-from-public.svg',
           '/url-prefix/test-css.html',
+          '/url-prefix/test-font.html',
           '/url-prefix/test-iframe.html',
           '/url-prefix/test-images.html',
           '/url-prefix/test-localtest-me-images.html',
         ]
-        expect(actual_urls).to eq(expected_urls)
+        expect(actual_urls).to match_array(expected_urls)
       end
     end
     context 'assets_dir with only skippable resources' do

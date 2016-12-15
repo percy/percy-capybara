@@ -30,6 +30,18 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
         ],
       )
     end
+    it 'returns the font resources' do
+      visit '/test-font.html'
+      loader = described_class.new(page: page)
+      resource_urls = loader.snapshot_resources.collect(&:resource_url)
+      expect(resource_urls).to match_array(
+        [
+          '/test-font.html',
+          '/css/font.css',
+          '/assets/bootstrap/glyphicons-halflings-regular-13634da.eot',
+        ],
+      )
+    end
     it 'returns the root HTML and image resources' do
       visit '/test-images.html'
       loader = described_class.new(page: page)
@@ -184,6 +196,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
       visit '/test-images.html'
 
       loader = described_class.new(page: page)
+      loader.instance_variable_set(:@urls_referred_by_css, [])
       resources = loader.send(:_get_image_resources)
 
       # The order of these is just for convenience, they match the order in test-images.html.
