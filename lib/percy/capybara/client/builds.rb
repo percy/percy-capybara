@@ -32,6 +32,7 @@ module Percy
         end
 
         def build_initialized?
+          return false unless defined? @current_build
           !!@current_build
         end
 

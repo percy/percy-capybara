@@ -77,7 +77,6 @@ module Percy
             response = _fetch_resource_url(url)
             _absolute_url_to_relative!(url, _current_host_port)
             next if !response
-            sha = Digest::SHA256.hexdigest(response.body)
             resources << Percy::Client::Resource.new(
               url, mimetype: 'text/css', content: response.body)
           end
@@ -164,7 +163,6 @@ module Percy
             _absolute_url_to_relative!(resource_url, _current_host_port)
             next if !response
 
-            sha = Digest::SHA256.hexdigest(response.body)
             resources << Percy::Client::Resource.new(
               resource_url, mimetype: response.content_type, content: response.body)
           end
@@ -210,10 +208,10 @@ module Percy
           !!result
         end
 
-        # @priivate
+        # @private
         def _current_host_port
           url_match = URL_REGEX.match(page.current_url)
-          host_port = url_match[1] + url_match[2] + (url_match[3] || '')
+          url_match[1] + url_match[2] + (url_match[3] || '')
         end
 
         # @private

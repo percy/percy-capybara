@@ -89,7 +89,6 @@ RSpec.describe Percy::Capybara::Client::Builds do
       expect(capybara_client.client).to receive(:upload_resource)
         .and_raise(Percy::Client::ConnectionFailed)
 
-      result = capybara_client.initialize_build
       expect(capybara_client.initialize_build).to eq(nil)
       expect(capybara_client.failed?).to eq(true)
       expect(build_stub).to have_been_requested

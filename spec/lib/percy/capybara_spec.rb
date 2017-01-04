@@ -70,7 +70,6 @@ RSpec.describe Percy::Capybara do
   end
   describe '#disable!' do
     it 'sets the current capybara_client to disabled' do
-      capybara_client = Percy::Capybara.capybara_client
       expect(Percy::Capybara.capybara_client.enabled?).to eq(true)
       Percy::Capybara.disable!
       expect(Percy::Capybara.capybara_client.enabled?).to eq(false)
@@ -80,7 +79,6 @@ RSpec.describe Percy::Capybara do
     class DummyLoader < Percy::Capybara::Loaders::NativeLoader; end
 
     it 'sets the current capybara clients custom loader' do
-      capybara_client = Percy::Capybara::Client
       expect(Percy::Capybara.capybara_client.custom_loader).to_not be
       Percy::Capybara.use_loader(DummyLoader)
       expect(Percy::Capybara.capybara_client.custom_loader).to be
