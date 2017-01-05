@@ -7,7 +7,7 @@ RSpec.describe Percy::Capybara do
   end
   after(:each) do
     ENV['TRAVIS_BUILD_ID'] = @original_env
-    ENV['PERCY_ENABLE'] = nil
+    ENV.delete('PERCY_ENABLE')
   end
 
   describe '#capybara_client' do
@@ -27,8 +27,8 @@ RSpec.describe Percy::Capybara do
       expect(capybara_client).to receive(:snapshot).with(mock_page, name: '/foo.html (modal)').once
       Percy::Capybara.snapshot(mock_page, name: '/foo.html (modal)')
     end
-    it 'silently skips if not enabled' do
-      ENV['PERCY_ENABLE'] = nil
+    it 'silently skips if disabled' do
+      ENV['PERCY_ENABLE'] = '0'
       mock_page = double('page')
       Percy::Capybara.snapshot(mock_page)
     end
@@ -52,8 +52,8 @@ RSpec.describe Percy::Capybara do
       expect(capybara_client).to receive(:finalize_current_build).once
       Percy::Capybara.finalize_build
     end
-    it 'silently skips if not enabled' do
-      ENV['PERCY_ENABLE'] = nil
+    it 'silently skips if disabled' do
+      ENV['PERCY_ENABLE'] = '0'
       capybara_client = Percy::Capybara.capybara_client
       expect(capybara_client.client).to_not receive(:create_build)
       Percy::Capybara.initialize_build
