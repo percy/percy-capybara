@@ -20,12 +20,20 @@ RSpec.describe Percy::Capybara::Client do
         expect(Percy::Capybara::Client.new.enabled?).to eq(true)
       end
     end
-    it 'is false by default for local dev environments or unknown CI environments' do
-      expect(Percy::Capybara::Client.new.enabled?).to eq(false)
+    it 'is true by default for local dev environments and unknown CI environments' do
+      expect(Percy::Capybara::Client.new.enabled?).to eq(true)
     end
     it 'is true if PERCY_ENABLE=1 is set' do
       ENV['PERCY_ENABLE'] = '1'
       expect(Percy::Capybara::Client.new.enabled?).to eq(true)
+    end
+    it 'is true if PERCY_ENABLE isn\'t set' do
+      ENV.delete('PERCY_ENABLE')
+      expect(Percy::Capybara::Client.new.enabled?).to eq(true)
+    end
+    it 'is false if PERCY_ENABLE=0 is set' do
+      ENV['PERCY_ENABLE'] = '0'
+      expect(Percy::Capybara::Client.new.enabled?).to eq(false)
     end
   end
   describe '#failed?' do
@@ -107,4 +115,3 @@ RSpec.describe Percy::Capybara::Client do
     end
   end
 end
-

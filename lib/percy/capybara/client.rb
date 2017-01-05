@@ -34,11 +34,11 @@ module Percy
       def enabled?
         return @enabled if !@enabled.nil?
 
-        # Enable if PERCY_ENABLE=1 in local dev (allow disabling if 0).
-        return @enabled ||= ENV['PERCY_ENABLE'] == '1' if ENV['PERCY_ENABLE']
+        # Disable if PERCY_ENABLE is set to 0
+        return @enabled = false if ENV['PERCY_ENABLE'] == '0'
 
-        # If in supported CI environment.
-        @enabled ||= !Percy::Client::Environment.current_ci.nil?
+        # Enable otherwise
+        return @enabled = true
       end
 
       def disable!
