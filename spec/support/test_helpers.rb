@@ -46,4 +46,17 @@ module TestHelpers
     capybara_client.sprockets_environment = environment
     capybara_client.sprockets_options = sprockets_options
   end
+
+  # Set the environment variables required by Percy::Client
+  def set_required_env_variables
+    ENV['PERCY_TOKEN'] = 'aa'
+    ENV['PERCY_PROJECT'] = 'aa'
+  end
+
+  # Clear the environment variables required by Percy::Client
+  def clear_required_env_variables
+    ENV.delete('PERCY_TOKEN')
+    ENV.delete('PERCY_PROJECT')
+  end
+
 end

@@ -2,7 +2,6 @@ RSpec.describe Percy::Capybara do
   before(:each) do
     Percy::Capybara.reset!
     @original_env = ENV['TRAVIS_BUILD_ID']
-    ENV['PERCY_ENABLE'] = '1'
     ENV['TRAVIS_BUILD_ID'] = nil
   end
   after(:each) do
@@ -18,6 +17,7 @@ RSpec.describe Percy::Capybara do
       expect(Percy::Capybara.capybara_client).to eq(capybara_client)
     end
   end
+
   describe '#snapshot' do
     it 'passes all arguments through to the current capybara_client' do
       mock_page = double('page')
@@ -33,6 +33,7 @@ RSpec.describe Percy::Capybara do
       Percy::Capybara.snapshot(mock_page)
     end
   end
+
   describe '#initialize_build' do
     it 'delegates to Percy::Capybara::Client' do
       capybara_client = Percy::Capybara.capybara_client
@@ -40,18 +41,24 @@ RSpec.describe Percy::Capybara do
       Percy::Capybara.initialize_build
     end
   end
+
   describe '#finalize_build' do
+
     it 'returns silently if no build is initialized' do
       expect { Percy::Capybara.finalize_build }.to_not raise_error
     end
+
     it 'delegates to Percy::Capybara::Client' do
       capybara_client = Percy::Capybara.capybara_client
+      expect(capybara_client).to receive(:enabled?).and_return(:true)
+
       build_data = {'data' => {'id' => 123}}
       expect(capybara_client.client).to receive(:create_build).and_return(build_data).once
       Percy::Capybara.initialize_build
       expect(capybara_client).to receive(:finalize_current_build).once
       Percy::Capybara.finalize_build
     end
+
     it 'silently skips if disabled' do
       ENV['PERCY_ENABLE'] = '0'
       capybara_client = Percy::Capybara.capybara_client
@@ -61,6 +68,7 @@ RSpec.describe Percy::Capybara do
       Percy::Capybara.finalize_build
     end
   end
+
   describe '#reset!' do
     it 'clears the current capybara_client' do
       capybara_client = Percy::Capybara.capybara_client
@@ -68,13 +76,19 @@ RSpec.describe Percy::Capybara do
       expect(Percy::Capybara.capybara_client).to_not eq(capybara_client)
     end
   end
+
   describe '#disable!' do
     it 'sets the current capybara_client to disabled' do
+      capybara_client = Percy::Capybara::Client.new(enabled:true)
+      expect(Percy::Capybara).to receive(:capybara_client)
+        .and_return(capybara_client).exactly(3).times
+
       expect(Percy::Capybara.capybara_client.enabled?).to eq(true)
       Percy::Capybara.disable!
       expect(Percy::Capybara.capybara_client.enabled?).to eq(false)
     end
   end
+
   describe '#use_loader' do
     class DummyLoader < Percy::Capybara::Loaders::NativeLoader; end
 
