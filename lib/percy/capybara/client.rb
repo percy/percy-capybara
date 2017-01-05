@@ -20,6 +20,8 @@ module Percy
       attr_accessor :custom_loader
 
       def initialize(options = {})
+        @failed = false
+
         @client = options[:client] || Percy.client
         @enabled = options[:enabled]
 
