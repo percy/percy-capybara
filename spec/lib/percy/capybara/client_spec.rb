@@ -5,35 +5,34 @@ RSpec.describe Percy::Capybara::Client do
     expect(capybara_client.client).to eq(client)
   end
   describe '#enabled?' do
-    before(:each) do
-      @original_env = ENV['TRAVIS_BUILD_ID']
-      ENV['TRAVIS_BUILD_ID'] = nil
-    end
-    after(:each) do
-      ENV['TRAVIS_BUILD_ID'] = @original_env
-      ENV['PERCY_ENABLE'] = nil
-    end
-
-    context 'in supported CI environment' do
-      it 'is true' do
-        ENV['TRAVIS_BUILD_ID'] = '123'
+    context 'when required environment variables set' do
+      before(:context) { set_required_env_variables }
+      after(:context) { clear_required_env_variables }
+      
+      it 'is true when PERCY_ENABLE is 1' do
+        ENV['PERCY_ENABLE'] = '1'
         expect(Percy::Capybara::Client.new.enabled?).to eq(true)
       end
+      it 'is true when PERCY_ENABLE is not set' do
+        ENV.delete 'PERCY_ENABLE'
+        expect(Percy::Capybara::Client.new.enabled?).to eq(true)
+      end
+      it 'is false when PERCY_ENABLE is 0' do
+        ENV['PERCY_ENABLE'] = '0'
+        expect(Percy::Capybara::Client.new.enabled?).to eq(false)
+      end
     end
-    it 'is true by default for local dev environments and unknown CI environments' do
-      expect(Percy::Capybara::Client.new.enabled?).to eq(true)
-    end
-    it 'is true if PERCY_ENABLE=1 is set' do
-      ENV['PERCY_ENABLE'] = '1'
-      expect(Percy::Capybara::Client.new.enabled?).to eq(true)
-    end
-    it 'is true if PERCY_ENABLE isn\'t set' do
-      ENV.delete('PERCY_ENABLE')
-      expect(Percy::Capybara::Client.new.enabled?).to eq(true)
-    end
-    it 'is false if PERCY_ENABLE=0 is set' do
-      ENV['PERCY_ENABLE'] = '0'
-      expect(Percy::Capybara::Client.new.enabled?).to eq(false)
+
+    context 'when required environment variables not set' do
+      before(:each) { clear_required_env_variables }
+      it 'is false' do
+        ENV.delete 'PERCY_ENABLE'
+        expect(Percy::Capybara::Client.new.enabled?).to eq(false)
+      end
+      it 'is false when PERCY_ENABLE is 1' do
+        ENV['PERCY_ENABLE'] = '1'
+        expect(Percy::Capybara::Client.new.enabled?).to eq(false)
+      end
     end
   end
   describe '#failed?' do

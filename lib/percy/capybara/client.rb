@@ -31,14 +31,22 @@ module Percy
         end
       end
 
+      # Check that environment variables required for Percy::Client are set
+      def required_environment_variables_set?
+        !(ENV['PERCY_PROJECT'].nil? || ENV['PERCY_TOKEN'].nil?)
+      end
+
       def enabled?
         return @enabled if !@enabled.nil?
 
         # Disable if PERCY_ENABLE is set to 0
         return @enabled = false if ENV['PERCY_ENABLE'] == '0'
 
-        # Enable otherwise
-        return @enabled = true
+        # Enable if required environment variables are set
+        return @enabled = true if required_environment_variables_set?
+
+        # Disable otherwise
+        return @enabled = false
       end
 
       def disable!
