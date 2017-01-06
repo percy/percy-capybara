@@ -58,5 +58,4 @@ module TestHelpers
     ENV.delete('PERCY_TOKEN')
     ENV.delete('PERCY_PROJECT')
   end
-
 end
