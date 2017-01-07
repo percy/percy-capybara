@@ -8,7 +8,7 @@ RSpec.describe Percy::Capybara::Client do
     context 'when required environment variables set' do
       before(:context) { set_required_env_variables }
       after(:context) { clear_required_env_variables }
-      
+
       it 'is true when PERCY_ENABLE is 1' do
         ENV['PERCY_ENABLE'] = '1'
         expect(Percy::Capybara::Client.new.enabled?).to eq(true)
@@ -20,6 +20,10 @@ RSpec.describe Percy::Capybara::Client do
       it 'is false when PERCY_ENABLE is 0' do
         ENV['PERCY_ENABLE'] = '0'
         expect(Percy::Capybara::Client.new.enabled?).to eq(false)
+      end
+      it 'raises error if PERCY_TOKEN is set but PERCY_PROJECT is not' do
+        ENV.delete 'PERCY_PROJECT'
+        expect { Percy::Capybara::Client.new.enabled? }.to raise_error(RuntimeError)
       end
     end
 

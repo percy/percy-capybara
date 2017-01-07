@@ -33,6 +33,13 @@ module Percy
 
       # Check that environment variables required for Percy::Client are set
       def required_environment_variables_set?
+        if !ENV['PERCY_TOKEN'].nil? && ENV['PERCY_PROJECT'].nil?
+          raise RuntimeError.new(
+            '[percy] It looks like you were trying to enable Percy because PERCY_TOKEN is set, ' +
+            'but you are missing the PERCY_PROJECT environment variable!'
+          )
+        end
+
         !(ENV['PERCY_PROJECT'].nil? || ENV['PERCY_TOKEN'].nil?)
       end
 
