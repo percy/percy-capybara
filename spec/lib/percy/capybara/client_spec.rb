@@ -6,8 +6,8 @@ RSpec.describe Percy::Capybara::Client do
   end
   describe '#enabled?' do
     context 'when required environment variables set' do
-      before(:context) { set_required_env_variables }
-      after(:context) { clear_required_env_variables }
+      before(:each) { set_required_env_variables }
+      after(:each) { clear_percy_env_variables }
 
       it 'is true when PERCY_ENABLE is 1' do
         ENV['PERCY_ENABLE'] = '1'
@@ -28,7 +28,8 @@ RSpec.describe Percy::Capybara::Client do
     end
 
     context 'when required environment variables not set' do
-      before(:each) { clear_required_env_variables }
+      before(:each) { clear_percy_env_variables }
+
       it 'is false' do
         ENV.delete 'PERCY_ENABLE'
         expect(Percy::Capybara::Client.new.enabled?).to eq(false)
