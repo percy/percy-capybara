@@ -79,6 +79,12 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
         expect(result).to eq(true)
         expect(capybara_client.failed?).to eq(false)
       end
+      it 'safely handles snapshot bad request errors' do
+        error = Percy::Client::BadRequestError.new(400, '', '', '', 'snapshot error msg')
+        expect(capybara_client.client).to receive(:create_snapshot).and_raise(error)
+        expect(capybara_client.snapshot(page)).to eq(nil)
+        expect(capybara_client.failed?).to eq(false)  # Build is not failed.
+      end
       it 'safely handles connection errors' do
         expect(capybara_client.client).to receive(:create_snapshot)
           .and_raise(Percy::Client::ConnectionFailed)

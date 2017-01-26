@@ -38,7 +38,14 @@ module Percy
           # Create the snapshot and upload any missing snapshot resources.
           start = Time.now
           rescue_connection_failures do
-            snapshot = client.create_snapshot(current_build_id, resources, options)
+            begin
+              snapshot = client.create_snapshot(current_build_id, resources, options)
+            rescue Percy::Client::BadRequestError => e
+              Percy.logger.warn('Bad request error, skipping snapshot:')
+              Percy.logger.warn(e)
+              return
+            end
+
             snapshot['data']['relationships']['missing-resources']['data'].each do |missing_resource|
               sha = missing_resource['id']
               client.upload_resource(current_build_id, resource_map[sha].content)
