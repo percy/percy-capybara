@@ -1,5 +1,6 @@
 require 'percy/capybara/client/builds'
 require 'percy/capybara/client/snapshots'
+require 'percy/capybara/loaders/filesystem_loader'
 require 'percy/capybara/loaders/native_loader'
 require 'percy/capybara/loaders/sprockets_loader'
 
@@ -17,13 +18,16 @@ module Percy
 
       attr_accessor :sprockets_environment
       attr_accessor :sprockets_options
-      attr_accessor :custom_loader
+      attr_accessor :loader
+      attr_accessor :loader_options
 
       def initialize(options = {})
         @failed = false
 
         @client = options[:client] || Percy.client
         @enabled = options[:enabled]
+
+        @loader_options = {}
 
         if defined?(Rails)
           @sprockets_environment = options[:sprockets_environment] || Rails.application.assets
@@ -80,17 +84,27 @@ module Percy
       end
 
       def initialize_loader(options = {})
-        if custom_loader
-          Percy.logger.debug { 'Using a custom loader to discover assets.' }
-          custom_loader.new(options)
+        merged_options = loader_options.merge(options)
+        if loader
+          case loader
+          when :filesystem
+            Percy.logger.debug { 'Using filesystem_loader to discover assets.' }
+            Percy::Capybara::Loaders::FilesystemLoader.new(merged_options)
+          when :native
+            Percy.logger.debug { 'Using native_loader to discover assets (slower).' }
+            Percy::Capybara::Loaders::NativeLoader.new(merged_options)
+          else
+            Percy.logger.debug { 'Using a custom loader to discover assets.' }
+            loader.new(merged_options)
+          end
         elsif sprockets_environment && sprockets_options
           Percy.logger.debug { 'Using sprockets_loader to discover assets.' }
-          options[:sprockets_environment] = sprockets_environment
-          options[:sprockets_options] = sprockets_options
-          Percy::Capybara::Loaders::SprocketsLoader.new(options)
+          merged_options[:sprockets_environment] = sprockets_environment
+          merged_options[:sprockets_options] = sprockets_options
+          Percy::Capybara::Loaders::SprocketsLoader.new(merged_options)
         else
           Percy.logger.debug { 'Using native_loader to discover assets (slower).' }
-          Percy::Capybara::Loaders::NativeLoader.new(options)
+          Percy::Capybara::Loaders::NativeLoader.new(merged_options)
         end
       end
     end

@@ -94,10 +94,26 @@ RSpec.describe Percy::Capybara::Client do
   describe '#initialize_loader' do
     let(:capybara_client) { Percy::Capybara::Client.new }
 
-    context 'when a custom loader has been set' do
+    context 'when loader has been set to :native' do
+      it 'returns a NativeLoader' do
+        capybara_client.loader = :native
+        loader = capybara_client.initialize_loader
+        expect(loader.class).to eq(Percy::Capybara::Loaders::NativeLoader)
+      end
+    end
+
+    context 'when loader has been set to :filesystem' do
+      it 'returns a FilesystemLoader' do
+        capybara_client.loader = :filesystem
+        loader = capybara_client.initialize_loader
+        expect(loader.class).to eq(Percy::Capybara::Loaders::FilesystemLoader)
+      end
+    end
+
+    context 'when loader has been set to a class' do
       it 'returns an instance of the clients custom loader' do
         class DummyLoader < Percy::Capybara::Loaders::NativeLoader; end
-        capybara_client.custom_loader = DummyLoader
+        capybara_client.loader = DummyLoader
         loader = capybara_client.initialize_loader
         expect(loader.class).to eq(DummyLoader)
       end
@@ -115,6 +131,18 @@ RSpec.describe Percy::Capybara::Client do
     context 'when no configuration has been set' do
       it 'returns a NativeLoader' do
         expect(capybara_client.initialize_loader.class).to eq(Percy::Capybara::Loaders::NativeLoader)
+      end
+    end
+
+    context 'when loader_options are set' do
+      let(:loader_class) { Percy::Capybara::Loaders::FilesystemLoader }
+      let(:options) { {asset_path: 'xyz'} }
+
+      it 'initializes the loader with them' do
+        capybara_client.loader = :filesystem
+        capybara_client.loader_options = options
+        expect(loader_class).to receive(:new).with(options).once
+        capybara_client.initialize_loader
       end
     end
   end
