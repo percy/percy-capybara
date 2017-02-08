@@ -47,7 +47,7 @@ module Percy
 
             if defined?(ActionController)
               # Ask Rails where this asset is (this handles asset_hosts, digest paths, etc.).
-              resource_url = ActionController::Base.helpers.asset_path(logical_path)
+              resource_url = ActionController::Base.helpers.assets_dir(logical_path)
             else
               # TODO: more robust support for Sprockets usage outside Rails, ie Sinatra.
               # How do we find the correct path in that case?
