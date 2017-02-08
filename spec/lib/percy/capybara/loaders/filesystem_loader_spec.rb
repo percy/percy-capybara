@@ -2,7 +2,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
   let(:fake_page) { OpenStruct.new(current_url: "http://localhost/foo") }
   let(:assets_dir) { File.expand_path("../../client/testdata", __FILE__) }
   let(:base_url) {'/url-prefix'}
-  let(:loader) { described_class.new(base_url: base_url, assets_dir:assets_dir, page: fake_page) }
+  let(:loader) { described_class.new(base_url: base_url, assets_dir: assets_dir, page: fake_page) }
 
   describe 'initialize' do
     context 'assets_dir not specified' do
