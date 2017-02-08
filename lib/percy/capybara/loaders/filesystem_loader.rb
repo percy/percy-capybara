@@ -18,7 +18,7 @@ module Percy
         def initialize(options = {})
           # @assets_dir should point to a _compiled_ static assets directory, not source assets.
           @assets_dir = options[:assets_dir]
-          @base_url = options[:base_url]
+          @base_url = options[:base_url] || ''
 
           raise ArgumentError.new('assets_dir is required') if @assets_dir.nil? || @assets_dir == ''
           unless (Pathname.new(@assets_dir)).absolute?
@@ -27,8 +27,6 @@ module Percy
           unless Dir.exist?(@assets_dir)
             raise ArgumentError.new("assets_dir provided was not found. Received: #{@assets_dir}")
           end
-
-          raise ArgumentError.new('base_url is required') if @base_url.nil?
 
           super
         end

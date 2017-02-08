@@ -23,12 +23,6 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
         expect { loader }.to raise_error(ArgumentError)
       end
     end
-    context 'base_url not specified' do
-      let(:base_url) { nil }
-      it 'raises an error' do
-        expect { loader }.to raise_error(ArgumentError)
-      end
-    end
   end
 
   describe '#snapshot_resources', type: :feature, js: true do
