@@ -4,7 +4,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
   let(:builds_api_url) { "https://percy.io/api/v1/repos/#{Percy::Client::Environment.repo}/builds/" }
 
   describe '#initialize_build', type: :feature, js: true do
-    before(:each) { setup_sprockets(capybara_client) }
+    before { setup_sprockets(capybara_client) }
 
     context 'percy is not enabled' do
       let(:enabled) { false }
@@ -147,7 +147,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
     end
   end
   describe '#_upload_missing_build_resources', type: :feature, js: true do
-    before(:each) { setup_sprockets(capybara_client) }
+    before { setup_sprockets(capybara_client) }
 
     it 'returns 0 if there are no missing build resources to upload' do
       mock_response = {

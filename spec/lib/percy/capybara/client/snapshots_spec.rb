@@ -8,7 +8,7 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
 
   describe '#snapshot', type: :feature, js: true do
     context 'simple page with no resources' do
-      before(:each) { setup_sprockets(capybara_client) }
+      before { setup_sprockets(capybara_client) }
       let(:loader) { capybara_client.initialize_loader(page: page) }
       let(:build_resource_sha) { loader.build_resources.first.sha }
       let(:snapshot_resource_sha) { loader.snapshot_resources.first.sha }
@@ -43,7 +43,7 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
           }
         }
       end
-      before :each do
+      before do
         visit '/'
         loader # Force evaluation now.
         repo = Percy::Client::Environment.repo

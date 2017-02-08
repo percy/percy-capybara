@@ -75,8 +75,8 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
   end
 
   context 'Rack::Test', type: :feature do
-    before(:each) { Capybara.app = RackAppWithIframe }
-    after(:each) { Capybara.app = nil }
+    before { Capybara.app = RackAppWithIframe }
+    after { Capybara.app = nil }
 
     describe '#iframes_resources' do
       it 'is silently ignored' do

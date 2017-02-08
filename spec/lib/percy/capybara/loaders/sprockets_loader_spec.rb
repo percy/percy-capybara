@@ -32,7 +32,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
 
   describe '#snapshot_resources' do
     context 'Rack::Test', type: :feature do
-      before(:each) { Capybara.app = SimpleRackApp }
+      before { Capybara.app = SimpleRackApp }
 
       it 'returns the root HTML resource' do
         visit '/'
@@ -73,7 +73,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
       expect(resources.first.content).to include('.colored-by-base')
     end
     context 'Rails app' do
-      before(:each) do
+      before do
         # Pretend like we're in a Rails app right now, all we care about is Rails.public_path.
         rails_double = double('Rails')
         # Pretend like the entire testdata directory is the public/ folder.
@@ -88,7 +88,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
         resource_urls = resources.map(&:resource_url)
         expect(resource_urls).to include('/assets/images/bg-relative.png') # From asset pipeline.
         expect(resource_urls).to include('/percy-from-public.svg') # Public merged into root.
-        expect(resource_urls).to_not include('/large-file-skipped.png') # Public merged into root.
+        expect(resource_urls).not_to include('/large-file-skipped.png') # Public merged into root.
       end
       context 'digest enabled' do
         let(:digest_enabled) { true }

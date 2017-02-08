@@ -10,4 +10,5 @@ gem 'guard-rspec', require: false
 
 group :test do
   gem 'rubocop'
+  gem 'rubocop-rspec'
 end

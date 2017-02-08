@@ -1,52 +1,52 @@
 RSpec.describe Percy::Capybara::Client do
   it 'accepts and memoizes a client arg' do
     client = Percy::Client.new
-    capybara_client = Percy::Capybara::Client.new(client: client)
+    capybara_client = described_class.new(client: client)
     expect(capybara_client.client).to eq(client)
   end
   describe '#enabled?' do
     context 'when required environment variables set' do
-      before(:each) { set_required_env_variables }
-      after(:each) { clear_percy_env_variables }
+      before { set_required_env_variables }
+      after { clear_percy_env_variables }
 
       it 'is true when PERCY_ENABLE is 1' do
         ENV['PERCY_ENABLE'] = '1'
-        expect(Percy::Capybara::Client.new.enabled?).to eq(true)
+        expect(described_class.new.enabled?).to eq(true)
       end
       it 'is true when PERCY_ENABLE is not set' do
         ENV.delete 'PERCY_ENABLE'
-        expect(Percy::Capybara::Client.new.enabled?).to eq(true)
+        expect(described_class.new.enabled?).to eq(true)
       end
       it 'is false when PERCY_ENABLE is 0' do
         ENV['PERCY_ENABLE'] = '0'
-        expect(Percy::Capybara::Client.new.enabled?).to eq(false)
+        expect(described_class.new.enabled?).to eq(false)
       end
       it 'raises error if PERCY_TOKEN is set but PERCY_PROJECT is not' do
         ENV.delete 'PERCY_PROJECT'
-        expect { Percy::Capybara::Client.new.enabled? }.to raise_error(RuntimeError)
+        expect { described_class.new.enabled? }.to raise_error(RuntimeError)
       end
     end
 
     context 'when required environment variables not set' do
-      before(:each) { clear_percy_env_variables }
+      before { clear_percy_env_variables }
 
       it 'is false' do
         ENV.delete 'PERCY_ENABLE'
-        expect(Percy::Capybara::Client.new.enabled?).to eq(false)
+        expect(described_class.new.enabled?).to eq(false)
       end
       it 'is false when PERCY_ENABLE is 1' do
         ENV['PERCY_ENABLE'] = '1'
-        expect(Percy::Capybara::Client.new.enabled?).to eq(false)
+        expect(described_class.new.enabled?).to eq(false)
       end
     end
   end
   describe '#failed?' do
     it 'is false by default' do
-      expect(Percy::Capybara::Client.new.failed?).to eq(false)
+      expect(described_class.new.failed?).to eq(false)
     end
   end
   describe '#rescue_connection_failures' do
-    let(:capybara_client) { Percy::Capybara::Client.new(enabled: true) }
+    let(:capybara_client) { described_class.new(enabled: true) }
     it 'returns block result on success' do
       result = capybara_client.rescue_connection_failures do
         true
@@ -92,7 +92,7 @@ RSpec.describe Percy::Capybara::Client do
     end
   end
   describe '#initialize_loader' do
-    let(:capybara_client) { Percy::Capybara::Client.new }
+    let(:capybara_client) { described_class.new }
 
     context 'when loader has been set to :native' do
       it 'returns a NativeLoader' do
