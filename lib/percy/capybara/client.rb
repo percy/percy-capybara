@@ -103,6 +103,7 @@ module Percy
           merged_options[:sprockets_options] = sprockets_options
           Percy::Capybara::Loaders::SprocketsLoader.new(merged_options)
         else
+          Percy.logger.warn { '[DEPRECATED] You\'re using the deprecated NativeLoader. Move to the faster, more reliable FilesystemLoader. See Percy\'s Capybara docs for Non-Rails frameworks: https://percy.io/docs/clients/ruby/capybara ' }
           Percy.logger.debug { 'Using native_loader to discover assets (slower).' }
           Percy::Capybara::Loaders::NativeLoader.new(merged_options)
         end
