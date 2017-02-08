@@ -1,6 +1,6 @@
 RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
   let(:fake_page) { OpenStruct.new(current_url: 'http://localhost/foo') }
-  let(:assets_dir) { File.expand_path("../../client/testdata", __FILE__) }
+  let(:assets_dir) { File.expand_path('../../client/testdata', __FILE__) }
   let(:base_url) { '/url-prefix' }
   let(:loader) { described_class.new(base_url: base_url, assets_dir: assets_dir, page: fake_page) }
 
@@ -42,7 +42,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
   describe '#build_resources' do
     context 'assets_dir including all test files' do
       it 'returns all included assets as resources' do
-        actual_paths = loader.build_resources.collect{ |resource| resource.path.gsub(assets_dir, '') }
+        actual_paths = loader.build_resources.collect { |resource| resource.path.gsub(assets_dir, '') }
         expected_paths = [
           '/assets/css/digested-f3420c6aee71c137a3ca39727052811bae84b2f37d898f4db242e20656a1579e.css',
           '/css/base.css',
@@ -72,7 +72,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
         ]
         expect(actual_paths).to eq(expected_paths)
 
-        expected_urls = loader.build_resources.collect{ |resource| resource.resource_url }
+        expected_urls = loader.build_resources.collect { |resource| resource.resource_url }
         puts expected_urls
         actual_urls = [
           '/url-prefix/assets/css/digested-f3420c6aee71c137a3ca39727052811bae84b2f37d898f4db242e20656a1579e.css',
@@ -105,7 +105,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
       end
     end
     context 'assets_dir with only skippable resources' do
-      let(:assets_dir) { File.expand_path("../../client/testdata/assets/images", __FILE__) }
+      let(:assets_dir) { File.expand_path('../../client/testdata/assets/images', __FILE__) }
       it 'returns an empty list' do
         expect(loader.build_resources).to eq([])
       end
