@@ -105,6 +105,7 @@ RSpec.describe Percy::Capybara::Client do
     context 'when loader has been set to :filesystem' do
       it 'returns a FilesystemLoader' do
         capybara_client.loader = :filesystem
+        capybara_client.loader_options = {assets_dir: '/', base_url: '/'}
         loader = capybara_client.initialize_loader
         expect(loader.class).to eq(Percy::Capybara::Loaders::FilesystemLoader)
       end

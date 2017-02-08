@@ -1,6 +1,7 @@
 require 'percy/capybara/loaders/base_loader'
 require 'digest'
 require 'find'
+require 'pathname'
 
 module Percy
   module Capybara
@@ -17,6 +18,18 @@ module Percy
         def initialize(options = {})
           # @assets_dir should point to a _compiled_ static assets directory, not source assets.
           @assets_dir = options[:assets_dir]
+          @base_url = options[:base_url]
+
+          raise ArgumentError.new('assets_dir is required') if @assets_dir.nil? || @assets_dir == ''
+          unless (Pathname.new(@assets_dir)).absolute?
+            raise ArgumentError.new("assets_dir needs to be an absolute path. Received: #{@assets_dir}")
+          end
+          unless Dir.exist?(@assets_dir)
+            raise ArgumentError.new("assets_dir provided was not found. Received: #{@assets_dir}")
+          end
+
+          raise ArgumentError.new('base_url is required') if @base_url.nil?
+
           super
         end
 
@@ -34,10 +47,8 @@ module Percy
             # Skip large files, these are hopefully downloads and not used in page rendering.
             next if File.size(path) > MAX_FILESIZE_BYTES
 
-            # Strip the public_path from the beginning of the resource_url.
-            # This assumes that everything in the public_path directory is served at the root
-            # of the app.
-            resource_url = path.sub(@assets_dir, '')
+            # Replace the assets_dir with the base_url to generate the resource_url
+            resource_url = path.sub(@assets_dir, @base_url)
 
             sha = Digest::SHA256.hexdigest(File.read(path))
             resources << Percy::Client::Resource.new(resource_url, sha: sha, path: path)
