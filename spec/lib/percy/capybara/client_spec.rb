@@ -136,7 +136,7 @@ RSpec.describe Percy::Capybara::Client do
 
     context 'when loader_options are set' do
       let(:loader_class) { Percy::Capybara::Loaders::FilesystemLoader }
-      let(:options) { {asset_path: 'xyz'} }
+      let(:options) { {assets_dir: 'xyz'} }
 
       it 'initializes the loader with them' do
         capybara_client.loader = :filesystem

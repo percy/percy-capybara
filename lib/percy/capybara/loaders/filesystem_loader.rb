@@ -15,8 +15,8 @@ module Percy
         MAX_FILESIZE_BYTES = 15 * 1024**2  # 15 MB.
 
         def initialize(options = {})
-          # @asset_path should point to a _compiled_ static assets directory, not source assets.
-          @asset_path = options[:asset_path]
+          # @assets_dir should point to a _compiled_ static assets directory, not source assets.
+          @assets_dir = options[:assets_dir]
           super
         end
 
@@ -26,7 +26,7 @@ module Percy
 
         def build_resources
           resources = []
-          Find.find(@asset_path).each do |path|
+          Find.find(@assets_dir).each do |path|
             # Skip directories.
             next if !FileTest.file?(path)
             # Skip certain extensions.
@@ -37,7 +37,7 @@ module Percy
             # Strip the public_path from the beginning of the resource_url.
             # This assumes that everything in the public_path directory is served at the root
             # of the app.
-            resource_url = path.sub(@asset_path, '')
+            resource_url = path.sub(@assets_dir, '')
 
             sha = Digest::SHA256.hexdigest(File.read(path))
             resources << Percy::Client::Resource.new(resource_url, sha: sha, path: path)
