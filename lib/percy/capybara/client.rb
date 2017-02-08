@@ -91,7 +91,7 @@ module Percy
             Percy.logger.debug { 'Using filesystem_loader to discover assets.' }
             Percy::Capybara::Loaders::FilesystemLoader.new(merged_options)
           when :native
-            Percy.logger.debug { 'Using native_loader to discover assets (slower).' }
+            Percy.logger.debug { 'Using native_loader to discover assets (slow).' }
             Percy::Capybara::Loaders::NativeLoader.new(merged_options)
           else
             Percy.logger.debug { 'Using a custom loader to discover assets.' }
@@ -104,7 +104,10 @@ module Percy
           Percy::Capybara::Loaders::SprocketsLoader.new(merged_options)
         else
           unless @warned_about_native_loader
-            Percy.logger.warn { '[DEPRECATED] Using Percy\'s deprecated NativeLoader. Move to the faster, more reliable FilesystemLoader. See Percy\'s Capybara docs for Non-Rails frameworks: https://percy.io/docs/clients/ruby/capybara ' }
+            Percy.logger.warn \
+              '[DEPRECATED] The native_loader is deprecated and will be opt-in in a future release. ' +
+              'You should move to the faster, more reliable filesystem_loader. See the docs for ' +
+              'Non-Rails frameworks: https://percy.io/docs/clients/ruby/capybara '
             @warned_about_native_loader = true
           end
           Percy.logger.debug { 'Using native_loader to discover assets (slower).' }
