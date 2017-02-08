@@ -7,3 +7,7 @@ gem 'guard-rspec', require: false
 
 # (for development)
 # gem 'percy-client', path: '~/src/percy-client'
+
+group :test do
+  gem 'rubocop'
+end
