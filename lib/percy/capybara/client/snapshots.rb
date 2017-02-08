@@ -12,14 +12,12 @@ module Percy
         #   builds. By default this is the URL of the page, but can be customized if the URL does not
         #   entirely identify the current state.
         def snapshot(page, options = {})
-          return if !enabled?  # Silently skip if the client is disabled.
+          return unless enabled? # Silently skip if the client is disabled.
 
           if current_build.nil?
-            raise RuntimeError.new(
-              'Whoops! Percy is enabled, but Percy::Capybara.initialize_build was never called. ' +
-              'Did you forget to setup Percy in your spec_helper.rb? ' +
+            raise 'Whoops! Percy is enabled, but Percy::Capybara.initialize_build was never called. ' \
+              'Did you forget to setup Percy in your spec_helper.rb? ' \
               'See: https://percy.io/docs/clients/ruby/capybara'
-            )
           end
 
           loader = initialize_loader(page: page)
@@ -56,7 +54,7 @@ module Percy
             client.finalize_snapshot(snapshot['data']['id'])
           end
           if failed?
-            Percy.logger.error { "Percy build failed! Check log above for errors." }
+            Percy.logger.error { 'Percy build failed! Check log above for errors.' }
             return
           end
           true

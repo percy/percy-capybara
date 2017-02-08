@@ -46,7 +46,7 @@ RSpec.describe Percy::Capybara do
     it 'delegates to Percy::Capybara::Client' do
       capybara_client = Percy::Capybara.capybara_client
       expect(capybara_client).to receive(:enabled?).and_return(:true)
-      build_data = {'data' => {'id' => 123}}
+      build_data = { 'data' => { 'id' => 123 } }
       expect(capybara_client.client).to receive(:create_build).and_return(build_data).once
       Percy::Capybara.initialize_build
       expect(capybara_client).to receive(:finalize_current_build).once
@@ -89,7 +89,7 @@ RSpec.describe Percy::Capybara do
 
     it 'sets the current capybara client\'s loader options' do
       expect(Percy::Capybara.capybara_client.loader_options).to eq({})
-      Percy::Capybara.use_loader(DummyLoader, {test_option: 3})
+      Percy::Capybara.use_loader(DummyLoader, test_option: 3)
       expect(Percy::Capybara.capybara_client.loader_options).to be
       expect(Percy::Capybara.capybara_client.loader_options[:test_option]).to eq(3)
     end

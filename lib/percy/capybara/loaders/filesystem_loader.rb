@@ -6,26 +6,25 @@ require 'pathname'
 module Percy
   module Capybara
     module Loaders
-
       # Resource loader that looks for resources in the specified folder.
       class FilesystemLoader < BaseLoader
         SKIP_RESOURCE_EXTENSIONS = [
-          '.map',  # Ignore source maps.
-          '.gz',  # Ignore gzipped files.
-        ]
-        MAX_FILESIZE_BYTES = 15 * 1024**2  # 15 MB.
+          '.map', # Ignore source maps.
+          '.gz', # Ignore gzipped files.
+        ].freeze
+        MAX_FILESIZE_BYTES = 15 * 1024**2 # 15 MB.
 
         def initialize(options = {})
           # @assets_dir should point to a _compiled_ static assets directory, not source assets.
           @assets_dir = options[:assets_dir]
           @base_url = options[:base_url] || ''
 
-          raise ArgumentError.new('assets_dir is required') if @assets_dir.nil? || @assets_dir == ''
-          unless (Pathname.new(@assets_dir)).absolute?
-            raise ArgumentError.new("assets_dir needs to be an absolute path. Received: #{@assets_dir}")
+          raise ArgumentError, 'assets_dir is required' if @assets_dir.nil? || @assets_dir == ''
+          unless Pathname.new(@assets_dir).absolute?
+            raise ArgumentError, "assets_dir needs to be an absolute path. Received: #{@assets_dir}"
           end
           unless Dir.exist?(@assets_dir)
-            raise ArgumentError.new("assets_dir provided was not found. Received: #{@assets_dir}")
+            raise ArgumentError, "assets_dir provided was not found. Received: #{@assets_dir}"
           end
 
           super
@@ -39,7 +38,7 @@ module Percy
           resources = []
           Find.find(@assets_dir).each do |path|
             # Skip directories.
-            next if !FileTest.file?(path)
+            next unless FileTest.file?(path)
             # Skip certain extensions.
             next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(path))
             # Skip large files, these are hopefully downloads and not used in page rendering.

@@ -1,7 +1,7 @@
 require 'sprockets'
 
 class SimpleRackApp
-  def self.call(env)
+  def self.call(_env)
     [200, {}, 'Hello World']
   end
 end
@@ -11,11 +11,11 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
     described_class.new(
       page: page,
       sprockets_environment: environment,
-      sprockets_options: sprockets_options,
+      sprockets_options: sprockets_options
     )
   end
   let(:environment) do
-    root = File.expand_path("../../client/testdata", __FILE__)
+    root = File.expand_path('../../client/testdata', __FILE__)
     environment = Sprockets::Environment.new(root)
     environment.append_path '.'
     environment
@@ -37,7 +37,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
       it 'returns the root HTML resource' do
         visit '/'
         resources = loader.snapshot_resources
-        expect(resources.map { |r| r.resource_url }).to eq(["/"])
+        expect(resources.map(&:resource_url)).to eq(['/'])
         expect(resources.first.is_root).to eq(true)
         expect(resources.first.content).to include('Hello World')
       end
@@ -46,7 +46,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
       it 'returns the root HTML resource' do
         visit '/'
         resources = loader.snapshot_resources
-        expect(resources.map { |r| r.resource_url }).to eq(["/"])
+        expect(resources.map(&:resource_url)).to eq(['/'])
         expect(resources.first.is_root).to eq(true)
         expect(resources.first.content).to include('Hello World!</body></html>')
       end
@@ -67,9 +67,9 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
         '/assets/images/srcset-base.png',
         '/assets/images/srcset-first.png',
         '/assets/images/srcset-second.png',
-        '/assets/js/base.js',
+        '/assets/js/base.js'
       ]
-      expect(resources.map { |r| r.resource_url }).to eq(expected_resources)
+      expect(resources.map(&:resource_url)).to eq(expected_resources)
       expect(resources.first.content).to include('.colored-by-base')
     end
     context 'Rails app' do
@@ -85,10 +85,10 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
         # Weak test that more things are in this list, because it merges asset pipeline with public.
         expect(resources.length).to be > 5
 
-        resource_urls = resources.map { |r| r.resource_url }
-        expect(resource_urls).to include('/assets/images/bg-relative.png')  # From asset pipeline.
-        expect(resource_urls).to include('/percy-from-public.svg')  # Public merged into root.
-        expect(resource_urls).to_not include('/large-file-skipped.png')  # Public merged into root.
+        resource_urls = resources.map(&:resource_url)
+        expect(resource_urls).to include('/assets/images/bg-relative.png') # From asset pipeline.
+        expect(resource_urls).to include('/percy-from-public.svg') # Public merged into root.
+        expect(resource_urls).to_not include('/large-file-skipped.png') # Public merged into root.
       end
       context 'digest enabled' do
         let(:digest_enabled) { true }

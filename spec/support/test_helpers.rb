@@ -3,7 +3,7 @@ require 'timeout'
 require 'sprockets'
 
 module TestHelpers
-  class ServerDown < Exception; end
+  class ServerDown < RuntimeError; end
 
   def get_random_open_port
     # Using a port of "0" relies on the system to pick an open port.
@@ -27,15 +27,13 @@ module TestHelpers
   end
 
   def find_resource(resources, regex)
-    begin
-      resources.select { |resource| resource.resource_url.match(regex) }.fetch(0)
-    rescue IndexError
-      raise "Missing expected image with resource_url that matches: #{regex}"
-    end
+    resources.select { |resource| resource.resource_url.match(regex) }.fetch(0)
+  rescue IndexError
+    raise "Missing expected image with resource_url that matches: #{regex}"
   end
 
   def setup_sprockets(capybara_client)
-    root = File.expand_path("../../lib/percy/capybara/client/testdata", __FILE__)
+    root = File.expand_path('../../lib/percy/capybara/client/testdata', __FILE__)
     environment = Sprockets::Environment.new(root)
     environment.append_path '.'
 

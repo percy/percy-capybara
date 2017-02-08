@@ -105,7 +105,7 @@ RSpec.describe Percy::Capybara::Client do
     context 'when loader has been set to :filesystem' do
       it 'returns a FilesystemLoader' do
         capybara_client.loader = :filesystem
-        capybara_client.loader_options = {assets_dir: '/', base_url: '/'}
+        capybara_client.loader_options = { assets_dir: '/', base_url: '/' }
         loader = capybara_client.initialize_loader
         expect(loader.class).to eq(Percy::Capybara::Loaders::FilesystemLoader)
       end
@@ -137,7 +137,7 @@ RSpec.describe Percy::Capybara::Client do
 
     context 'when loader_options are set' do
       let(:loader_class) { Percy::Capybara::Loaders::FilesystemLoader }
-      let(:options) { {assets_dir: 'xyz'} }
+      let(:options) { { assets_dir: 'xyz' } }
 
       it 'initializes the loader with them' do
         capybara_client.loader = :filesystem

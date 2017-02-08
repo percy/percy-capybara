@@ -18,7 +18,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
       end
     end
     context 'assets_dir doesn\'t exist' do
-      let(:assets_dir) { File.expand_path("../../client/testdata-doesnt-exist", __FILE__) }
+      let(:assets_dir) { File.expand_path('../../client/testdata-doesnt-exist', __FILE__) }
       it 'raises an error' do
         expect { loader }.to raise_error(ArgumentError)
       end
@@ -68,11 +68,11 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
           '/test-css.html',
           '/test-iframe.html',
           '/test-images.html',
-          '/test-localtest-me-images.html',
+          '/test-localtest-me-images.html'
         ]
         expect(actual_paths).to eq(expected_paths)
 
-        expected_urls = loader.build_resources.collect { |resource| resource.resource_url }
+        expected_urls = loader.build_resources.collect(&:resource_url)
         puts expected_urls
         actual_urls = [
           '/url-prefix/assets/css/digested-f3420c6aee71c137a3ca39727052811bae84b2f37d898f4db242e20656a1579e.css',
@@ -99,7 +99,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
           '/url-prefix/test-css.html',
           '/url-prefix/test-iframe.html',
           '/url-prefix/test-images.html',
-          '/url-prefix/test-localtest-me-images.html',
+          '/url-prefix/test-localtest-me-images.html'
         ]
         expect(actual_urls).to eq(expected_urls)
       end

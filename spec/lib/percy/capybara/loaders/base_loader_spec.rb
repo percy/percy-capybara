@@ -1,7 +1,7 @@
 IFRAME_PATH = File.expand_path('../../client/testdata/test-iframe.html', __FILE__)
 
 class RackAppWithIframe
-  def self.call(env)
+  def self.call(_env)
     [200, {}, File.read(IFRAME_PATH)]
   end
 end
@@ -87,5 +87,3 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
     end
   end
 end
-
-
