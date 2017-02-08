@@ -21,10 +21,10 @@ module Percy
           @base_url = options[:base_url] || ''
 
           raise ArgumentError.new('assets_dir is required') if @assets_dir.nil? || @assets_dir == ''
-          unless (Pathname.new(@assets_dir)).absolute?
+          if !Pathname.new(@assets_dir).absolute?
             raise ArgumentError.new("assets_dir needs to be an absolute path. Received: #{@assets_dir}")
           end
-          unless Dir.exist?(@assets_dir)
+          if !Dir.exist?(@assets_dir)
             raise ArgumentError.new("assets_dir provided was not found. Received: #{@assets_dir}")
           end
 
