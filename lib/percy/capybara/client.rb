@@ -27,7 +27,7 @@ module Percy
         @client = options[:client] || Percy.client
         @enabled = options[:enabled]
 
-        @loader_options = {}
+        @loader_options = options[:loader_options] || {}
 
         if defined?(Rails)
           @sprockets_environment = options[:sprockets_environment] || Rails.application.assets
