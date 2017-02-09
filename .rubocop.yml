@@ -16,3 +16,7 @@ Style/DoubleNegation:
 
 RSpec/MessageSpies:
   EnforcedStyle: receive
+
+# Will be able to do this in >= v1.11
+# RSpec/DescribedClass:
+#   EnforcedStyle: explicit
