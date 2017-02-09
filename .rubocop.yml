@@ -23,6 +23,9 @@ Style/MultilineMethodCallIndentation:
 Style/RedundantBegin:
   Enabled: false
 
+Style/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space
+
 Style/TrailingCommaInLiteral:
   EnforcedStyleForMultiline: comma
 

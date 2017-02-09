@@ -54,9 +54,9 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
           .to_return(status: 201, body: mock_snapshot_response.to_json)
         stub_request(:post, 'https://percy.io/api/v1/builds/123/resources/')
           .with(body: /#{snapshot_resource_sha}/)
-          .to_return(status: 201, body: { success: true }.to_json)
+          .to_return(status: 201, body: {success: true}.to_json)
         stub_request(:post, 'https://percy.io/api/v1/snapshots/256/finalize')
-          .to_return(status: 200, body: { success: true }.to_json)
+          .to_return(status: 200, body: {success: true}.to_json)
         capybara_client.initialize_build
       end
 

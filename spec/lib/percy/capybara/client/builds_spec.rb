@@ -51,7 +51,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
 
       # Stub resource upload.
       resources_stub = stub_request(:post, 'https://percy.io/api/v1/builds/123/resources/')
-        .to_return(status: 201, body: { success: true }.to_json)
+        .to_return(status: 201, body: {success: true}.to_json)
       capybara_client.initialize_build
 
       expect(resources_stub).to have_been_requested
@@ -125,7 +125,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
   end
   describe '#finalize_current_build' do
     it 'finalizes the current build' do
-      build_data = { 'data' => { 'id' => 123 } }
+      build_data = {'data' => {'id' => 123}}
       expect(capybara_client.client).to receive(:create_build).and_return(build_data)
       capybara_client.initialize_build
 
@@ -138,7 +138,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
       end.to raise_error(Percy::Capybara::Client::BuildNotInitializedError)
     end
     it 'safely handles connection errors' do
-      build_data = { 'data' => { 'id' => 123 } }
+      build_data = {'data' => {'id' => 123}}
       expect(capybara_client.client).to receive(:create_build).and_return(build_data)
       capybara_client.initialize_build
 
