@@ -46,12 +46,6 @@ RSpec/ExampleLength:
     - 'spec/lib/percy/capybara/loaders/sprockets_loader_spec.rb'
     - 'spec/lib/percy/capybara_spec.rb'
 
-# Offense count: 1
-# Configuration parameters: CustomTransform, IgnoreMethods.
-RSpec/FilePath:
-  Exclude:
-    - 'spec/lib/percy/capybara/httpfetcher_spec.rb'
-
 # Offense count: 2
 # Configuration parameters: AssignmentOnly.
 RSpec/InstanceVariable:
