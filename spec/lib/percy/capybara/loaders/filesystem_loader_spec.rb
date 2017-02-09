@@ -73,7 +73,6 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
         expect(actual_paths).to eq(expected_paths)
 
         expected_urls = loader.build_resources.collect { |resource| resource.resource_url }
-        puts expected_urls
         actual_urls = [
           '/url-prefix/assets/css/digested-f3420c6aee71c137a3ca39727052811bae84b2f37d898f4db242e20656a1579e.css',
           '/url-prefix/css/base.css',
