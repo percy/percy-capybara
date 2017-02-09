@@ -83,3 +83,9 @@ Style/RegexpLiteral:
 Style/StructInheritance:
   Exclude:
     - 'lib/percy/capybara/httpfetcher.rb'
+
+# Offense count: 2
+# Configuration parameters: AssignmentOnly.
+RSpec/InstanceVariable:
+  Exclude:
+    - 'spec/lib/percy/capybara_spec.rb'
