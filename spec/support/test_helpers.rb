@@ -27,9 +27,11 @@ module TestHelpers
   end
 
   def find_resource(resources, regex)
-    resources.select { |resource| resource.resource_url.match(regex) }.fetch(0)
-  rescue IndexError
-    raise "Missing expected image with resource_url that matches: #{regex}"
+    begin
+      resources.select { |resource| resource.resource_url.match(regex) }.fetch(0)
+    rescue IndexError
+      raise "Missing expected image with resource_url that matches: #{regex}"
+    end
   end
 
   def setup_sprockets(capybara_client)

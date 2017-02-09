@@ -14,8 +14,13 @@ Style/Documentation:
 Style/DoubleNegation:
   Enabled: false
 
+Style/RedundantBegin:
+  Enabled: false
+
 RSpec/MessageSpies:
   EnforcedStyle: receive
+
+
 
 # Will be able to do this in >= v1.11
 # RSpec/DescribedClass:
