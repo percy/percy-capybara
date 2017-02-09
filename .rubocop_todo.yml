@@ -69,11 +69,6 @@ RSpec/NestedGroups:
   Exclude:
     - 'spec/lib/percy/capybara/loaders/sprockets_loader_spec.rb'
 
-# Offense count: 2
-RSpec/ScatteredSetup:
-  Exclude:
-    - 'spec/lib/percy/capybara/client/snapshots_spec.rb'
-
 # Offense count: 10
 # Configuration parameters: IgnoreSymbolicNames.
 RSpec/VerifiedDoubles:
