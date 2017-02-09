@@ -14,6 +14,12 @@ Style/Documentation:
 Style/DoubleNegation:
   Enabled: false
 
+Style/IndentArray:
+  EnforcedStyle: consistent
+
+Style/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
 Style/RedundantBegin:
   Enabled: false
 

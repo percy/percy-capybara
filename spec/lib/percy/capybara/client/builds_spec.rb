@@ -47,11 +47,11 @@ RSpec.describe Percy::Capybara::Client::Builds do
       }
       # Stub create build.
       build_stub = stub_request(:post, builds_api_url)
-                   .to_return(status: 201, body: mock_response.to_json)
+        .to_return(status: 201, body: mock_response.to_json)
 
       # Stub resource upload.
       resources_stub = stub_request(:post, 'https://percy.io/api/v1/builds/123/resources/')
-                       .to_return(status: 201, body: { success: true }.to_json)
+        .to_return(status: 201, body: { success: true }.to_json)
       capybara_client.initialize_build
 
       expect(resources_stub).to have_been_requested
@@ -85,7 +85,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
       }
       # Stub create build.
       build_stub = stub_request(:post, builds_api_url)
-                   .to_return(status: 201, body: mock_response.to_json)
+        .to_return(status: 201, body: mock_response.to_json)
 
       # Stub resource upload.
       expect(capybara_client.client).to receive(:upload_resource)
