@@ -163,8 +163,8 @@ RSpec.describe Percy::Capybara::Client::Builds do
       capybara_client.initialize_build
 
       loader = capybara_client.initialize_loader
-      expect(capybara_client.send(:_upload_missing_build_resources, loader.build_resources))
-        .to eq(0)
+      result = capybara_client.send(:_upload_missing_build_resources, loader.build_resources)
+      expect(result).to eq(0)
     end
   end
 end
