@@ -80,18 +80,6 @@ RSpec/VerifiedDoubles:
     - 'spec/lib/percy/capybara_spec.rb'
     - 'spec/support/test_helpers.rb'
 
-# Offense count: 6
-Style/Documentation:
-  Exclude:
-    - 'spec/**/*'
-    - 'test/**/*'
-    - 'lib/percy/capybara.rb'
-    - 'lib/percy/capybara/client.rb'
-    - 'lib/percy/capybara/client/builds.rb'
-    - 'lib/percy/capybara/client/snapshots.rb'
-    - 'lib/percy/capybara/httpfetcher.rb'
-    - 'lib/percy/capybara/loaders/base_loader.rb'
-
 # Offense count: 3
 Style/DoubleNegation:
   Exclude:
