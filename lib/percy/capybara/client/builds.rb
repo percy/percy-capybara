@@ -56,9 +56,9 @@ module Percy
         def _upload_missing_build_resources(build_resources)
           # Upload any missing build resources.
           new_build_resources = current_build['data'] &&
-                                current_build['data']['relationships'] &&
-                                current_build['data']['relationships']['missing-resources'] &&
-                                current_build['data']['relationships']['missing-resources']['data']
+            current_build['data']['relationships'] &&
+            current_build['data']['relationships']['missing-resources'] &&
+            current_build['data']['relationships']['missing-resources']['data']
           return 0 unless new_build_resources
 
           new_build_resources.each_with_index do |missing_resource, i|
