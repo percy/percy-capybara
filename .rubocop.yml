@@ -4,3 +4,6 @@ AllCops:
   Include:
     - Rakefile
     - lib/**/*.rake
+
+Metrics/LineLength:
+  Max: 100
