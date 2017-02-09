@@ -175,7 +175,8 @@ module Percy
         def _fetch_resource_url(url)
           response = Percy::Capybara::HttpFetcher.fetch(url)
           unless response
-            STDERR.puts "[percy] Warning: failed to fetch page resource, this might be a bug: #{url}"
+            STDERR.puts '[percy] Warning: failed to fetch page resource, ' \
+              "this might be a bug: #{url}"
             return nil
           end
           response

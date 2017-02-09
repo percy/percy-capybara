@@ -1,7 +1,9 @@
 RSpec.describe Percy::Capybara::Client::Builds do
   let(:enabled) { true }
   let(:capybara_client) { Percy::Capybara::Client.new(enabled: enabled) }
-  let(:builds_api_url) { "https://percy.io/api/v1/repos/#{Percy::Client::Environment.repo}/builds/" }
+  let(:builds_api_url) do
+    "https://percy.io/api/v1/repos/#{Percy::Client::Environment.repo}/builds/"
+  end
 
   describe '#initialize_build', type: :feature, js: true do
     before { setup_sprockets(capybara_client) }
@@ -161,7 +163,8 @@ RSpec.describe Percy::Capybara::Client::Builds do
       capybara_client.initialize_build
 
       loader = capybara_client.initialize_loader
-      expect(capybara_client.send(:_upload_missing_build_resources, loader.build_resources)).to eq(0)
+      expect(capybara_client.send(:_upload_missing_build_resources, loader.build_resources))
+        .to eq(0)
     end
   end
 end

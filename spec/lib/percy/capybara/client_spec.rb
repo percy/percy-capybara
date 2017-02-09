@@ -131,7 +131,8 @@ RSpec.describe Percy::Capybara::Client do
 
     context 'when no configuration has been set' do
       it 'returns a NativeLoader' do
-        expect(capybara_client.initialize_loader.class).to eq(Percy::Capybara::Loaders::NativeLoader)
+        expect(capybara_client.initialize_loader.class)
+          .to eq(Percy::Capybara::Loaders::NativeLoader)
       end
     end
 

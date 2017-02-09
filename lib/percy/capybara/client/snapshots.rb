@@ -8,15 +8,15 @@ module Percy
         #
         # @param [Capybara::Session] page The Capybara page to snapshot.
         # @param [Hash] options
-        # @option options [String] :name A unique name for the current page that identifies it across
-        #   builds. By default this is the URL of the page, but can be customized if the URL does not
-        #   entirely identify the current state.
+        # @option options [String] :name A unique name for the current page that identifies
+        #   it across builds. By default this is the URL of the page, but can be customized if the
+        #   URL does not entirely identify the current state.
         def snapshot(page, options = {})
           return unless enabled? # Silently skip if the client is disabled.
 
           if current_build.nil?
-            raise 'Whoops! Percy is enabled, but Percy::Capybara.initialize_build was never called. ' \
-              'Did you forget to setup Percy in your spec_helper.rb? ' \
+            raise 'Whoops! Percy is enabled, but Percy::Capybara.initialize_build was never ' \
+              'called. Did you forget to setup Percy in your spec_helper.rb? ' \
               'See: https://percy.io/docs/clients/ruby/capybara'
           end
 
@@ -44,7 +44,8 @@ module Percy
               return
             end
 
-            snapshot['data']['relationships']['missing-resources']['data'].each do |missing_resource|
+            snapshot['data']['relationships']['missing-resources']['data']
+              .each do |missing_resource|
               sha = missing_resource['id']
               client.upload_resource(current_build_id, resource_map[sha].content)
             end

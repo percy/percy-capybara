@@ -99,7 +99,8 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
           # `config.assets.digest = true` set can safely run "rake assets:precompile" before tests.
           resources = loader.build_resources
           expected_digest_url = \
-            '/assets/css/digested-f3420c6aee71c137a3ca39727052811bae84b2f37d898f4db242e20656a1579e.css'
+            '/assets/css/digested-f3420c6aee71c137a3ca39727052811bae84b2f37' \
+            'd898f4db242e20656a1579e.css'
           digested_resources = resources.select { |r| r.resource_url == expected_digest_url }
           expect(digested_resources.length).to eq(1)
         end

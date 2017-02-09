@@ -38,8 +38,8 @@ module Percy
       # Check that environment variables required for Percy::Client are set
       def required_environment_variables_set?
         if !ENV['PERCY_TOKEN'].nil? && ENV['PERCY_PROJECT'].nil?
-          raise '[percy] It looks like you were trying to enable Percy because PERCY_TOKEN is set, ' \
-            'but you are missing the PERCY_PROJECT environment variable!'
+          raise '[percy] It looks like you were trying to enable Percy because PERCY_TOKEN ' \
+            'is set, but you are missing the PERCY_PROJECT environment variable!'
         end
 
         !(ENV['PERCY_PROJECT'].nil? || ENV['PERCY_TOKEN'].nil?)
@@ -103,9 +103,9 @@ module Percy
         else
           unless @warned_about_native_loader
             Percy.logger.warn \
-              '[DEPRECATED] The native_loader is deprecated and will be opt-in in a future release. ' \
-              'You should move to the faster, more reliable filesystem_loader. See the docs for ' \
-              'Non-Rails frameworks: https://percy.io/docs/clients/ruby/capybara '
+              '[DEPRECATED] The native_loader is deprecated and will be opt-in in a future ' \
+              'release. You should move to the faster, more reliable filesystem_loader. See the ' \
+              'docs for Non-Rails frameworks: https://percy.io/docs/clients/ruby/capybara '
             @warned_about_native_loader = true
           end
           Percy.logger.debug { 'Using native_loader to discover assets (slower).' }
