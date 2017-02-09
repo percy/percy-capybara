@@ -1,10 +1,12 @@
 RSpec.describe Percy::Capybara::Client::Builds do
   let(:enabled) { true }
   let(:capybara_client) { Percy::Capybara::Client.new(enabled: enabled) }
-  let(:builds_api_url) { "https://percy.io/api/v1/repos/#{Percy::Client::Environment.repo}/builds/" }
+  let(:builds_api_url) do
+    "https://percy.io/api/v1/repos/#{Percy::Client::Environment.repo}/builds/"
+  end
 
   describe '#initialize_build', type: :feature, js: true do
-    before(:each) { setup_sprockets(capybara_client) }
+    before { setup_sprockets(capybara_client) }
 
     context 'percy is not enabled' do
       let(:enabled) { false }
@@ -31,7 +33,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
           'id' => '123',
           'type' => 'builds',
           'relationships' => {
-            'self' => "/api/v1/snapshots/123",
+            'self' => '/api/v1/snapshots/123',
             'missing-resources' => {
               'data' => [
                 {
@@ -48,7 +50,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
         .to_return(status: 201, body: mock_response.to_json)
 
       # Stub resource upload.
-      resources_stub = stub_request(:post, "https://percy.io/api/v1/builds/123/resources/")
+      resources_stub = stub_request(:post, 'https://percy.io/api/v1/builds/123/resources/')
         .to_return(status: 201, body: {success: true}.to_json)
       capybara_client.initialize_build
 
@@ -69,7 +71,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
           'id' => '123',
           'type' => 'builds',
           'relationships' => {
-            'self' => "/api/v1/snapshots/123",
+            'self' => '/api/v1/snapshots/123',
             'missing-resources' => {
               'data' => [
                 {
@@ -147,7 +149,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
     end
   end
   describe '#_upload_missing_build_resources', type: :feature, js: true do
-    before(:each) { setup_sprockets(capybara_client) }
+    before { setup_sprockets(capybara_client) }
 
     it 'returns 0 if there are no missing build resources to upload' do
       mock_response = {
@@ -161,8 +163,8 @@ RSpec.describe Percy::Capybara::Client::Builds do
       capybara_client.initialize_build
 
       loader = capybara_client.initialize_loader
-      expect(capybara_client.send(:_upload_missing_build_resources, loader.build_resources)).to eq(0)
+      result = capybara_client.send(:_upload_missing_build_resources, loader.build_resources)
+      expect(result).to eq(0)
     end
   end
-
 end

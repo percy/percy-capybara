@@ -10,7 +10,7 @@ module Percy
       include Percy::Capybara::Client::Builds
       include Percy::Capybara::Client::Snapshots
 
-      class Error < Exception; end
+      class Error < RuntimeError; end
       class BuildNotInitializedError < Error; end
       class WebMockBlockingConnectionsError < Error; end
 
@@ -29,26 +29,24 @@ module Percy
 
         @loader_options = options[:loader_options] || {}
 
-        if defined?(Rails)
-          @sprockets_environment = options[:sprockets_environment] || Rails.application.assets
-          @sprockets_options = options[:sprockets_options] || Rails.application.config.assets
-        end
+        return unless defined?(Rails)
+
+        @sprockets_environment = options[:sprockets_environment] || Rails.application.assets
+        @sprockets_options = options[:sprockets_options] || Rails.application.config.assets
       end
 
       # Check that environment variables required for Percy::Client are set
       def required_environment_variables_set?
         if !ENV['PERCY_TOKEN'].nil? && ENV['PERCY_PROJECT'].nil?
-          raise RuntimeError.new(
-            '[percy] It looks like you were trying to enable Percy because PERCY_TOKEN is set, ' +
-            'but you are missing the PERCY_PROJECT environment variable!'
-          )
+          raise '[percy] It looks like you were trying to enable Percy because PERCY_TOKEN ' \
+            'is set, but you are missing the PERCY_PROJECT environment variable!'
         end
 
         !(ENV['PERCY_PROJECT'].nil? || ENV['PERCY_TOKEN'].nil?)
       end
 
       def enabled?
-        return @enabled if !@enabled.nil?
+        return @enabled unless @enabled.nil?
 
         # Disable if PERCY_ENABLE is set to 0
         return @enabled = false if ENV['PERCY_ENABLE'] == '0'
@@ -57,21 +55,21 @@ module Percy
         return @enabled = true if required_environment_variables_set?
 
         # Disable otherwise
-        return @enabled = false
+        @enabled = false
       end
 
       def disable!
         @enabled = false
       end
 
-      def rescue_connection_failures(&block)
-        raise ArgumentError.new('block is required') if !block_given?
+      def rescue_connection_failures
+        raise ArgumentError, 'block is required' unless block_given?
         begin
-          block.call
-        rescue Percy::Client::ServerError,  # Rescue server errors.
-            Percy::Client::PaymentRequiredError,  # Rescue quota exceeded errors.
-            Percy::Client::ConnectionFailed,  # Rescue some networking errors.
-            Percy::Client::TimeoutError => e
+          yield
+        rescue Percy::Client::ServerError, # Rescue server errors.
+               Percy::Client::PaymentRequiredError, # Rescue quota exceeded errors.
+               Percy::Client::ConnectionFailed, # Rescue some networking errors.
+               Percy::Client::TimeoutError => e
           Percy.logger.error(e)
           @enabled = false
           @failed = true
@@ -80,7 +78,7 @@ module Percy
       end
 
       def failed?
-        return !!@failed
+        !!@failed
       end
 
       def initialize_loader(options = {})
@@ -105,9 +103,9 @@ module Percy
         else
           unless @warned_about_native_loader
             Percy.logger.warn \
-              '[DEPRECATED] The native_loader is deprecated and will be opt-in in a future release. ' +
-              'You should move to the faster, more reliable filesystem_loader. See the docs for ' +
-              'Non-Rails frameworks: https://percy.io/docs/clients/ruby/capybara '
+              '[DEPRECATED] The native_loader is deprecated and will be opt-in in a future ' \
+              'release. You should move to the faster, more reliable filesystem_loader. See the ' \
+              'docs for Non-Rails frameworks: https://percy.io/docs/clients/ruby/capybara '
             @warned_about_native_loader = true
           end
           Percy.logger.debug { 'Using native_loader to discover assets (slower).' }

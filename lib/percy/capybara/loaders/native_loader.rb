@@ -5,7 +5,6 @@ require 'uri'
 module Percy
   module Capybara
     module Loaders
-
       # Resource loader that uses the native Capybara browser interface to discover resources.
       # This loader uses JavaScript to discover page resources, so specs must be tagged with
       # "js: true" because the default Rack::Test driver does not support executing JavaScript.
@@ -73,12 +72,13 @@ module Percy
           resource_urls = _evaluate_script(page, script)
 
           resource_urls.each do |url|
-            next if !_should_include_url?(url)
+            next unless _should_include_url?(url)
             response = _fetch_resource_url(url)
             _absolute_url_to_relative!(url, _current_host_port)
-            next if !response
+            next unless response
             resources << Percy::Client::Resource.new(
-              url, mimetype: 'text/css', content: response.body)
+              url, mimetype: 'text/css', content: response.body
+            )
           end
           resources
         end
@@ -92,7 +92,7 @@ module Percy
           # Find all image tags on the page.
           page.all('img').each do |image_element|
             srcs = []
-            srcs << image_element[:src] if !image_element[:src].nil?
+            srcs << image_element[:src] unless image_element[:src].nil?
 
             srcset_raw_urls = image_element[:srcset] || ''
             temp_urls = srcset_raw_urls.split(',')
@@ -152,7 +152,7 @@ module Percy
             # Skip duplicates.
             next if resources.find { |r| r.resource_url == resource_url }
 
-            next if !_should_include_url?(resource_url)
+            next unless _should_include_url?(resource_url)
 
             # Fetch the images.
             # TODO(fotinakis): this can be pretty inefficient for image-heavy pages because the
@@ -161,10 +161,11 @@ module Percy
             # development server, so it may not be so bad. Re-evaluate if this becomes an issue.
             response = _fetch_resource_url(resource_url)
             _absolute_url_to_relative!(resource_url, _current_host_port)
-            next if !response
+            next unless response
 
             resources << Percy::Client::Resource.new(
-              resource_url, mimetype: response.content_type, content: response.body)
+              resource_url, mimetype: response.content_type, content: response.body
+            )
           end
           resources
         end
@@ -173,8 +174,9 @@ module Percy
         # @private
         def _fetch_resource_url(url)
           response = Percy::Capybara::HttpFetcher.fetch(url)
-          if !response
-            STDERR.puts "[percy] Warning: failed to fetch page resource, this might be a bug: #{url}"
+          unless response
+            STDERR.puts '[percy] Warning: failed to fetch page resource, ' \
+              "this might be a bug: #{url}"
             return nil
           end
           response
@@ -216,15 +218,14 @@ module Percy
 
         # @private
         def _same_server?(url, host_port)
-          url.start_with?(host_port + "/") || url == host_port
+          url.start_with?(host_port + '/') || url == host_port
         end
 
         # @private
         def _absolute_url_to_relative!(url, host_port)
-          url.gsub!(host_port + '/','/') if url.start_with?(host_port + "/")
+          url.gsub!(host_port + '/', '/') if url.start_with?(host_port + '/')
         end
         private :_absolute_url_to_relative!
-
       end
     end
   end

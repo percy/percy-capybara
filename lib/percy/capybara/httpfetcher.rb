@@ -23,13 +23,13 @@ module Percy
         content_type = output.match(/< Content-Type:(.*)/i)
         content_type = content_type[1].strip if content_type
 
-        if File.exist?(temppath)
-          response = Percy::Capybara::HttpFetcher::Response.new(File.read(temppath), content_type)
-          # We've broken the tempfile so it won't get deleted when garbage collected. Delete!
-          File.delete(temppath)
-          return if response.body == ''
-          response
-        end
+        return unless File.exist?(temppath)
+
+        response = Percy::Capybara::HttpFetcher::Response.new(File.read(temppath), content_type)
+        # We've broken the tempfile so it won't get deleted when garbage collected. Delete!
+        File.delete(temppath)
+        return if response.body == ''
+        response
       end
     end
   end

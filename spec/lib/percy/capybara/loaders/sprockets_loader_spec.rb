@@ -1,7 +1,7 @@
 require 'sprockets'
 
 class SimpleRackApp
-  def self.call(env)
+  def self.call(_env)
     [200, {}, 'Hello World']
   end
 end
@@ -11,11 +11,11 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
     described_class.new(
       page: page,
       sprockets_environment: environment,
-      sprockets_options: sprockets_options,
+      sprockets_options: sprockets_options
     )
   end
   let(:environment) do
-    root = File.expand_path("../../client/testdata", __FILE__)
+    root = File.expand_path('../../client/testdata', __FILE__)
     environment = Sprockets::Environment.new(root)
     environment.append_path '.'
     environment
@@ -32,12 +32,12 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
 
   describe '#snapshot_resources' do
     context 'Rack::Test', type: :feature do
-      before(:each) { Capybara.app = SimpleRackApp }
+      before { Capybara.app = SimpleRackApp }
 
       it 'returns the root HTML resource' do
         visit '/'
         resources = loader.snapshot_resources
-        expect(resources.map { |r| r.resource_url }).to eq(["/"])
+        expect(resources.map(&:resource_url)).to eq(['/'])
         expect(resources.first.is_root).to eq(true)
         expect(resources.first.content).to include('Hello World')
       end
@@ -46,7 +46,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
       it 'returns the root HTML resource' do
         visit '/'
         resources = loader.snapshot_resources
-        expect(resources.map { |r| r.resource_url }).to eq(["/"])
+        expect(resources.map(&:resource_url)).to eq(['/'])
         expect(resources.first.is_root).to eq(true)
         expect(resources.first.content).to include('Hello World!</body></html>')
       end
@@ -69,11 +69,11 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
         '/assets/images/srcset-second.png',
         '/assets/js/base.js',
       ]
-      expect(resources.map { |r| r.resource_url }).to eq(expected_resources)
+      expect(resources.map(&:resource_url)).to eq(expected_resources)
       expect(resources.first.content).to include('.colored-by-base')
     end
     context 'Rails app' do
-      before(:each) do
+      before do
         # Pretend like we're in a Rails app right now, all we care about is Rails.public_path.
         rails_double = double('Rails')
         # Pretend like the entire testdata directory is the public/ folder.
@@ -85,10 +85,10 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
         # Weak test that more things are in this list, because it merges asset pipeline with public.
         expect(resources.length).to be > 5
 
-        resource_urls = resources.map { |r| r.resource_url }
-        expect(resource_urls).to include('/assets/images/bg-relative.png')  # From asset pipeline.
-        expect(resource_urls).to include('/percy-from-public.svg')  # Public merged into root.
-        expect(resource_urls).to_not include('/large-file-skipped.png')  # Public merged into root.
+        resource_urls = resources.map(&:resource_url)
+        expect(resource_urls).to include('/assets/images/bg-relative.png') # From asset pipeline.
+        expect(resource_urls).to include('/percy-from-public.svg') # Public merged into root.
+        expect(resource_urls).not_to include('/large-file-skipped.png') # Public merged into root.
       end
       context 'digest enabled' do
         let(:digest_enabled) { true }
@@ -99,7 +99,8 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
           # `config.assets.digest = true` set can safely run "rake assets:precompile" before tests.
           resources = loader.build_resources
           expected_digest_url = \
-            '/assets/css/digested-f3420c6aee71c137a3ca39727052811bae84b2f37d898f4db242e20656a1579e.css'
+            '/assets/css/digested-f3420c6aee71c137a3ca39727052811bae84b2f37' \
+            'd898f4db242e20656a1579e.css'
           digested_resources = resources.select { |r| r.resource_url == expected_digest_url }
           expect(digested_resources.length).to eq(1)
         end

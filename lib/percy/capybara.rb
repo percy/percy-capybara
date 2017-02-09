@@ -36,7 +36,7 @@ module Percy
     #
     # @see Percy::Capybara::Client::Builds#finalize_current_build
     def self.finalize_build
-      return if !capybara_client.build_initialized?
+      return unless capybara_client.build_initialized?
       capybara_client.finalize_current_build
     end
 
@@ -45,7 +45,7 @@ module Percy
       @capybara_client = nil
     end
     # The 'reset' method is deprecated and will be removed: use the reset! method instead.
-    class << self; alias_method :reset, :reset!; end;
+    class << self; alias reset reset!; end
 
     # Manually disable Percy for the current capybara client. This can also be done with the
     # PERCY_ENABLE=0 environment variable.

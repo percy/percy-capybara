@@ -6,8 +6,8 @@ RSpec.describe Percy::Capybara::Client do
   end
   describe '#enabled?' do
     context 'when required environment variables set' do
-      before(:each) { set_required_env_variables }
-      after(:each) { clear_percy_env_variables }
+      before { set_required_env_variables }
+      after { clear_percy_env_variables }
 
       it 'is true when PERCY_ENABLE is 1' do
         ENV['PERCY_ENABLE'] = '1'
@@ -28,7 +28,7 @@ RSpec.describe Percy::Capybara::Client do
     end
 
     context 'when required environment variables not set' do
-      before(:each) { clear_percy_env_variables }
+      before { clear_percy_env_variables }
 
       it 'is false' do
         ENV.delete 'PERCY_ENABLE'
@@ -131,7 +131,8 @@ RSpec.describe Percy::Capybara::Client do
 
     context 'when no configuration has been set' do
       it 'returns a NativeLoader' do
-        expect(capybara_client.initialize_loader.class).to eq(Percy::Capybara::Loaders::NativeLoader)
+        expect(capybara_client.initialize_loader.class)
+          .to eq(Percy::Capybara::Loaders::NativeLoader)
       end
     end
 

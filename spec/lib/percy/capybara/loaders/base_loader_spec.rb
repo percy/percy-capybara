@@ -1,7 +1,7 @@
 IFRAME_PATH = File.expand_path('../../client/testdata/test-iframe.html', __FILE__)
 
 class RackAppWithIframe
-  def self.call(env)
+  def self.call(_env)
     [200, {}, File.read(IFRAME_PATH)]
   end
 end
@@ -75,8 +75,8 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
   end
 
   context 'Rack::Test', type: :feature do
-    before(:each) { Capybara.app = RackAppWithIframe }
-    after(:each) { Capybara.app = nil }
+    before { Capybara.app = RackAppWithIframe }
+    after { Capybara.app = nil }
 
     describe '#iframes_resources' do
       it 'is silently ignored' do
@@ -87,5 +87,3 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
     end
   end
 end
-
-

@@ -1,0 +1,42 @@
+require: rubocop-rspec
+inherit_from: .rubocop_todo.yml
+AllCops:
+  Include:
+    - Rakefile
+    - lib/**/*.rake
+
+Metrics/LineLength:
+  Max: 100
+
+Style/Documentation:
+  Enabled: false
+
+Style/DoubleNegation:
+  Enabled: false
+
+Style/IndentArray:
+  EnforcedStyle: consistent
+
+Style/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+Style/MultilineOperationIndentation:
+  EnforcedStyle: indented
+
+Style/RedundantBegin:
+  Enabled: false
+
+Style/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space
+
+Style/TrailingCommaInLiteral:
+  EnforcedStyleForMultiline: comma
+
+RSpec/MessageSpies:
+  EnforcedStyle: receive
+
+
+
+# Will be able to do this in >= v1.11
+# RSpec/DescribedClass:
+#   EnforcedStyle: explicit

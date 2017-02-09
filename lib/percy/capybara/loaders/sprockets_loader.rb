@@ -14,10 +14,10 @@ module Percy
         attr_reader :sprockets_options
 
         SKIP_RESOURCE_EXTENSIONS = [
-          '.map',  # Ignore source maps.
-          '.gz',  # Ignore gzipped files.
-        ]
-        MAX_FILESIZE_BYTES = 15 * 1024**2  # 15 MB.
+          '.map', # Ignore source maps.
+          '.gz', # Ignore gzipped files.
+        ].freeze
+        MAX_FILESIZE_BYTES = 15 * 1024**2 # 15 MB.
 
         def initialize(options = {})
           @sprockets_environment = options[:sprockets_environment]
@@ -66,7 +66,7 @@ module Percy
             public_path = _rails.public_path.to_s
             Find.find(public_path).each do |path|
               # Skip directories.
-              next if !FileTest.file?(path)
+              next unless FileTest.file?(path)
               # Skip certain extensions.
               next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(path))
               # Skip large files, these are hopefully downloads and not used in page rendering.

@@ -3,9 +3,9 @@ require 'timeout'
 require 'sprockets'
 
 module TestHelpers
-  class ServerDown < Exception; end
+  class ServerDown < RuntimeError; end
 
-  def get_random_open_port
+  def random_open_port
     # Using a port of "0" relies on the system to pick an open port.
     server = TCPServer.new('127.0.0.1', 0)
     port = server.addr[1]
@@ -35,7 +35,7 @@ module TestHelpers
   end
 
   def setup_sprockets(capybara_client)
-    root = File.expand_path("../../lib/percy/capybara/client/testdata", __FILE__)
+    root = File.expand_path('../../lib/percy/capybara/client/testdata', __FILE__)
     environment = Sprockets::Environment.new(root)
     environment.append_path '.'
 
