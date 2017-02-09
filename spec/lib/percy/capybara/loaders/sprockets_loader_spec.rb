@@ -67,7 +67,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
         '/assets/images/srcset-base.png',
         '/assets/images/srcset-first.png',
         '/assets/images/srcset-second.png',
-        '/assets/js/base.js'
+        '/assets/js/base.js',
       ]
       expect(resources.map(&:resource_url)).to eq(expected_resources)
       expect(resources.first.content).to include('.colored-by-base')

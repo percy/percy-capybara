@@ -18,8 +18,8 @@ RSpec.describe Percy::Capybara::Client::Builds do
       mock_response = {
         'data' => {
           'id' => '123',
-          'type' => 'builds'
-        }
+          'type' => 'builds',
+        },
       }
       stub_request(:post, builds_api_url)
         .to_return(status: 201, body: mock_response.to_json)
@@ -38,12 +38,12 @@ RSpec.describe Percy::Capybara::Client::Builds do
               'data' => [
                 {
                   'type' => 'resources',
-                  'id' => loader.build_resources.first.sha
-                }
-              ]
-            }
-          }
-        }
+                  'id' => loader.build_resources.first.sha,
+                },
+              ],
+            },
+          },
+        },
       }
       # Stub create build.
       build_stub = stub_request(:post, builds_api_url)
@@ -76,12 +76,12 @@ RSpec.describe Percy::Capybara::Client::Builds do
               'data' => [
                 {
                   'type' => 'resources',
-                  'id' => loader.build_resources.first.sha
-                }
-              ]
-            }
-          }
-        }
+                  'id' => loader.build_resources.first.sha,
+                },
+              ],
+            },
+          },
+        },
       }
       # Stub create build.
       build_stub = stub_request(:post, builds_api_url)
@@ -155,8 +155,8 @@ RSpec.describe Percy::Capybara::Client::Builds do
       mock_response = {
         'data' => {
           'id' => '123',
-          'type' => 'builds'
-        }
+          'type' => 'builds',
+        },
       }
       stub_request(:post, builds_api_url)
         .to_return(status: 201, body: mock_response.to_json)

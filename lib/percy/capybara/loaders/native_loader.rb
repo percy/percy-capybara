@@ -14,7 +14,7 @@ module Percy
         LOCAL_HOSTNAMES = [
           'localhost',
           '127.0.0.1',
-          '0.0.0.0'
+          '0.0.0.0',
         ].freeze
 
         def snapshot_resources

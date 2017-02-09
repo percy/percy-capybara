@@ -17,6 +17,9 @@ Style/DoubleNegation:
 Style/RedundantBegin:
   Enabled: false
 
+Style/TrailingCommaInLiteral:
+  EnforcedStyleForMultiline: comma
+
 RSpec/MessageSpies:
   EnforcedStyle: receive
 

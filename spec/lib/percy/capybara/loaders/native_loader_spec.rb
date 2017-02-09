@@ -24,7 +24,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
                                              '/css/level0-imports.css',
                                              '/css/level1-imports.css',
                                              '/css/level2-imports.css',
-                                             '/css/simple-imports.css'
+                                             '/css/simple-imports.css',
                                            ])
     end
     it 'returns the root HTML and image resources' do
@@ -41,7 +41,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
                                              '/images/srcset-second.png',
                                              '/images/bg-relative.png',
                                              '/images/bg-relative-to-root.png',
-                                             '/images/bg-stacked.png'
+                                             '/images/bg-stacked.png',
                                            ])
     end
   end
@@ -59,7 +59,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
       resource_urls = loader.snapshot_resources.collect(&:resource_url)
       expect(resource_urls).to eq([
                                     '/test-localtest-me-images.html',
-                                    '/images/img-relative.png'
+                                    '/images/img-relative.png',
                                   ])
       expect(loader.snapshot_resources.collect(&:is_root)).to eq([true, nil])
     end
@@ -247,7 +247,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
                                              '/images/srcset-second.png',
                                              '/images/bg-relative.png',
                                              '/images/bg-relative-to-root.png',
-                                             '/images/bg-stacked.png'
+                                             '/images/bg-stacked.png',
                                            ])
       expect(resources.collect(&:is_root).uniq).to match_array([nil])
     end

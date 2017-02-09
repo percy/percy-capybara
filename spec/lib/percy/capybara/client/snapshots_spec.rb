@@ -18,9 +18,9 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
             'type' => 'builds',
             'relationships' => {
               'self' => '/api/v1/snapshots/123',
-              'missing-resources' => {}
-            }
-          }
+              'missing-resources' => {},
+            },
+          },
         }
       end
       let(:mock_snapshot_response) do
@@ -34,12 +34,12 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
                 'data' => [
                   {
                     'type' => 'resources',
-                    'id' => snapshot_resource_sha
-                  }
-                ]
-              }
-            }
-          }
+                    'id' => snapshot_resource_sha,
+                  },
+                ],
+              },
+            },
+          },
         }
       end
       before do
