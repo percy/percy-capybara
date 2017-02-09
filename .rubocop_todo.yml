@@ -46,12 +46,6 @@ RSpec/ExampleLength:
     - 'spec/lib/percy/capybara/loaders/sprockets_loader_spec.rb'
     - 'spec/lib/percy/capybara_spec.rb'
 
-# Offense count: 29
-# Configuration parameters: SupportedStyles.
-# SupportedStyles: have_received, receive
-RSpec/MessageSpies:
-  EnforcedStyle: receive
-
 # Offense count: 42
 RSpec/MultipleExpectations:
   Max: 29
@@ -72,13 +66,6 @@ RSpec/VerifiedDoubles:
     - 'spec/lib/percy/capybara/loaders/sprockets_loader_spec.rb'
     - 'spec/lib/percy/capybara_spec.rb'
     - 'spec/support/test_helpers.rb'
-
-# Offense count: 3
-Style/DoubleNegation:
-  Exclude:
-    - 'lib/percy/capybara/client.rb'
-    - 'lib/percy/capybara/client/builds.rb'
-    - 'lib/percy/capybara/loaders/native_loader.rb'
 
 
 # Offense count: 4
