@@ -29,10 +29,10 @@ module Percy
 
         @loader_options = options[:loader_options] || {}
 
-        if defined?(Rails)
-          @sprockets_environment = options[:sprockets_environment] || Rails.application.assets
-          @sprockets_options = options[:sprockets_options] || Rails.application.config.assets
-        end
+        return unless defined?(Rails)
+
+        @sprockets_environment = options[:sprockets_environment] || Rails.application.assets
+        @sprockets_options = options[:sprockets_options] || Rails.application.config.assets
       end
 
       # Check that environment variables required for Percy::Client are set
