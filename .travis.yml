@@ -12,4 +12,6 @@ matrix:
 before_install:
   - gem update --system
   - gem update bundler
-script: xvfb-run bundle exec rspec
+script:
+  - xvfb-run bundle exec rspec
+  - bundle exec rubocop -D
