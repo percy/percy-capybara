@@ -46,12 +46,12 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
     end
   end
   describe 'nonlocal.me', type: :feature, js: true do
+    let(:orig_app_host) { Capybara.app_host }
     before do
-      @orig_app_host = Capybara.app_host
       Capybara.app_host = Capybara.app_host.gsub('http://localhost:', 'http://localtest.me:')
     end
     after do
-      Capybara.app_host = @orig_app_host
+      Capybara.app_host = orig_app_host
     end
     it 'returns the root HTML and image resources' do
       visit '/test-localtest-me-images.html'

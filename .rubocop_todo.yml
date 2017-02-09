@@ -46,13 +46,6 @@ RSpec/ExampleLength:
     - 'spec/lib/percy/capybara/loaders/sprockets_loader_spec.rb'
     - 'spec/lib/percy/capybara_spec.rb'
 
-# Offense count: 2
-# Configuration parameters: AssignmentOnly.
-RSpec/InstanceVariable:
-  Exclude:
-    - 'spec/lib/percy/capybara/loaders/native_loader_spec.rb'
-    - 'spec/lib/percy/capybara_spec.rb'
-
 # Offense count: 29
 # Configuration parameters: SupportedStyles.
 # SupportedStyles: have_received, receive
