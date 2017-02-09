@@ -87,14 +87,6 @@ Style/DoubleNegation:
     - 'lib/percy/capybara/client/builds.rb'
     - 'lib/percy/capybara/loaders/native_loader.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect, EnforcedStyle, SupportedStyles.
-# SupportedStyles: predicate, comparison
-Style/NumericPredicate:
-  Exclude:
-    - 'spec/**/*'
-    - 'lib/percy/capybara/client/builds.rb'
 
 # Offense count: 4
 # Cop supports --auto-correct.

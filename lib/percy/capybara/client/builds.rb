@@ -66,7 +66,7 @@ module Percy
             resource = build_resources.find { |r| r.sha == sha }
             content = resource.content || File.read(resource.path)
             client.upload_resource(current_build['data']['id'], content)
-            if i % 10 == 0
+            if (i % 10).zero?
               puts "[percy] Uploading #{i + 1} of #{new_build_resources.length} new resources..."
             end
           end
