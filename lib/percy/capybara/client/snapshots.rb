@@ -44,8 +44,8 @@ module Percy
               return
             end
 
-            snapshot['data']['relationships']['missing-resources']['data']
-              .each do |missing_resource|
+            missing_resource_data = snapshot['data']['relationships']['missing-resources']['data']
+            missing_resource_data.each do |missing_resource|
               sha = missing_resource['id']
               client.upload_resource(current_build_id, resource_map[sha].content)
             end
