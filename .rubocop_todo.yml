@@ -80,11 +80,6 @@ RSpec/VerifiedDoubles:
     - 'spec/lib/percy/capybara_spec.rb'
     - 'spec/support/test_helpers.rb'
 
-# Offense count: 1
-Style/AccessorMethodName:
-  Exclude:
-    - 'spec/support/test_helpers.rb'
-
 # Offense count: 6
 Style/Documentation:
   Exclude:

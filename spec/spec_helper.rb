@@ -55,7 +55,7 @@ RSpec.configure do |config|
   # You can test this server manually by running:
   # ruby -run -e httpd spec/lib/percy/capybara/client/testdata/ -p 9090
   config.before(:all, type: :feature) do
-    port = get_random_open_port
+    port = random_open_port
     Capybara.app = nil
     Capybara.app_host = "http://localhost:#{port}"
     Capybara.run_server = false
