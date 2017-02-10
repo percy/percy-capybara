@@ -76,7 +76,7 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
           .and_call_original
 
         result = capybara_client.snapshot(
-          page, name: 'foo', widths: [320, 1024], enable_javascript: true
+          page, name: 'foo', widths: [320, 1024], enable_javascript: true,
         )
         expect(result).to eq(true)
         expect(capybara_client.failed?).to eq(false)

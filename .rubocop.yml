@@ -29,8 +29,11 @@ Style/RedundantBegin:
 Style/SpaceInsideHashLiteralBraces:
   EnforcedStyle: no_space
 
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: consistent_comma
+
 Style/TrailingCommaInLiteral:
-  EnforcedStyleForMultiline: comma
+  EnforcedStyleForMultiline: consistent_comma
 
 RSpec/MessageSpies:
   EnforcedStyle: receive

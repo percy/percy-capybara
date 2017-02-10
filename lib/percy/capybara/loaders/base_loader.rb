@@ -29,7 +29,7 @@ module Percy
           # port number
           '(:\\d{2,5})?' +
           # resource path
-          "(/[^\\s\"']*)?"
+          "(/[^\\s\"']*)?",
         )
 
         attr_reader :page
@@ -50,7 +50,7 @@ module Percy
         # @private
         def root_html_resource
           Percy::Client::Resource.new(
-            current_path, is_root: true, mimetype: 'text/html', content: page.html
+            current_path, is_root: true, mimetype: 'text/html', content: page.html,
           )
         end
 
@@ -92,7 +92,7 @@ module Percy
                   path,
                   content: content,
                   sha: sha,
-                  mimetype: 'text/html'
+                  mimetype: 'text/html',
                 )
             end
           end
