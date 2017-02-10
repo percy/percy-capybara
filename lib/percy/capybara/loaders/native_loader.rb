@@ -77,7 +77,7 @@ module Percy
             _absolute_url_to_relative!(url, _current_host_port)
             next unless response
             resources << Percy::Client::Resource.new(
-              url, mimetype: 'text/css', content: response.body
+              url, mimetype: 'text/css', content: response.body,
             )
           end
           resources
@@ -164,7 +164,7 @@ module Percy
             next unless response
 
             resources << Percy::Client::Resource.new(
-              resource_url, mimetype: response.content_type, content: response.body
+              resource_url, mimetype: response.content_type, content: response.body,
             )
           end
           resources

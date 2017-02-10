@@ -62,9 +62,11 @@ RSpec.configure do |config|
 
     # Note: using this form of popen to keep stdout and stderr silent and captured.
     dir = File.expand_path('../lib/percy/capybara/client/testdata/', __FILE__)
-    @process = IO.popen([
-      'ruby', '-run', '-e', 'httpd', dir, '-p', port.to_s, err: [:child, :out]
-    ].flatten)
+    @process = IO.popen(
+      [
+        'ruby', '-run', '-e', 'httpd', dir, '-p', port.to_s, err: [:child, :out],
+      ].flatten,
+    )
 
     # Block until the server is up.
     WebMock.disable_net_connect!(allow_localhost: true)

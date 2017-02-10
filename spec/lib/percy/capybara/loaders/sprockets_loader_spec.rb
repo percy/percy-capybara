@@ -11,7 +11,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
     described_class.new(
       page: page,
       sprockets_environment: environment,
-      sprockets_options: sprockets_options
+      sprockets_options: sprockets_options,
     )
   end
   let(:environment) do
