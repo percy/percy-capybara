@@ -5,8 +5,14 @@ AllCops:
     - Rakefile
     - lib/**/*.rake
 
+Lint/EndAlignment:
+  EnforcedStyleAlignWith: variable
+
 Metrics/LineLength:
   Max: 100
+
+Style/CaseIndentation:
+  EnforcedStyle: end
 
 Style/AlignParameters:
   EnforcedStyle: with_fixed_indentation

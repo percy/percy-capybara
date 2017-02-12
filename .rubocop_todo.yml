@@ -81,17 +81,6 @@ RSpec/VerifiedDoubles:
     - 'spec/lib/percy/capybara_spec.rb'
     - 'spec/support/test_helpers.rb'
 
-# Offense count: 4
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles, AllowInnerSlashes.
-# SupportedStyles: slashes, percent_r, mixed
-Style/RegexpLiteral:
-  Exclude:
-    - 'lib/percy/capybara/loaders/native_loader.rb'
-    - 'spec/lib/percy/capybara/loaders/native_loader_spec.rb'
-    - 'spec/lib/percy/capybara/loaders/sprockets_loader_spec.rb'
-    - 'spec/support/test_helpers.rb'
-
 # Offense count: 1
 Style/StructInheritance:
   Exclude:
