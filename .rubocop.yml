@@ -8,6 +8,9 @@ AllCops:
 Metrics/LineLength:
   Max: 100
 
+Style/AlignParameters:
+  EnforcedStyle: with_fixed_indentation
+
 Style/Documentation:
   Enabled: false
 
@@ -23,8 +26,19 @@ Style/MultilineMethodCallIndentation:
 Style/MultilineOperationIndentation:
   EnforcedStyle: indented
 
+# Disable Style/NumericLiterals so numbers don't need underscores
+Style/NumericLiterals:
+  Enabled: false
+
+Style/NumericPredicate:
+  EnforcedStyle: comparison
+
 Style/RedundantBegin:
   Enabled: false
+
+Style/RegexpLiteral:
+  EnforcedStyle: slashes
+  AllowInnerSlashes: true
 
 Style/SpaceInsideHashLiteralBraces:
   EnforcedStyle: no_space
@@ -37,8 +51,6 @@ Style/TrailingCommaInLiteral:
 
 RSpec/MessageSpies:
   EnforcedStyle: receive
-
-
 
 # Will be able to do this in >= v1.11
 # RSpec/DescribedClass:
