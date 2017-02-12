@@ -40,7 +40,7 @@ module Percy
           return unless enabled?  # Silently skip if the client is disabled.
           unless build_initialized?
             raise Percy::Capybara::Client::BuildNotInitializedError,
-                  'Failed to finalize build because no build has been initialized.'
+              'Failed to finalize build because no build has been initialized.'
           end
           result = rescue_connection_failures do
             client.finalize_build(current_build['data']['id'])
@@ -66,7 +66,7 @@ module Percy
             resource = build_resources.find { |r| r.sha == sha }
             content = resource.content || File.read(resource.path)
             client.upload_resource(current_build['data']['id'], content)
-            if (i % 10).zero?
+            if (i % 10) == 0
               puts "[percy] Uploading #{i + 1} of #{new_build_resources.length} new resources..."
             end
           end
