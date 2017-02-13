@@ -221,11 +221,13 @@ module Percy
           url_match = URL_REGEX.match(page.current_url)
           url_match[1] + url_match[2] + (url_match[3] || '')
         end
+        private :_current_host_port
 
         # @private
         def _same_server?(url, host_port)
           url.start_with?(host_port + '/') || url == host_port
         end
+        private :_same_server?
 
         # @private
         def _absolute_url_to_relative!(url, host_port)
@@ -233,11 +235,10 @@ module Percy
         end
         private :_absolute_url_to_relative!
 
-        private
-
         def asset_hostnames
           LOCAL_HOSTNAMES + @asset_hostnames
         end
+        private :asset_hostnames
       end
     end
   end
