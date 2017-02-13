@@ -1,6 +1,7 @@
 RSpec.describe Percy::Capybara::Loaders::NativeLoader do
   let(:fake_page) { OpenStruct.new(current_url: 'http://localhost/foo') }
-  let(:loader) { described_class.new(page: fake_page) }
+  let(:asset_hostnames) { nil }
+  let(:loader) { described_class.new(page: fake_page, :asset_hostnames => asset_hostnames) }
 
   describe '#build_resources' do
     it 'returns an empty list' do
@@ -97,11 +98,48 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
     it 'returns false for data URLs' do
       expect(loader._should_include_url?('data:image/gif;base64,R0')).to eq(false)
     end
-    it 'returns false for remote URLs' do
-      expect(loader._should_include_url?('http://foo/')).to eq(false)
-      expect(loader._should_include_url?('http://example.com/')).to eq(false)
-      expect(loader._should_include_url?('http://example.com/foo')).to eq(false)
-      expect(loader._should_include_url?('https://example.com/foo')).to eq(false)
+
+    context 'remote urls' do
+      context 'given loader is initialised with asset hostnames' do
+        let(:asset_hostnames) { ['bar', 'baz'] }
+        context 'and the remote url is included in asset hostnames' do
+          context 'with the same port' do
+            it 'returns true' do
+              expect(loader._should_include_url?('http://bar/')).to eq(true)
+              expect(loader._should_include_url?('http://baz/')).to eq(true)
+              expect(loader._should_include_url?('http://bar/foo')).to eq(true)
+            end
+          end
+          context 'with different port' do
+            it 'returns true' do
+              expect(loader._should_include_url?('http://baz:1234/foo')).to eq(true)
+              expect(loader._should_include_url?('http://bar:4321/foo')).to eq(true)
+            end
+          end
+          context 'https' do
+            it 'returns true' do
+              expect(loader._should_include_url?('https://baz/foo')).to eq(true)
+              expect(loader._should_include_url?('https://bar/foo')).to eq(true)
+            end
+          end
+        end
+        context 'and the remote url is NOT included in asset hostnames' do
+          it 'returns false' do
+            expect(loader._should_include_url?('http://foo/')).to eq(false)
+            expect(loader._should_include_url?('http://example.com/')).to eq(false)
+            expect(loader._should_include_url?('http://example.com/foo')).to eq(false)
+            expect(loader._should_include_url?('https://example.com/foo')).to eq(false)
+          end
+        end
+      end
+      context 'given loader is NOT initialised with asset hostnames' do
+        it 'returns false for remote urls' do
+          expect(loader._should_include_url?('http://foo/')).to eq(false)
+          expect(loader._should_include_url?('http://example.com/')).to eq(false)
+          expect(loader._should_include_url?('http://example.com/foo')).to eq(false)
+          expect(loader._should_include_url?('https://example.com/foo')).to eq(false)
+        end
+      end
     end
     context 'for nonlocal hosts' do
       let(:fake_page) { OpenStruct.new(current_url: 'http://foo:123/') }
