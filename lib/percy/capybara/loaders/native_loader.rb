@@ -17,6 +17,12 @@ module Percy
           '0.0.0.0',
         ].freeze
 
+        def initialize(options = {})
+          super(options)
+
+          @asset_hostnames = options[:asset_hostnames] || []
+        end
+
         def snapshot_resources
           resources = []
           resources << root_html_resource
@@ -204,7 +210,7 @@ module Percy
           # Is not a remote URL.
           if url_match && !data_url_match
             host = url_match[2]
-            result = LOCAL_HOSTNAMES.include?(host) || _same_server?(url, _current_host_port)
+            result = asset_hostnames.include?(host) || _same_server?(url, _current_host_port)
           end
 
           !!result
@@ -215,17 +221,24 @@ module Percy
           url_match = URL_REGEX.match(page.current_url)
           url_match[1] + url_match[2] + (url_match[3] || '')
         end
+        private :_current_host_port
 
         # @private
         def _same_server?(url, host_port)
           url.start_with?(host_port + '/') || url == host_port
         end
+        private :_same_server?
 
         # @private
         def _absolute_url_to_relative!(url, host_port)
           url.gsub!(host_port + '/', '/') if url.start_with?(host_port + '/')
         end
         private :_absolute_url_to_relative!
+
+        def asset_hostnames
+          LOCAL_HOSTNAMES + @asset_hostnames
+        end
+        private :asset_hostnames
       end
     end
   end
