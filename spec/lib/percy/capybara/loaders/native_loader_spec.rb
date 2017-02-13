@@ -100,34 +100,26 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
     end
 
     context 'when loader is initialised with asset hostnames' do
-      let(:asset_hostnames) { ['bar'] }
+      let(:asset_hostnames) { ['dev.local'] }
       context 'with the same port' do
         it 'returns in accordance with asset_hostnames' do
-          expect(loader._should_include_url?('http://bar/')).to eq(true)
-          expect(loader._should_include_url?('http://bar/foo')).to eq(true)
+          expect(loader._should_include_url?('http://dev.local/')).to eq(true)
+          expect(loader._should_include_url?('http://dev.local/foo')).to eq(true)
 
-          expect(loader._should_include_url?('http://baz/')).to eq(false)
+          expect(loader._should_include_url?('http://other.local/')).to eq(false)
         end
       end
       context 'with different port' do
         it 'returns in accordance with asset_hostnames' do
-          expect(loader._should_include_url?('http://bar:4321/foo')).to eq(true)
-          expect(loader._should_include_url?('http://baz:1234/foo')).to eq(false)
+          expect(loader._should_include_url?('http://dev.local:4321/foo')).to eq(true)
+          expect(loader._should_include_url?('http://other.local:1234/foo')).to eq(false)
         end
       end
       context 'https' do
         it 'returns in accordance with asset_hostnames' do
-          expect(loader._should_include_url?('https://bar/foo')).to eq(true)
-          expect(loader._should_include_url?('https://baz/foo')).to eq(false)
+          expect(loader._should_include_url?('https://dev.local/foo')).to eq(true)
+          expect(loader._should_include_url?('https://other.local/foo')).to eq(false)
         end
-      end
-    end
-    context 'when loader is NOT initialised with asset hostnames' do
-      it 'returns false for remote urls' do
-        expect(loader._should_include_url?('http://foo/')).to eq(false)
-        expect(loader._should_include_url?('http://example.com/')).to eq(false)
-        expect(loader._should_include_url?('http://example.com/foo')).to eq(false)
-        expect(loader._should_include_url?('https://example.com/foo')).to eq(false)
       end
     end
     context 'for nonlocal hosts' do
