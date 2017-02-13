@@ -233,7 +233,6 @@ module Percy
         end
         private :_absolute_url_to_relative!
 
-
         private
 
         def asset_hostnames

@@ -13,12 +13,12 @@ Metrics/AbcSize:
 # Offense count: 27
 # Configuration parameters: CountComments, ExcludedMethods.
 Metrics/BlockLength:
-  Max: 235
+  Max: 300
 
 # Offense count: 1
 # Configuration parameters: CountComments.
 Metrics/ClassLength:
-  Max: 164
+  Max: 200
 
 # Offense count: 5
 Metrics/CyclomaticComplexity:
@@ -67,8 +67,7 @@ RSpec/MultipleExpectations:
 # Offense count: 1
 # Configuration parameters: Max.
 RSpec/NestedGroups:
-  Exclude:
-    - 'spec/lib/percy/capybara/loaders/sprockets_loader_spec.rb'
+  Enabled: false
 
 # Offense count: 10
 # Configuration parameters: IgnoreSymbolicNames.

@@ -1,7 +1,7 @@
 RSpec.describe Percy::Capybara::Loaders::NativeLoader do
   let(:fake_page) { OpenStruct.new(current_url: 'http://localhost/foo') }
   let(:asset_hostnames) { nil }
-  let(:loader) { described_class.new(page: fake_page, :asset_hostnames => asset_hostnames) }
+  let(:loader) { described_class.new(page: fake_page, asset_hostnames: asset_hostnames) }
 
   describe '#build_resources' do
     it 'returns an empty list' do
@@ -101,7 +101,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
 
     context 'remote urls' do
       context 'given loader is initialised with asset hostnames' do
-        let(:asset_hostnames) { ['bar', 'baz'] }
+        let(:asset_hostnames) { %w(bar baz) }
         context 'and the remote url is included in asset hostnames' do
           context 'with the same port' do
             it 'returns true' do
