@@ -6,6 +6,15 @@ class RackAppWithIframe
   end
 end
 
+# Mock dependency on Poltergeist so we can test an error class.
+module Capybara
+  module Poltergeist
+    class Error < StandardError; end
+    class ClientError < Error; end
+    class FrameNotFound < ClientError; end
+  end
+end
+
 RSpec.describe Percy::Capybara::Loaders::BaseLoader do
   let(:loader) { described_class.new }
 
@@ -35,6 +44,14 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
       expect(last_resource.resource_url).to eq('iframe.html')
       expect(last_resource.mimetype).to eq('text/html')
       expect(last_resource.content).to include('Inside iframe')
+    end
+    it 'skips poltergeist frame not found errors' do
+      visit '/test-iframe.html'
+
+      expect(page).to receive(:within_frame).twice.and_raise(Capybara::Poltergeist::FrameNotFound)
+      loader = described_class.new(page: page)
+      resources = loader.iframes_resources
+      expect(resources.size).to eq(0)
     end
   end
   describe '#build_resources' do
