@@ -82,18 +82,24 @@ module Percy
             iframe_url = iframe_element[:src]
             root_page_host = page.current_host
 
-            page.within_frame(iframe_element) do
-              next unless page.current_host == root_page_host
-              path = URI.parse(iframe_url).path
-              content = page.body
-              sha = Digest::SHA256.hexdigest(content)
-              resources <<
-                Percy::Client::Resource.new(
-                  path,
-                  content: content,
-                  sha: sha,
-                  mimetype: 'text/html',
-                )
+            begin
+              page.within_frame(iframe_element) do
+                next unless page.current_host == root_page_host
+                path = URI.parse(iframe_url).path
+                content = page.body
+                sha = Digest::SHA256.hexdigest(content)
+                resources <<
+                  Percy::Client::Resource.new(
+                    path,
+                    content: content,
+                    sha: sha,
+                    mimetype: 'text/html',
+                  )
+              end
+            rescue StandardError => e
+              # Skip frame not found errors. This library doesn't explicitly depend on Poltergeist,
+              # so we check the string class name.
+              raise e unless e.class.to_s == 'Capybara::Poltergeist::FrameNotFound'
             end
           end
 
