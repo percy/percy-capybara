@@ -8,7 +8,7 @@ module Percy
       # Resource loader that uses the native Capybara browser interface to discover resources.
       # This loader uses JavaScript to discover page resources, so specs must be tagged with
       # "js: true" because the default Rack::Test driver does not support executing JavaScript.
-      class NativeLoader < BaseLoader
+      class NativeLoader < BaseLoader # rubocop:disable ClassLength
         PATH_REGEX = /\A\/[^\\s\"']*/
         DATA_URL_REGEX = /\Adata:/
         LOCAL_HOSTNAMES = [
@@ -21,6 +21,8 @@ module Percy
           super(options)
 
           @asset_hostnames = options[:asset_hostnames] || []
+          @assets_from_stylesheets = options[:include_assets_from_stylesheets] || :all
+          @assets_from_stylesheets = ->(_) { true } if @assets_from_stylesheets == :all
         end
 
         def snapshot_resources
@@ -76,16 +78,19 @@ module Percy
             return css_urls;
           JS
           resource_urls = _evaluate_script(page, script)
+          urls_referred_by_css = []
 
           resource_urls.each do |url|
             next unless _should_include_url?(url)
             response = _fetch_resource_url(url)
+            urls_referred_by_css.concat(_parse_urls_from_css(response.body))
             _absolute_url_to_relative!(url, _current_host_port)
             next unless response
             resources << Percy::Client::Resource.new(
               url, mimetype: 'text/css', content: response.body,
             )
           end
+          @urls_referred_by_css = urls_referred_by_css
           resources
         end
         private :_get_css_resources
@@ -111,30 +116,7 @@ module Percy
             end
           end
 
-          # Find all CSS-loaded images which set a background-image.
-          script = <<-JS
-            var raw_image_urls = [];
-
-            var tags = document.getElementsByTagName('*');
-            var el;
-            var rawValue;
-
-            for (var i = 0; i < tags.length; i++) {
-              el = tags[i];
-              if (el.currentStyle) {
-                rawValue = el.currentStyle['backgroundImage'];
-              } else if (window.getComputedStyle) {
-                rawValue = window.getComputedStyle(el).getPropertyValue('background-image');
-              }
-              if (!rawValue || rawValue === "none") {
-                continue;
-              } else {
-                raw_image_urls.push(rawValue);
-              }
-            }
-            return raw_image_urls;
-          JS
-          raw_image_urls = _evaluate_script(page, script)
+          raw_image_urls = _evaluate_script(page, _find_all_css_loaded_background_image_js)
           raw_image_urls.each do |raw_image_url|
             temp_urls = raw_image_url.scan(/url\(["']?(.*?)["']?\)/)
             # background-image can accept multiple url()s, so temp_urls is an array of URLs.
@@ -142,6 +124,10 @@ module Percy
               url = temp_url[0]
               image_urls << url
             end
+          end
+
+          if @assets_from_stylesheets && @assets_from_stylesheets != :none
+            image_urls.merge(@urls_referred_by_css.select { |path| @assets_from_stylesheets[path] })
           end
 
           image_urls.each do |image_url|
@@ -176,6 +162,62 @@ module Percy
           resources
         end
         private :_get_image_resources
+
+        # @private
+        def _find_all_css_loaded_background_image_js
+          <<-JS
+            var raw_image_urls = [];
+
+            var tags = document.getElementsByTagName('*');
+            var el;
+            var rawValue;
+
+            for (var i = 0; i < tags.length; i++) {
+              el = tags[i];
+              if (el.currentStyle) {
+                rawValue = el.currentStyle['backgroundImage'];
+              } else if (window.getComputedStyle) {
+                rawValue = window.getComputedStyle(el).getPropertyValue('background-image');
+              }
+              if (!rawValue || rawValue === "none") {
+                continue;
+              } else {
+                raw_image_urls.push(rawValue);
+              }
+            }
+            return raw_image_urls;
+          JS
+        end
+
+        # @private
+        def _parse_urls_from_css(css_content)
+          css_content.scan(/url\(([^\)]+)\)/)
+            .map { |i| _remove_quotes(i.first) }
+            .select { |path| _should_include_url?(path) }
+            .map { |path| _remove_hash_from_url(path) }
+        end
+
+        # @private
+        def _remove_hash_from_url(string)
+          if /^(?<url_base>.+)?\#[^#]+$/ =~ string
+            if url_base.end_with?('?')
+              url_base[0...-1]
+            else
+              url_base
+            end
+          else
+            string
+          end
+        end
+
+        # @private
+        def _remove_quotes(string)
+          if string.length >= 2 && (string[0] == string[-1]) && ['"', "'"].include?(string[0])
+            string[1...-1]
+          else
+            string
+          end
+        end
 
         # @private
         def _fetch_resource_url(url)
