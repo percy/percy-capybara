@@ -1,3 +1,5 @@
+require 'percy/capybara'
+
 module Percy
   module Capybara
     module Loaders
