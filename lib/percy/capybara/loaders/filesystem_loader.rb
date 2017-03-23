@@ -17,7 +17,7 @@ module Percy
         def initialize(options = {})
           # @assets_dir should point to a _compiled_ static assets directory, not source assets.
           @assets_dir = options[:assets_dir]
-          @base_url = options[:base_url] || ''
+          @base_url = options[:base_url] || '/'
 
           raise ArgumentError, 'assets_dir is required' if @assets_dir.nil? || @assets_dir == ''
           unless Pathname.new(@assets_dir).absolute?
@@ -45,7 +45,7 @@ module Percy
             next if File.size(path) > MAX_FILESIZE_BYTES
 
             # Replace the assets_dir with the base_url to generate the resource_url
-            resource_url = path.sub(@assets_dir, @base_url)
+            resource_url = @base_url.chomp('/') + path.sub(@assets_dir, '')
 
             sha = Digest::SHA256.hexdigest(File.read(path))
             resources << Percy::Client::Resource.new(resource_url, sha: sha, path: path)
