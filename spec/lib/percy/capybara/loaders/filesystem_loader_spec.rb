@@ -7,18 +7,21 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
   describe 'initialize' do
     context 'assets_dir not specified' do
       let(:assets_dir) { nil }
+
       it 'raises an error' do
         expect { loader }.to raise_error(ArgumentError)
       end
     end
     context 'assets_dir is not an absolute path' do
       let(:assets_dir) { '../../client/testdata' }
+
       it 'raises an error' do
         expect { loader }.to raise_error(ArgumentError)
       end
     end
     context 'assets_dir doesn\'t exist' do
       let(:assets_dir) { File.expand_path('../../client/testdata-doesnt-exist', __FILE__) }
+
       it 'raises an error' do
         expect { loader }.to raise_error(ArgumentError)
       end
@@ -130,6 +133,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
     end
     context 'assets_dir with only skippable resources' do
       let(:assets_dir) { File.expand_path('../../client/testdata/assets/images', __FILE__) }
+
       it 'returns an empty list' do
         expect(loader.build_resources).to eq([])
       end

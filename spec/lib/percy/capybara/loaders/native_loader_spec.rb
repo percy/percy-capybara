@@ -64,6 +64,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
   end
   describe 'nonlocal.me', type: :feature, js: true do
     let(:orig_app_host) { Capybara.app_host }
+
     before do
       Capybara.app_host = Capybara.app_host.gsub('http://localhost:', 'http://localtest.me:')
     end
@@ -113,6 +114,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
 
     context 'when loader is initialised with asset hostnames' do
       let(:asset_hostnames) { ['dev.local'] }
+
       context 'with the same port' do
         it 'returns in accordance with asset_hostnames' do
           expect(loader._should_include_url?('http://dev.local/')).to eq(true)
@@ -136,6 +138,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
     end
     context 'for nonlocal hosts' do
       let(:fake_page) { OpenStruct.new(current_url: 'http://foo:123/') }
+
       it 'returns true for the same host port' do
         expect(loader._should_include_url?('http://foo:123/')).to eq(true)
         expect(loader._should_include_url?('http://foo:123/bar')).to eq(true)
