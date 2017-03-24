@@ -47,6 +47,7 @@ RSpec.describe Percy::Capybara::Client do
   end
   describe '#rescue_connection_failures' do
     let(:capybara_client) { Percy::Capybara::Client.new(enabled: true) }
+
     it 'returns block result on success' do
       result = capybara_client.rescue_connection_failures do
         true

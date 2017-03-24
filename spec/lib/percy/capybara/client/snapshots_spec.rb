@@ -42,6 +42,7 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
           },
         }
       end
+
       before do
         setup_sprockets(capybara_client)
 

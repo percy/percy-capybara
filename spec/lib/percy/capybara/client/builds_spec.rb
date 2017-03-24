@@ -10,6 +10,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
 
     context 'percy is not enabled' do
       let(:enabled) { false }
+
       it 'returns nil if not enabled' do
         expect(capybara_client.initialize_build).to be_nil
       end
