@@ -110,6 +110,23 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
         ]
         expect(actual_urls).to match_array(expected_urls)
       end
+      it 'works with different base_url configs' do
+        loader = described_class.new(base_url: '/url-prefix/', assets_dir: assets_dir)
+        expected_urls = loader.build_resources.collect(&:resource_url)
+        expect(expected_urls).to include('/url-prefix/css/font.css')
+
+        loader = described_class.new(base_url: '/url-prefix', assets_dir: assets_dir)
+        expected_urls = loader.build_resources.collect(&:resource_url)
+        expect(expected_urls).to include('/url-prefix/css/font.css')
+
+        loader = described_class.new(base_url: '/', assets_dir: assets_dir)
+        expected_urls = loader.build_resources.collect(&:resource_url)
+        expect(expected_urls).to include('/css/font.css')
+
+        loader = described_class.new(base_url: '', assets_dir: assets_dir)
+        expected_urls = loader.build_resources.collect(&:resource_url)
+        expect(expected_urls).to include('/css/font.css')
+      end
     end
     context 'assets_dir with only skippable resources' do
       let(:assets_dir) { File.expand_path('../../client/testdata/assets/images', __FILE__) }
