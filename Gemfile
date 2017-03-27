@@ -9,6 +9,6 @@ gem 'guard-rspec', require: false
 # gem 'percy-client', path: '~/src/percy-client'
 
 group :test do
-  gem 'rubocop'
+  gem 'rubocop', '~> 0.48.0'
   gem 'rubocop-rspec'
 end

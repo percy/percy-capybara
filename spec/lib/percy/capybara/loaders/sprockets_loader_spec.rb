@@ -24,7 +24,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
   let(:sprockets_options) do
     options = double('options')
     # Set specific files we want to compile. In normal use, this would be all asset files.
-    precompile_list = [/(?:\/|\\|\A)(base|digested)\.(css|js)$|\.map|\.png/]
+    precompile_list = [%r{(?:/|\\|\A)(base|digested)\.(css|js)$|\.map|\.png}]
     allow(options).to receive(:precompile).and_return(precompile_list)
     allow(options).to receive(:digest).and_return(digest_enabled)
     options
