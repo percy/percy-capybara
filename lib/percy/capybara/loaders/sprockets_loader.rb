@@ -93,16 +93,20 @@ module Percy
         end
 
         def _asset_logical_paths
-          # Re-implement the same technique that "rake assets:precompile" uses to generate the
-          # list of asset paths to include in compiled assets. https://goo.gl/sy2R4z
-          # We can't just use environment.each_logical_path without any filters, because then
-          # we will attempt to compile assets before they're rendered (such as _mixins.css).
-          precompile_list = sprockets_options.precompile
-          logical_paths = sprockets_environment.each_logical_path(*precompile_list).to_a
-          logical_paths += precompile_list.flatten.select do |filename|
-            Pathname.new(filename).absolute? if filename.is_a?(String)
+          if _rails && _rails.application.respond_to?(:precompiled_assets)
+            _rails.application.precompiled_assets
+          else
+            # Re-implement the same technique that "rake assets:precompile" uses to generate the
+            # list of asset paths to include in compiled assets. https://goo.gl/sy2R4z
+            # We can't just use environment.each_logical_path without any filters, because then
+            # we will attempt to compile assets before they're rendered (such as _mixins.css).
+            precompile_list = sprockets_options.precompile
+            logical_paths = sprockets_environment.each_logical_path(*precompile_list).to_a
+            logical_paths += precompile_list.flatten.select do |filename|
+              Pathname.new(filename).absolute? if filename.is_a?(String)
+            end
+            logical_paths.uniq
           end
-          logical_paths.uniq
         end
       end
     end
