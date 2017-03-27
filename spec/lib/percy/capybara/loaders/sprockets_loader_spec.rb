@@ -24,7 +24,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
   let(:sprockets_options) do
     options = double('options')
     # Set specific files we want to compile. In normal use, this would be all asset files.
-    precompile_list = [/(?:\/|\\|\A)(base|digested)\.(css|js)$|\.map|\.png/]
+    precompile_list = [%r{(?:/|\\|\A)(base|digested)\.(css|js)$|\.map|\.png}]
     allow(options).to receive(:precompile).and_return(precompile_list)
     allow(options).to receive(:digest).and_return(digest_enabled)
     options
@@ -77,6 +77,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
         # Pretend like we're in a Rails app right now, all we care about is Rails.public_path.
         rails_double = double('Rails')
         # Pretend like the entire testdata directory is the public/ folder.
+        expect(rails_double).to receive(:application).and_return(nil)
         expect(rails_double).to receive(:public_path).and_return(environment.root + '/public')
         expect(loader).to receive(:_rails).at_least(:once).and_return(rails_double)
       end
