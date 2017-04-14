@@ -19,7 +19,7 @@ module Percy
         # influenced by any HTTP middleware/restrictions. This helps us avoid causing lots of
         # problems for people using gems like VCR/WebMock. We also disable certificate checking
         # because, as odd as that is, it's the default state for Selenium Firefox and others.
-        output = `curl --insecure -v -o #{temppath} "#{url.shellescape}" 2>&1`
+        output = `curl --compressed --insecure -v -o #{temppath} "#{url.shellescape}" 2>&1`
         content_type = output.match(/< Content-Type:(.*)/i)
         content_type = content_type[1].strip if content_type
 
