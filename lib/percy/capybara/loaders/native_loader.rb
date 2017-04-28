@@ -31,7 +31,7 @@ module Percy
           resources += _get_css_resources
           resources += _get_image_resources
           resources += iframes_resources
-          resources
+          resources.uniq
         end
 
         def build_resources

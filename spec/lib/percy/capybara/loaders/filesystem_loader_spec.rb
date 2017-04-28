@@ -77,6 +77,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
           '/test-iframe.html',
           '/test-images.html',
           '/test-localtest-me-images.html',
+          '/test-mixed-relative-and-absolute.html',
         ]
         expect(actual_paths).to match_array(expected_paths)
 
@@ -110,6 +111,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
           '/url-prefix/test-iframe.html',
           '/url-prefix/test-images.html',
           '/url-prefix/test-localtest-me-images.html',
+          '/url-prefix/test-mixed-relative-and-absolute.html',
         ]
         expect(actual_urls).to match_array(expected_urls)
       end

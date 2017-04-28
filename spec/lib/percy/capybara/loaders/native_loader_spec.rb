@@ -84,6 +84,20 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
       expect(loader.snapshot_resources.collect(&:is_root)).to eq([true, nil])
     end
   end
+  describe 'mixed relative and absolute paths', type: :feature, js: true do
+    it 'returns unique list of resources' do
+      visit '/test-mixed-relative-and-absolute.html'
+      loader = described_class.new(page: page)
+      resource_urls = loader.snapshot_resources.collect(&:resource_url)
+
+      expect(resource_urls).to eq(
+        [
+          '/test-mixed-relative-and-absolute.html',
+          '/images/bg-relative.png',
+        ],
+      )
+    end
+  end
   describe '#_should_include_url?' do
     it 'returns true for valid, local URLs' do
       expect(loader._should_include_url?('http://localhost/')).to eq(true)
