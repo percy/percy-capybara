@@ -3,6 +3,7 @@ require 'percy/capybara/client/snapshots'
 require 'percy/capybara/loaders/filesystem_loader'
 require 'percy/capybara/loaders/native_loader'
 require 'percy/capybara/loaders/sprockets_loader'
+require 'percy/capybara/loaders/ember_cli_rails_loader'
 
 module Percy
   module Capybara
@@ -83,6 +84,14 @@ module Percy
 
       def initialize_loader(options = {})
         merged_options = loader_options.merge(options)
+
+        is_sprockets = sprockets_environment && sprockets_options
+
+        if is_sprockets
+          merged_options[:sprockets_environment] = sprockets_environment
+          merged_options[:sprockets_options]     = sprockets_options
+        end
+
         if loader
           case loader
           when :filesystem
@@ -91,14 +100,17 @@ module Percy
           when :native
             Percy.logger.debug { 'Using native_loader to discover assets (slow).' }
             Percy::Capybara::Loaders::NativeLoader.new(merged_options)
+          when :ember_cli_rails
+            Percy.logger.debug { 'Using ember_cli_rails_loader to discover assets.' }
+
+            mounted_apps = merged_options.delete(:mounted_apps)
+            Percy::Capybara::Loaders::EmberCliRailsLoader.new(mounted_apps, merged_options)
           else
             Percy.logger.debug { 'Using a custom loader to discover assets.' }
             loader.new(merged_options)
           end
-        elsif sprockets_environment && sprockets_options
+        elsif is_sprockets
           Percy.logger.debug { 'Using sprockets_loader to discover assets.' }
-          merged_options[:sprockets_environment] = sprockets_environment
-          merged_options[:sprockets_options] = sprockets_options
           Percy::Capybara::Loaders::SprocketsLoader.new(merged_options)
         else
           unless @warned_about_native_loader
