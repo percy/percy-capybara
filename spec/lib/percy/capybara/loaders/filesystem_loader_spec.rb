@@ -1,6 +1,6 @@
 RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
   let(:fake_page) { OpenStruct.new(current_url: 'http://localhost/foo') }
-  let(:assets_dir) { File.expand_path('../../client/testdata', __FILE__) }
+  let(:assets_dir) { File.expand_path('../../client/test_data', __FILE__) }
   let(:base_url) { '/url-prefix/' }
   let(:loader) { described_class.new(base_url: base_url, assets_dir: assets_dir, page: fake_page) }
 
@@ -13,14 +13,14 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
       end
     end
     context 'assets_dir is not an absolute path' do
-      let(:assets_dir) { '../../client/testdata' }
+      let(:assets_dir) { '../../client/test_data' }
 
       it 'raises an error' do
         expect { loader }.to raise_error(ArgumentError)
       end
     end
-    context 'assets_dir doesn\'t exist' do
-      let(:assets_dir) { File.expand_path('../../client/testdata-doesnt-exist', __FILE__) }
+    context "assets_dir doesn't exist" do
+      let(:assets_dir) { File.expand_path('../../client/test-data-doesnt-exist', __FILE__) }
 
       it 'raises an error' do
         expect { loader }.to raise_error(ArgumentError)
@@ -132,7 +132,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
       end
     end
     context 'assets_dir with only skippable resources' do
-      let(:assets_dir) { File.expand_path('../../client/testdata/assets/images', __FILE__) }
+      let(:assets_dir) { File.expand_path('../../client/test_data/assets/images', __FILE__) }
 
       it 'returns an empty list' do
         expect(loader.build_resources).to eq([])

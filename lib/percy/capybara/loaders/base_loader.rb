@@ -34,6 +34,13 @@ module Percy
           "(/[^\\s\"']*)?",
         )
 
+        SKIP_RESOURCE_EXTENSIONS = [
+          '.map', # Ignore source maps.
+          '.gz', # Ignore gzipped files.
+        ].freeze
+
+        MAX_FILESIZE_BYTES = 15 * 1024**2 # 15 MB.
+
         attr_reader :page
 
         # @param [Capybara::Session] page The Capybara page.
@@ -108,6 +115,34 @@ module Percy
           resources
         rescue ::Capybara::NotSupportedByDriverError
           []
+        end
+
+        def _resources_from_dir(root_dir, base_url: '/')
+          resources = []
+
+          Find.find(root_dir).each do |path|
+            # Skip directories.
+            next unless FileTest.file?(path)
+            # Skip certain extensions.
+            next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(path))
+            # Skip large files, these are hopefully downloads and not used in page rendering.
+            next if File.size(path) > MAX_FILESIZE_BYTES
+
+            # Replace the assets_dir with the base_url to generate the resource_url
+            resource_url = _uri_join(base_url, path.sub(root_dir.to_s, ''))
+
+            sha = Digest::SHA256.hexdigest(File.read(path))
+
+            resources << Percy::Client::Resource.new(resource_url, sha: sha, path: path)
+          end
+
+          resources
+        end
+
+        def _uri_join(*paths)
+          # We must swap File::SEPARATOR for '/' here because on Windows File.join
+          # will use backslashes and this is a URL.
+          File.join(paths).gsub(File::SEPARATOR, '/')
         end
       end
     end

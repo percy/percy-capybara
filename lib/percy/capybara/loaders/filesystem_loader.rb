@@ -8,12 +8,6 @@ module Percy
     module Loaders
       # Resource loader that looks for resources in the specified folder.
       class FilesystemLoader < BaseLoader
-        SKIP_RESOURCE_EXTENSIONS = [
-          '.map', # Ignore source maps.
-          '.gz', # Ignore gzipped files.
-        ].freeze
-        MAX_FILESIZE_BYTES = 15 * 1024**2 # 15 MB.
-
         def initialize(options = {})
           # @assets_dir should point to a _compiled_ static assets directory, not source assets.
           @assets_dir = options[:assets_dir]
@@ -35,22 +29,7 @@ module Percy
         end
 
         def build_resources
-          resources = []
-          Find.find(@assets_dir).each do |path|
-            # Skip directories.
-            next unless FileTest.file?(path)
-            # Skip certain extensions.
-            next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(path))
-            # Skip large files, these are hopefully downloads and not used in page rendering.
-            next if File.size(path) > MAX_FILESIZE_BYTES
-
-            # Replace the assets_dir with the base_url to generate the resource_url
-            resource_url = @base_url.chomp('/') + path.sub(@assets_dir, '')
-
-            sha = Digest::SHA256.hexdigest(File.read(path))
-            resources << Percy::Client::Resource.new(resource_url, sha: sha, path: path)
-          end
-          resources
+          _resources_from_dir(@assets_dir, base_url: @base_url)
         end
       end
     end

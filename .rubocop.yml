@@ -58,6 +58,9 @@ Style/TrailingCommaInLiteral:
 RSpec/MessageSpies:
   EnforcedStyle: receive
 
+RSpec/ExampleLength:
+  Enabled: false
+
 Style/FileName:
   Exclude:
     - 'Gemfile'
