@@ -118,10 +118,10 @@ module Percy
           []
         end
 
-        def _resources_from_path(root_path, base_url: '/')
+        def _resources_from_dir(root_dir, base_url: '/')
           resources = []
 
-          Find.find(root_path).each do |path|
+          Find.find(root_dir).each do |path|
             # Skip directories.
             next unless FileTest.file?(path)
             # Skip certain extensions.
@@ -130,7 +130,7 @@ module Percy
             next if File.size(path) > MAX_FILESIZE_BYTES
 
             # Replace the assets_dir with the base_url to generate the resource_url
-            resource_url = _uri_join(base_url, path.sub(root_path.to_s, ''))
+            resource_url = _uri_join(base_url, path.sub(root_dir.to_s, ''))
 
             sha = Digest::SHA256.hexdigest(File.read(path))
 

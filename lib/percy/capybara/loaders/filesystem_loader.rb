@@ -29,7 +29,7 @@ module Percy
         end
 
         def build_resources
-          _resources_from_path(@assets_dir, base_url: @base_url)
+          _resources_from_dir(@assets_dir, base_url: @base_url)
         end
       end
     end

@@ -31,7 +31,7 @@ module Percy
             # e.g. /Users/djones/Code/rails-ember-app/tmp/ember-cli/apps/frontend/assets
             ember_assets_path = File.join(dist_path, EMBER_ASSETS_DIR)
 
-            resources += _resources_from_path(ember_assets_path, base_url: base_assets_url)
+            resources += _resources_from_dir(ember_assets_path, base_url: base_assets_url)
           end
 
           resources += super # adds sprockets resources from Rails
