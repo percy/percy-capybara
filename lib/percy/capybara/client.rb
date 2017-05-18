@@ -102,7 +102,6 @@ module Percy
             Percy::Capybara::Loaders::NativeLoader.new(merged_options)
           when :ember_cli_rails
             Percy.logger.debug { 'Using ember_cli_rails_loader to discover assets.' }
-
             mounted_apps = merged_options.delete(:mounted_apps)
             Percy::Capybara::Loaders::EmberCliRailsLoader.new(mounted_apps, merged_options)
           else

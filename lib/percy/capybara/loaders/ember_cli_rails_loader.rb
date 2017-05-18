@@ -11,6 +11,7 @@ module Percy
         def initialize(mounted_apps, options = {})
           super(options)
 
+          raise 'mounted_apps is required' unless mounted_apps
           @mounted_apps = mounted_apps
         end
 
