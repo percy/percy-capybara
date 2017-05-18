@@ -1,5 +1,4 @@
 require 'percy/capybara'
-require 'pry'
 
 module Percy
   module Capybara
