@@ -1,4 +1,5 @@
 require 'percy/capybara'
+require 'pry'
 
 module Percy
   module Capybara
@@ -129,7 +130,10 @@ module Percy
             next if File.size(path) > MAX_FILESIZE_BYTES
 
             # Replace the assets_dir with the base_url to generate the resource_url
-            resource_url = File.join(base_url, path.sub(root_path.to_s, ''))
+            # We must swap File::SEPARATOR for '/' here because on Windows File.join
+            # will use backslashes and this is URL.
+            resource_url = File.join(base_url, path.sub(root_path.to_s, ''))\
+                            .gsub(File::SEPARATOR, '/')
 
             sha = Digest::SHA256.hexdigest(File.read(path))
 
