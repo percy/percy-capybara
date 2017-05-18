@@ -1,6 +1,6 @@
 RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
   let(:assets_dir) { File.expand_path('../../client/ember_test_data', __FILE__) }
-  let(:mounted_apps) { { frontend: '' } }
+  let(:mounted_apps) { {frontend: ''} }
   let(:digest_enabled) { false }
 
   let(:environment) do
@@ -11,9 +11,8 @@ RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
 
   let(:loader) do
     described_class.new(
-      mounted_apps,
-      { sprockets_environment: environment,
-        sprockets_options: sprockets_options })
+      mounted_apps, sprockets_environment: environment, sprockets_options: sprockets_options,
+    )
   end
 
   let(:sprockets_options) do
@@ -45,7 +44,7 @@ RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
   describe '#build_resources' do
     shared_examples 'a mounted ember app' do |mounted_apps|
       ember_app  = mounted_apps.keys.first
-      mount_path = mounted_apps.values.first 
+      mount_path = mounted_apps.values.first
 
       let(:ember_app) { ember_app }
       let(:mount_path) { mounted_apps.values.first }
@@ -58,8 +57,7 @@ RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
           allow(loader).to receive(:_dist_path_for_app).and_return(dist_dir)
 
           expected_urls = loader.build_resources.collect(&:resource_url)
-          expected_url  = loader._uri_join(mount_path,
-                                           described_class::EMBER_ASSETS_DIR,
+          expected_url  = loader._uri_join(mount_path, described_class::EMBER_ASSETS_DIR,
                                            "percy-#{ember_app}.svg")
 
           expect(expected_urls).to include(expected_url)
@@ -67,9 +65,9 @@ RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
       end
     end
 
-    it_behaves_like "a mounted ember app", { frontend: '/' }
-    it_behaves_like "a mounted ember app", { frontend: '' }
-    it_behaves_like "a mounted ember app", { admin: '/admin' }
-    it_behaves_like "a mounted ember app", { admin: '/admin/' }
+    it_behaves_like 'a mounted ember app', {frontend: '/'}
+    it_behaves_like 'a mounted ember app', {frontend: ''}
+    it_behaves_like 'a mounted ember app', {admin: '/admin'}
+    it_behaves_like 'a mounted ember app', {admin: '/admin/'}
   end
 end
