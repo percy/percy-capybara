@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'percy/capybara/loaders/sprockets_loader'
 
 module Percy
@@ -8,7 +6,7 @@ module Percy
       class EmberCliRailsLoader < SprocketsLoader
         attr_reader :mounted_apps
 
-        EMBER_ASSETS_DIR = 'assets'
+        EMBER_ASSETS_DIR = 'assets'.freeze
 
         def initialize(mounted_apps, options = {})
           super(options)
