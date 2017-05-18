@@ -51,9 +51,9 @@ RSpec.configure do |config|
   # Cover all debug messages by outputting them in this gem's tests.
   Percy.config.debug = true
 
-  # Start a temp webserver that serves the testdata directory.
+  # Start a temp webserver that serves the test_data directory.
   # You can test this server manually by running:
-  # ruby -run -e httpd spec/lib/percy/capybara/client/testdata/ -p 9090
+  # ruby -run -e httpd spec/lib/percy/capybara/client/test_data/ -p 9090
   config.before(:all, type: :feature) do
     port = random_open_port
     Capybara.app = nil
@@ -61,7 +61,7 @@ RSpec.configure do |config|
     Capybara.run_server = false
 
     # Note: using this form of popen to keep stdout and stderr silent and captured.
-    dir = File.expand_path('../lib/percy/capybara/client/testdata/', __FILE__)
+    dir = File.expand_path('../lib/percy/capybara/client/test_data/', __FILE__)
     @process = IO.popen(
       [
         'ruby', '-run', '-e', 'httpd', dir, '-p', port.to_s, err: [:child, :out],

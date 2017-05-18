@@ -35,7 +35,7 @@ module TestHelpers
   end
 
   def setup_sprockets(capybara_client)
-    root = File.expand_path('../../lib/percy/capybara/client/testdata', __FILE__)
+    root = File.expand_path('../../lib/percy/capybara/client/test_data', __FILE__)
     environment = Sprockets::Environment.new(root)
     environment.append_path '.'
 

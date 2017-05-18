@@ -1,4 +1,4 @@
-IFRAME_PATH = File.expand_path('../../client/testdata/test-iframe.html', __FILE__)
+IFRAME_PATH = File.expand_path('../../client/test_data/test-iframe.html', __FILE__)
 
 class RackAppWithIframe
   def self.call(_env)
@@ -102,5 +102,9 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
         expect(loader.iframes_resources).to eq([])
       end
     end
+  end
+
+  describe '#_uri_join' do
+    pending
   end
 end

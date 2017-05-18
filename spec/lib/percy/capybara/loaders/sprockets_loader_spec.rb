@@ -15,7 +15,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
     )
   end
   let(:environment) do
-    root = File.expand_path('../../client/testdata', __FILE__)
+    root = File.expand_path('../../client/test_data', __FILE__)
     environment = Sprockets::Environment.new(root)
     environment.append_path '.'
     environment
@@ -76,7 +76,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
       before do
         # Pretend like we're in a Rails app right now, all we care about is Rails.public_path.
         rails_double = double('Rails')
-        # Pretend like the entire testdata directory is the public/ folder.
+        # Pretend like the entire test_data directory is the public/ folder.
         expect(rails_double).to receive(:application).and_return(nil)
         expect(rails_double).to receive(:public_path).and_return(environment.root + '/public')
         expect(loader).to receive(:_rails).at_least(:once).and_return(rails_double)

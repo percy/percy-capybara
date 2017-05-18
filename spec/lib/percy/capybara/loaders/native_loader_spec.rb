@@ -205,7 +205,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
       # The order of these is just for convenience, they match the order in test-images.html.
 
       resource = find_resource(resources, '/images/img-relative.png')
-      path = File.expand_path('../../client/testdata/images/img-relative.png', __FILE__)
+      path = File.expand_path('../../client/test_data/images/img-relative.png', __FILE__)
       content = File.read(path)
       expect(resource.mimetype).to eq('image/png')
       expected_sha = Digest::SHA256.hexdigest(content)
@@ -213,7 +213,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
       expect(resource.sha).to eq(expected_sha)
 
       resource = find_resource(resources, '/images/img-relative-to-root.png')
-      path = File.expand_path('../../client/testdata/images/img-relative-to-root.png', __FILE__)
+      path = File.expand_path('../../client/test_data/images/img-relative-to-root.png', __FILE__)
       content = File.read(path)
       expect(resource.mimetype).to eq('image/png')
       expected_sha = Digest::SHA256.hexdigest(content)
@@ -221,7 +221,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
       expect(resource.sha).to eq(expected_sha)
 
       resource = find_resource(resources, '/images/percy.svg')
-      path = File.expand_path('../../client/testdata/images/percy.svg', __FILE__)
+      path = File.expand_path('../../client/test_data/images/percy.svg', __FILE__)
       content = File.read(path)
       # In Ruby 1.9.3 the SVG mimetype is not registered so our mini ruby webserver doesn't serve
       # the correct content type. Allow either to work here so we can test older Rubies fully.
@@ -231,7 +231,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
       expect(resource.sha).to eq(expected_sha)
 
       resource = find_resource(resources, '/images/bg-relative.png')
-      path = File.expand_path('../../client/testdata/images/bg-relative.png', __FILE__)
+      path = File.expand_path('../../client/test_data/images/bg-relative.png', __FILE__)
       content = File.read(path)
       expect(resource.mimetype).to eq('image/png')
       expected_sha = Digest::SHA256.hexdigest(content)
@@ -239,7 +239,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
       expect(resource.sha).to eq(expected_sha)
 
       resource = find_resource(resources, '/images/bg-relative-to-root.png')
-      path = File.expand_path('../../client/testdata/images/bg-relative-to-root.png', __FILE__)
+      path = File.expand_path('../../client/test_data/images/bg-relative-to-root.png', __FILE__)
       content = File.read(path)
       expect(resource.mimetype).to eq('image/png')
       expected_sha = Digest::SHA256.hexdigest(content)
@@ -247,7 +247,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
       expect(resource.sha).to eq(expected_sha)
 
       resource = find_resource(resources, '/images/bg-stacked.png')
-      path = File.expand_path('../../client/testdata/images/bg-stacked.png', __FILE__)
+      path = File.expand_path('../../client/test_data/images/bg-stacked.png', __FILE__)
       content = File.read(path)
       expect(resource.mimetype).to eq('image/png')
       expected_sha = Digest::SHA256.hexdigest(content)
@@ -255,7 +255,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
       expect(resource.sha).to eq(expected_sha)
 
       resource = find_resource(resources, '/images/srcset-base.png')
-      path = File.expand_path('../../client/testdata/images/srcset-base.png', __FILE__)
+      path = File.expand_path('../../client/test_data/images/srcset-base.png', __FILE__)
       content = File.read(path)
       expect(resource.mimetype).to eq('image/png')
       expected_sha = Digest::SHA256.hexdigest(content)
@@ -263,7 +263,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
       expect(resource.sha).to eq(expected_sha)
 
       resource = find_resource(resources, '/images/srcset-first.png')
-      path = File.expand_path('../../client/testdata/images/srcset-first.png', __FILE__)
+      path = File.expand_path('../../client/test_data/images/srcset-first.png', __FILE__)
       content = File.read(path)
       expect(resource.mimetype).to eq('image/png')
       expected_sha = Digest::SHA256.hexdigest(content)
@@ -271,7 +271,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
       expect(resource.sha).to eq(expected_sha)
 
       resource = find_resource(resources, '/images/srcset-second.png')
-      path = File.expand_path('../../client/testdata/images/srcset-second.png', __FILE__)
+      path = File.expand_path('../../client/test_data/images/srcset-second.png', __FILE__)
       content = File.read(path)
       expect(resource.mimetype).to eq('image/png')
       expected_sha = Digest::SHA256.hexdigest(content)
