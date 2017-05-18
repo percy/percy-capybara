@@ -105,6 +105,8 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
   end
 
   describe '#_uri_join' do
-    pending
+      it 'joins files into a uri' do
+        expect(described_class.new.send(:_uri_join, 'foo/', '/bar', 'baz')).to eq('foo/bar/baz')
+      end
   end
 end
