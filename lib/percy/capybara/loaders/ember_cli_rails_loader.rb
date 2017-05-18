@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'percy/capybara/loaders/sprockets_loader'
 
 module Percy
