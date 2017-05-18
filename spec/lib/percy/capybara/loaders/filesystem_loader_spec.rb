@@ -19,7 +19,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
         expect { loader }.to raise_error(ArgumentError)
       end
     end
-    context 'assets_dir doesn\'t exist' do
+    context "assets_dir doesn't exist" do
       let(:assets_dir) { File.expand_path('../../client/testdata-doesnt-exist', __FILE__) }
 
       it 'raises an error' do
