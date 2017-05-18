@@ -142,7 +142,7 @@ module Percy
 
         def _uri_join(*paths)
           # We must swap File::SEPARATOR for '/' here because on Windows File.join
-          # will use backslashes and this is URL.
+          # will use backslashes and this is a URL.
           File.join(paths).gsub(File::SEPARATOR, '/')
         end
       end

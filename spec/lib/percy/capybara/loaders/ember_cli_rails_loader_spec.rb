@@ -1,7 +1,5 @@
 RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
-  let(:fake_page) { OpenStruct.new(current_url: 'http://localhost/foo') }
   let(:assets_dir) { File.expand_path('../../client/ember_test_data', __FILE__) }
-  let(:base_url) { '/url-prefix/' }
   let(:mounted_apps) { { frontend: '' } }
   let(:digest_enabled) { false }
 
@@ -14,14 +12,14 @@ RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
   let(:loader) do
     described_class.new(
       mounted_apps,
-      { page: fake_page,
-        sprockets_environment: environment,
+      { sprockets_environment: environment,
         sprockets_options: sprockets_options })
   end
 
   let(:sprockets_options) do
     options = double('options')
     # Set specific files we want to compile. In normal use, this would be all asset files.
+    # For this test we just use .svg files
     precompile_list = [%r{(?:/|\\|\A)\.svg}]
     allow(options).to receive(:precompile).and_return(precompile_list)
     allow(options).to receive(:digest).and_return(digest_enabled)
@@ -46,7 +44,7 @@ RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
 
   describe '#build_resources' do
     shared_examples 'a mounted ember app' do |mounted_apps|
-      ember_app = mounted_apps.keys.first
+      ember_app  = mounted_apps.keys.first
       mount_path = mounted_apps.values.first 
 
       let(:ember_app) { ember_app }
