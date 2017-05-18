@@ -11,7 +11,9 @@ RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
 
   let(:loader) do
     described_class.new(
-      mounted_apps, sprockets_environment: environment, sprockets_options: sprockets_options,
+      mounted_apps,
+      sprockets_environment: environment,
+      sprockets_options: sprockets_options,
     )
   end
 
