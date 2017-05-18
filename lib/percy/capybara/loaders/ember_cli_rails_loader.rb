@@ -25,7 +25,7 @@ module Percy
 
             # full path on disk to the assets for this ember app
             # e.g. /Users/djones/Code/rails-ember-app/tmp/ember-cli/apps/frontend
-            dist_path = _ember_cli.apps[app_name].dist_path
+            dist_path = _dist_path_for_app(app_name)
 
             # full path to the directory on disk where ember stores assets for this ember app
             # e.g. /Users/djones/Code/rails-ember-app/tmp/ember-cli/apps/frontend/assets
@@ -35,6 +35,10 @@ module Percy
           end
 
           resources += super # adds sprockets resources from Rails
+        end
+
+        def _dist_path_for_app(app_name)
+          _ember_cli.apps[app_name].dist_path
         end
 
         def _ember_cli
