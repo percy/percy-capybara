@@ -44,8 +44,10 @@ module Percy
         attr_reader :page
 
         # @param [Capybara::Session] page The Capybara page.
+        # @param [bool] include_iframes Include iframes in the snapshot
         def initialize(options = {})
           @page = options[:page]
+          @include_iframes = options[:include_iframes] || false
         end
 
         def build_resources
@@ -85,17 +87,18 @@ module Percy
         # - Doesn't handle multiple iframes with the same URL (`src` attribute)
         # @private
         def iframes_resources
+          return [] unless @include_iframes
+
           resources = []
 
           page.all(:css, 'iframe').each do |iframe_element|
             iframe_url = iframe_element[:src]
             root_page_host = page.current_host
-
             begin
               page.within_frame(iframe_element) do
                 next unless page.current_host == root_page_host
                 path = URI.parse(iframe_url).path
-                content = page.body
+                content = page.html
                 sha = Digest::SHA256.hexdigest(content)
                 resources <<
                   Percy::Client::Resource.new(
@@ -108,7 +111,8 @@ module Percy
             rescue StandardError => e
               # Skip frame not found errors. This library doesn't explicitly depend on Poltergeist,
               # so we check the string class name.
-              raise e unless e.class.to_s == 'Capybara::Poltergeist::FrameNotFound'
+              raise e unless e.class.to_s == 'Capybara::Poltergeist::FrameNotFound' ||
+                  e.class.to_s == 'Capybara::Poltergeist::TimeoutError'
             end
           end
 

@@ -42,7 +42,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
         expect(resources.first.content).to include('Hello World')
       end
     end
-    context 'Capybara::Webkit', type: :feature, js: true do
+    context 'Capybara::Poltergeist', type: :feature, js: true do
       it 'returns the root HTML resource' do
         visit '/'
         resources = loader.snapshot_resources

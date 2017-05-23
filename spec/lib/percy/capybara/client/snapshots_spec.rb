@@ -1,7 +1,6 @@
 require 'json'
 require 'digest'
 require 'capybara'
-require 'capybara/webkit'
 
 RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
   let(:capybara_client) { Percy::Capybara::Client.new(enabled: true) }
