@@ -66,7 +66,7 @@ RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
         it 'builds the expected resources' do
           built_urls = Set.new(loader.build_resources.collect(&:resource_url))
 
-          expected_urls = Set.new()
+          expected_urls = Set.new
           expected_urls << loader._uri_join(mount_path, "/assets/percy-#{ember_app}.svg")
           expected_urls << loader._uri_join(mount_path, "/percy-#{ember_app}-public.svg")
 
