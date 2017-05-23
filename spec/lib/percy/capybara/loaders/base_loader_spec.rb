@@ -47,7 +47,8 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
     it 'skips poltergeist frame not found errors when include_iframes true' do
       visit '/test-iframe.html'
 
-      expect(page).to receive(:within_frame).twice.and_raise(Capybara::Poltergeist::FrameNotFound, "Hi")
+      expect(page).to receive(:within_frame).twice
+        .and_raise(Capybara::Poltergeist::FrameNotFound, 'Hi')
       loader = described_class.new(page: page, include_iframes: true)
       resources = loader.iframes_resources
       expect(resources.size).to eq(0)
@@ -55,7 +56,8 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
     it 'skips poltergeist timeout errors when include_iframes true' do
       visit '/test-iframe.html'
 
-      expect(page).to receive(:within_frame).twice.and_raise(Capybara::Poltergeist::TimeoutError, "Hi")
+      expect(page).to receive(:within_frame).twice
+        .and_raise(Capybara::Poltergeist::TimeoutError, 'Hi')
       loader = described_class.new(page: page, include_iframes: true)
       resources = loader.iframes_resources
       expect(resources.size).to eq(0)

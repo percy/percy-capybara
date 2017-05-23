@@ -35,9 +35,7 @@ RSpec.configure do |config|
   # Comment this out to test the default Selenium/Firefox flow:
   Capybara.javascript_driver = :poltergeist
   Capybara.register_driver :poltergeist do |app|
-    Capybara::Poltergeist::Driver.new(app, {
-      timeout: 1
-    })
+    Capybara::Poltergeist::Driver.new(app, timeout: 1, url_blacklist: ['i.imgur.com'])
   end
 
   config.before(:each) do

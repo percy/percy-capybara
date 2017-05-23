@@ -112,7 +112,7 @@ module Percy
               # Skip frame not found errors. This library doesn't explicitly depend on Poltergeist,
               # so we check the string class name.
               raise e unless e.class.to_s == 'Capybara::Poltergeist::FrameNotFound' ||
-                e.class.to_s == 'Capybara::Poltergeist::TimeoutError'
+                  e.class.to_s == 'Capybara::Poltergeist::TimeoutError'
             end
           end
 
