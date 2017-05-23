@@ -6,15 +6,6 @@ class RackAppWithIframe
   end
 end
 
-# Mock dependency on Poltergeist so we can test an error class.
-module Capybara
-  module Poltergeist
-    class Error < StandardError; end
-    class ClientError < Error; end
-    class FrameNotFound < ClientError; end
-  end
-end
-
 RSpec.describe Percy::Capybara::Loaders::BaseLoader do
   let(:loader) { described_class.new }
 
@@ -33,23 +24,41 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
     end
   end
   describe '#iframes_resources', type: :feature, js: true do
-    it 'includes the iframe DOM HTML' do
+    it 'excludes the iframe by default' do
       visit '/test-iframe.html'
 
       loader = described_class.new(page: page)
       resources = loader.iframes_resources
+      expect(resources).to eq([])
+    end
+
+    it 'includes the iframe with DOM HTML when include_iframes true' do
+      visit '/test-iframe.html'
+
+      loader = described_class.new(page: page, include_iframes: true)
+      resources = loader.iframes_resources
 
       expect(resources.size).to eq(1) # doesn't include iframe to remote host
       last_resource = resources.last
-      expect(last_resource.resource_url).to eq('iframe.html')
+      expect(last_resource.resource_url).to eq('/iframe.html')
       expect(last_resource.mimetype).to eq('text/html')
       expect(last_resource.content).to include('Inside iframe')
     end
-    it 'skips poltergeist frame not found errors' do
+    it 'skips poltergeist frame not found errors when include_iframes true' do
       visit '/test-iframe.html'
 
-      expect(page).to receive(:within_frame).twice.and_raise(Capybara::Poltergeist::FrameNotFound)
-      loader = described_class.new(page: page)
+      expect(page).to receive(:within_frame).twice
+        .and_raise(Capybara::Poltergeist::FrameNotFound, 'Hi')
+      loader = described_class.new(page: page, include_iframes: true)
+      resources = loader.iframes_resources
+      expect(resources.size).to eq(0)
+    end
+    it 'skips poltergeist timeout errors when include_iframes true' do
+      visit '/test-iframe.html'
+
+      expect(page).to receive(:within_frame).twice
+        .and_raise(Capybara::Poltergeist::TimeoutError, 'Hi')
+      loader = described_class.new(page: page, include_iframes: true)
       resources = loader.iframes_resources
       expect(resources.size).to eq(0)
     end

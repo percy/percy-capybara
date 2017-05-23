@@ -22,7 +22,7 @@ module Percy
         def initialize(options = {})
           @sprockets_environment = options[:sprockets_environment]
           @sprockets_options = options[:sprockets_options]
-          super
+          super(options)
         end
 
         def snapshot_resources
