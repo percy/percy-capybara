@@ -1,15 +1,9 @@
 require 'capybara/rspec'
-require 'capybara/webkit'
+require 'capybara/poltergeist'
 require 'webmock/rspec'
 require 'support/test_helpers'
 require 'percy'
 require 'percy/capybara'
-
-Capybara::Webkit.configure do |config|
-  # config.allow_url("*")
-  config.allow_url('localtest.me')
-  config.block_unknown_urls
-end
 
 RSpec.configure do |config|
   config.include TestHelpers
@@ -39,7 +33,12 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 
   # Comment this out to test the default Selenium/Firefox flow:
-  Capybara.javascript_driver = :webkit
+  Capybara.javascript_driver = :poltergeist
+  Capybara.register_driver :poltergeist do |app|
+    Capybara::Poltergeist::Driver.new(app, {
+      timeout: 1
+    })
+  end
 
   config.before(:each) do
     WebMock.disable_net_connect!(allow_localhost: true)
