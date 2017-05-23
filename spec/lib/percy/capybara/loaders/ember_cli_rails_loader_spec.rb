@@ -1,3 +1,5 @@
+require 'set'
+
 RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
   let(:assets_dir) { File.expand_path('../../client/ember_test_data', __FILE__) }
   let(:mounted_apps) { {frontend: ''} }
@@ -62,14 +64,13 @@ RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
         end
 
         it 'builds the expected resources' do
-          expected_urls = loader.build_resources.collect(&:resource_url)
-          expected_url = loader._uri_join(
-            mount_path,
-            described_class::EMBER_ASSETS_DIR,
-            "percy-#{ember_app}.svg",
-          )
+          built_urls = Set.new(loader.build_resources.collect(&:resource_url))
 
-          expect(expected_urls).to include(expected_url)
+          expected_urls = Set.new()
+          expected_urls << loader._uri_join(mount_path, "/assets/percy-#{ember_app}.svg")
+          expected_urls << loader._uri_join(mount_path, "/percy-#{ember_app}-public.svg")
+
+          expect(expected_urls.subset?(built_urls)).to be true
         end
       end
     end

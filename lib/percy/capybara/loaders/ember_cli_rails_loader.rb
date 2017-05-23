@@ -1,12 +1,11 @@
 require 'percy/capybara/loaders/sprockets_loader'
+require 'set'
 
 module Percy
   module Capybara
     module Loaders
       class EmberCliRailsLoader < SprocketsLoader
         attr_reader :mounted_apps
-
-        EMBER_ASSETS_DIR = 'assets'.freeze
 
         def initialize(mounted_apps, options = {})
           super(options)
@@ -16,25 +15,28 @@ module Percy
         end
 
         def build_resources
-          resources = []
+          resources = super # adds sprockets resources first
+
+          sprockets_resource_urls = resources.collect(&:resource_url)
+          loaded_resource_urls = Set.new(sprockets_resource_urls)
 
           @mounted_apps.map do |app_name, mount_path|
-            # public assets path for this particular ember app. If the app is mounted on /admin
-            # the output would be: /admin/assets
-            base_assets_url = File.join(mount_path, EMBER_ASSETS_DIR)
-
-            # full path on disk to the assets for this ember app
+            # full path on disk to this ember app
             # e.g. /Users/djones/Code/rails-ember-app/tmp/ember-cli/apps/frontend
             dist_path = _dist_path_for_app(app_name)
 
-            # full path to the directory on disk where ember stores assets for this ember app
-            # e.g. /Users/djones/Code/rails-ember-app/tmp/ember-cli/apps/frontend/assets
-            ember_assets_path = File.join(dist_path, EMBER_ASSETS_DIR)
+            resources_from_dir = _resources_from_dir(dist_path, base_url: mount_path)
 
-            resources += _resources_from_dir(ember_assets_path, base_url: base_assets_url)
+            resources_from_dir.each do |resource|
+              # avoid loading in duplicate resource_urls
+              next if loaded_resource_urls.include? resource.resource_url
+
+              resources << resource
+              loaded_resource_urls << resource.resource_url
+            end
           end
 
-          resources += super # adds sprockets resources from Rails
+          resources
         end
 
         def _dist_path_for_app(app_name)
