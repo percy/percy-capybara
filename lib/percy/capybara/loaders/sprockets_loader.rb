@@ -64,24 +64,9 @@ module Percy
           # Load resources from the public/ directory, if a Rails app.
           if _rails
             public_path = _rails.public_path.to_s
-            Find.find(public_path).each do |path|
-              # Skip directories.
-              next unless FileTest.file?(path)
-              # Skip certain extensions.
-              next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(path))
-              # Skip large files, these are hopefully downloads and not used in page rendering.
-              next if File.size(path) > MAX_FILESIZE_BYTES
-
-              # Strip the public_path from the beginning of the resource_url.
-              # This assumes that everything in the Rails public/ directory is served at the root
-              # of the app.
-              resource_url = path.sub(public_path, '')
-
+            resources += _resources_from_dir(public_path).select do |resource|
               # Skip precompiled files already included via the asset pipeline.
-              next if loaded_resource_urls.include?(resource_url)
-
-              sha = Digest::SHA256.hexdigest(File.read(path))
-              resources << Percy::Client::Resource.new(resource_url, sha: sha, path: path)
+              !loaded_resource_urls.include?(resource.resource_url)
             end
           end
 
