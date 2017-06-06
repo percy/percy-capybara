@@ -1,3 +1,4 @@
+require 'pathname'
 require 'percy/capybara'
 
 module Percy
@@ -124,9 +125,7 @@ module Percy
         def _resources_from_dir(root_dir, base_url: '/')
           resources = []
 
-          Find.find(root_dir).each do |path|
-            # Skip directories.
-            next unless FileTest.file?(path)
+          _find_files(root_dir).each do |path|
             # Skip certain extensions.
             next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(path))
             # Skip large files, these are hopefully downloads and not used in page rendering.
@@ -141,6 +140,21 @@ module Percy
           end
 
           resources
+        end
+
+        # A simplified version of Find.find that only returns files and follows symlinks.
+        def _find_files(*paths)
+          paths.flatten!
+          paths.map! { |p| Pathname.new(p) }
+          files = []
+          paths.each do |path|
+            if path.file?
+              files << path.to_s
+            else
+              files = files.concat(_find_files(path.children))
+            end
+          end
+          files
         end
 
         def _uri_join(*paths)
