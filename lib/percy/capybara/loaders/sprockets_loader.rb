@@ -64,9 +64,9 @@ module Percy
           # Load resources from the public/ directory, if a Rails app.
           if _rails
             public_path = _rails.public_path.to_s
-            resources += _resources_from_dir(public_path).select do |resource|
+            resources += _resources_from_dir(public_path).reject do |resource|
               # Skip precompiled files already included via the asset pipeline.
-              !loaded_resource_urls.include?(resource.resource_url)
+              loaded_resource_urls.include?(resource.resource_url)
             end
           end
 
