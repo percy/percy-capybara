@@ -7,6 +7,12 @@ class SimpleRackApp
 end
 
 RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
+  let(:test_data_path) do
+    File.expand_path('../../client/test_data', __FILE__)
+  end
+  let(:rails_public_test_data_path) do
+    File.expand_path('../../client/rails_public_test_data', __FILE__)
+  end
   let(:loader) do
     described_class.new(
       page: page,
@@ -15,8 +21,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
     )
   end
   let(:environment) do
-    root = File.expand_path('../../client/test_data', __FILE__)
-    environment = Sprockets::Environment.new(root)
+    environment = Sprockets::Environment.new(test_data_path)
     environment.append_path '.'
     environment
   end
@@ -78,7 +83,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
         rails_double = double('Rails')
         # Pretend like the entire test_data directory is the public/ folder.
         expect(rails_double).to receive(:application).and_return(nil)
-        expect(rails_double).to receive(:public_path).and_return(environment.root + '/public')
+        expect(rails_double).to receive(:public_path).and_return(rails_public_test_data_path)
         expect(loader).to receive(:_rails).at_least(:once).and_return(rails_double)
       end
       it 'includes files from the public folder (non-asset-pipeline)' do
@@ -89,6 +94,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
         resource_urls = resources.map(&:resource_url)
         expect(resource_urls).to include('/assets/images/bg-relative.png') # From asset pipeline.
         expect(resource_urls).to include('/percy-from-public.svg') # Public merged into root.
+        expect(resource_urls).to include('/symlink_to_images/test.png') # Symlink in public dir.
         expect(resource_urls).not_to include('/large-file-skipped.png') # Public merged into root.
       end
       context 'digest enabled' do
