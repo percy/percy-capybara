@@ -144,17 +144,10 @@ module Percy
 
         # A simplified version of Find.find that only returns files and follows symlinks.
         def _find_files(*paths)
-          paths.flatten!
-          paths.map! { |p| Pathname.new(p) }
-          files = []
-          paths.each do |path|
-            if path.file?
-              files << path.to_s
-            else
-              files = files.concat(_find_files(path.children))
-            end
-          end
-          files
+          paths.flatten.map do |path|
+            path = Pathname.new(path)
+            path.file? ? [path.to_s] : _find_files(path.children)
+          end.flatten
         end
 
         def _uri_join(*paths)
