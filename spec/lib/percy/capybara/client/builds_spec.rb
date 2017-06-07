@@ -125,8 +125,10 @@ RSpec.describe Percy::Capybara::Client::Builds do
     end
   end
   describe '#finalize_current_build' do
+    let(:build_data) do
+      {'data' => {'id' => 123, 'attributes' => {'web-url' => 'http://localhost/'}}}
+    end
     it 'finalizes the current build' do
-      build_data = {'data' => {'id' => 123}}
       expect(capybara_client.client).to receive(:create_build).and_return(build_data)
       capybara_client.initialize_build
 
@@ -139,7 +141,6 @@ RSpec.describe Percy::Capybara::Client::Builds do
       end.to raise_error(Percy::Capybara::Client::BuildNotInitializedError)
     end
     it 'safely handles connection errors' do
-      build_data = {'data' => {'id' => 123}}
       expect(capybara_client.client).to receive(:create_build).and_return(build_data)
       capybara_client.initialize_build
 
