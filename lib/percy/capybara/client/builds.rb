@@ -49,6 +49,8 @@ module Percy
             Percy.logger.error { 'Percy build failed! Check log above for errors.' }
             return
           end
+          build_url = current_build['data']['attributes']['web-url']
+          puts "\n[percy] Visual diffs are now processing: #{build_url}"
           result
         end
 
