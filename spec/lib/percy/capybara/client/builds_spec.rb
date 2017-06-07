@@ -128,6 +128,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
     let(:build_data) do
       {'data' => {'id' => 123, 'attributes' => {'web-url' => 'http://localhost/'}}}
     end
+
     it 'finalizes the current build' do
       expect(capybara_client.client).to receive(:create_build).and_return(build_data)
       capybara_client.initialize_build
