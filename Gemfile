@@ -12,3 +12,7 @@ group :test do
   gem 'rubocop', '~> 0.48.0'
   gem 'rubocop-rspec'
 end
+
+group :test, :development do
+  gem 'pry'
+end
