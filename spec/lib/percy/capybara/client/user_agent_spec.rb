@@ -1,6 +1,6 @@
 RSpec.describe Percy::Capybara::Client do
   subject(:client) do
-    Percy::Capybara::Client.new(
+    described_class.new(
       enabled: true,
       sprockets_environment: 'test',
       sprockets_options: 'test',
@@ -11,7 +11,7 @@ RSpec.describe Percy::Capybara::Client do
     subject(:environment_info) { client._environment_info }
 
     context 'an app with Rails, Sinatra and Ember Cli Rails' do
-      before(:each) do
+      before do
         stub_const('Rails', nil)
         stub_const('Sinatra', nil)
         stub_const('EmberCli::VERSION', 0.9)
@@ -32,7 +32,7 @@ RSpec.describe Percy::Capybara::Client do
     end
 
     context 'a loader is configured' do
-      before(:each) { client.loader = :sprockets_loader }
+      before { client.loader = :sprockets_loader }
 
       it 'includes loader information' do
         expect(environment_info).to eq('percy-capybara-loader/sprockets_loader')

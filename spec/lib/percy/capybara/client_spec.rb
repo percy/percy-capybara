@@ -4,6 +4,7 @@ RSpec.describe Percy::Capybara::Client do
     capybara_client = Percy::Capybara::Client.new(client: client)
     expect(capybara_client.client).to eq(client)
   end
+
   describe '#enabled?' do
     context 'when required environment variables set' do
       before { set_required_env_variables }
@@ -13,14 +14,17 @@ RSpec.describe Percy::Capybara::Client do
         ENV['PERCY_ENABLE'] = '1'
         expect(Percy::Capybara::Client.new.enabled?).to eq(true)
       end
+
       it 'is true when PERCY_ENABLE is not set' do
         ENV.delete 'PERCY_ENABLE'
         expect(Percy::Capybara::Client.new.enabled?).to eq(true)
       end
+
       it 'is false when PERCY_ENABLE is 0' do
         ENV['PERCY_ENABLE'] = '0'
         expect(Percy::Capybara::Client.new.enabled?).to eq(false)
       end
+
       it 'raises error if PERCY_TOKEN is set but PERCY_PROJECT is not' do
         ENV.delete 'PERCY_PROJECT'
         expect { Percy::Capybara::Client.new.enabled? }.to raise_error(RuntimeError)
@@ -34,64 +38,76 @@ RSpec.describe Percy::Capybara::Client do
         ENV.delete 'PERCY_ENABLE'
         expect(Percy::Capybara::Client.new.enabled?).to eq(false)
       end
+
       it 'is false when PERCY_ENABLE is 1' do
         ENV['PERCY_ENABLE'] = '1'
         expect(Percy::Capybara::Client.new.enabled?).to eq(false)
       end
     end
   end
+
   describe '#failed?' do
     it 'is false by default' do
       expect(Percy::Capybara::Client.new.failed?).to eq(false)
     end
   end
+
   describe '#rescue_connection_failures' do
     let(:capybara_client) { Percy::Capybara::Client.new(enabled: true) }
 
     it 'returns block result on success' do
-      result = capybara_client.rescue_connection_failures do
-        true
-      end
+      result = capybara_client.rescue_connection_failures { true }
+
       expect(result).to eq(true)
       expect(capybara_client.enabled?).to eq(true)
       expect(capybara_client.failed?).to eq(false)
     end
+
     it 'makes block safe from server errors' do
       result = capybara_client.rescue_connection_failures do
         raise Percy::Client::ServerError.new(500, 'POST', '', '')
       end
+
       expect(result).to eq(nil)
       expect(capybara_client.enabled?).to eq(false)
       expect(capybara_client.failed?).to eq(true)
     end
+
     it 'makes block safe from quota exceeded errors' do
       result = capybara_client.rescue_connection_failures do
         raise Percy::Client::PaymentRequiredError.new(409, 'POST', '', '')
       end
+
       expect(result).to eq(nil)
       expect(capybara_client.enabled?).to eq(false)
       expect(capybara_client.failed?).to eq(true)
     end
+
     it 'makes block safe from ConnectionFailed' do
       result = capybara_client.rescue_connection_failures do
         raise Percy::Client::ConnectionFailed
       end
+
       expect(result).to eq(nil)
       expect(capybara_client.enabled?).to eq(false)
       expect(capybara_client.failed?).to eq(true)
     end
+
     it 'makes block safe from TimeoutError' do
       result = capybara_client.rescue_connection_failures do
         raise Percy::Client::TimeoutError
       end
+
       expect(result).to eq(nil)
       expect(capybara_client.enabled?).to eq(false)
       expect(capybara_client.failed?).to eq(true)
     end
+
     it 'requires a block' do
       expect { capybara_client.rescue_connection_failures }.to raise_error(ArgumentError)
     end
   end
+
   describe '#initialize' do
     let(:capybara_client) { Percy::Capybara::Client.new }
 
@@ -105,6 +121,7 @@ RSpec.describe Percy::Capybara::Client do
       expect(capybara_client.client.environment_info).to eq('test env info')
     end
   end
+
   describe '#initialize_loader' do
     let(:capybara_client) { Percy::Capybara::Client.new }
 
