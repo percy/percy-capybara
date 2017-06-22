@@ -92,6 +92,19 @@ RSpec.describe Percy::Capybara::Client do
       expect { capybara_client.rescue_connection_failures }.to raise_error(ArgumentError)
     end
   end
+  describe '#initialize' do
+    let(:capybara_client) { Percy::Capybara::Client.new }
+
+    it 'passes client and environment info down to the lower level Percy client' do
+      expect_any_instance_of(Percy::Capybara::Client)
+        .to receive(:_environment_info).and_return('test env info')
+      expect_any_instance_of(Percy::Capybara::Client)
+        .to receive(:_client_info).and_return('test client info')
+
+      expect(capybara_client.client.client_info).to eq('test client info')
+      expect(capybara_client.client.environment_info).to eq('test env info')
+    end
+  end
   describe '#initialize_loader' do
     let(:capybara_client) { Percy::Capybara::Client.new }
 
