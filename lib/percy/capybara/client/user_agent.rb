@@ -18,7 +18,10 @@ module Percy
         end
 
         def _ember_cli_rails_version
-          EmberCli::VERSION if defined? EmberCli
+          return unless defined? EmberCli
+
+          require 'ember_cli/version'
+          EmberCli::VERSION
         end
 
         def _rails_version
