@@ -1,10 +1,4 @@
 RSpec.describe Percy::Capybara::Client do
-  it 'accepts and memoizes a client arg' do
-    client = Percy::Client.new
-    capybara_client = Percy::Capybara::Client.new(client: client)
-    expect(capybara_client.client).to eq(client)
-  end
-
   describe '#enabled?' do
     context 'when required environment variables set' do
       before { set_required_env_variables }
@@ -111,14 +105,14 @@ RSpec.describe Percy::Capybara::Client do
   describe '#initialize' do
     let(:capybara_client) { Percy::Capybara::Client.new }
 
-    it 'passes client and environment info down to the lower level Percy client' do
-      expect_any_instance_of(Percy::Capybara::Client)
-        .to receive(:_environment_info).and_return('test env info')
-      expect_any_instance_of(Percy::Capybara::Client)
-        .to receive(:_client_info).and_return('test client info')
+    it 'accepts and memoizes a client arg' do
+      client = Percy::Client.new
+      capybara_client = Percy::Capybara::Client.new(client: client)
+      expect(capybara_client.client).to eq(client)
+    end
 
-      expect(capybara_client.client.client_info).to eq('test client info')
-      expect(capybara_client.client.environment_info).to eq('test env info')
+    it 'passes client info down to the lower level Percy client' do
+      expect(capybara_client.client.client_info).to eq("percy-capybara/#{Percy::Capybara::VERSION}")
     end
   end
 

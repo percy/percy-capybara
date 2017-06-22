@@ -1,6 +1,6 @@
-RSpec.describe Percy::Capybara::Client do
+RSpec.describe Percy::Capybara::Client::UserAgent do
   subject(:client) do
-    described_class.new(
+    Percy::Capybara::Client.new(
       enabled: true,
       sprockets_environment: 'test',
       sprockets_options: 'test',
@@ -11,17 +11,12 @@ RSpec.describe Percy::Capybara::Client do
     subject(:environment_info) { client._environment_info }
 
     context 'an app with Rails, Sinatra and Ember Cli Rails' do
-      before do
-        stub_const('Rails', nil)
-        stub_const('Sinatra', nil)
-        stub_const('EmberCli::VERSION', 0.9)
-      end
-
       it 'returns full environment information' do
-        expect(Rails).to receive(:version).and_return('4.2')
-        expect(Sinatra).to receive(:version).and_return('2.0.0')
+        expect(client).to receive(:_rails_version).at_least(:once).times.and_return('4.2')
+        expect(client).to receive(:_sinatra_version).at_least(:once).and_return('2.0.0')
+        expect(client).to receive(:_ember_cli_rails_version).at_least(:once).and_return('0.9')
 
-        expect(environment_info).to eq('rails/2.0.0; sinatra/3.1.0; ember-cli-rails/0.9')
+        expect(environment_info).to eq('rails/4.2; sinatra/2.0.0; ember-cli-rails/0.9')
       end
     end
 

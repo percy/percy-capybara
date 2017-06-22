@@ -11,6 +11,7 @@ module Percy
     class Client
       include Percy::Capybara::Client::Builds
       include Percy::Capybara::Client::Snapshots
+      include Percy::Capybara::Client::UserAgent
 
       class Error < RuntimeError; end
       class BuildNotInitializedError < Error; end
