@@ -27,11 +27,12 @@ module Percy
       def initialize(options = {})
         @failed = false
 
-        @client = options[:client] || \
-          Percy.client(client_info: _client_info, environment_info: _environment_info)
-
         @enabled = options[:enabled]
         @loader_options = options[:loader_options] || {}
+        @loader = options[:loader]
+
+        @client = options[:client] || \
+          Percy.client(client_info: _client_info, environment_info: _environment_info)
 
         return unless defined?(Rails)
 
