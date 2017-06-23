@@ -83,12 +83,16 @@ RSpec.describe Percy::Capybara do
 
     it 'sets the current capybara client\'s loader' do
       expect(Percy::Capybara.capybara_client.loader).not_to be
+      Percy::Capybara.reset!
+
       Percy::Capybara.use_loader(DummyLoader)
       expect(Percy::Capybara.capybara_client.loader).to be
     end
 
     it 'sets the current capybara client\'s loader options' do
       expect(Percy::Capybara.capybara_client.loader_options).to eq({})
+      Percy::Capybara.reset!
+
       Percy::Capybara.use_loader(DummyLoader, test_option: 3)
       expect(Percy::Capybara.capybara_client.loader_options).to be
       expect(Percy::Capybara.capybara_client.loader_options[:test_option]).to eq(3)

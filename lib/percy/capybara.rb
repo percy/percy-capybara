@@ -54,10 +54,7 @@ module Percy
     end
 
     def self.use_loader(loader, options = {})
-      client = capybara_client(loader: loader)
-
-      client.loader = loader
-      client.loader_options = options
+      capybara_client(loader: loader, loader_options: options)
     end
   end
 end
