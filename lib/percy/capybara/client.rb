@@ -1,5 +1,6 @@
 require 'percy/capybara/client/builds'
 require 'percy/capybara/client/snapshots'
+require 'percy/capybara/client/user_agent'
 require 'percy/capybara/loaders/filesystem_loader'
 require 'percy/capybara/loaders/native_loader'
 require 'percy/capybara/loaders/sprockets_loader'
@@ -10,6 +11,7 @@ module Percy
     class Client
       include Percy::Capybara::Client::Builds
       include Percy::Capybara::Client::Snapshots
+      include Percy::Capybara::Client::UserAgent
 
       class Error < RuntimeError; end
       class BuildNotInitializedError < Error; end
@@ -25,10 +27,12 @@ module Percy
       def initialize(options = {})
         @failed = false
 
-        @client = options[:client] || Percy.client
         @enabled = options[:enabled]
-
         @loader_options = options[:loader_options] || {}
+        @loader = options[:loader]
+
+        @client = options[:client] || \
+          Percy.client(client_info: _client_info, environment_info: _environment_info)
 
         return unless defined?(Rails)
 

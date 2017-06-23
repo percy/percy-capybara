@@ -6,8 +6,8 @@ require 'percy/capybara/client'
 module Percy
   module Capybara
     # @see Percy::Capybara::Client
-    def self.capybara_client
-      @capybara_client ||= Percy::Capybara::Client.new
+    def self.capybara_client(options = {})
+      @capybara_client ||= Percy::Capybara::Client.new(options)
     end
 
     # {include:Percy::Capybara::Client::Snapshots#snapshot}
@@ -54,8 +54,7 @@ module Percy
     end
 
     def self.use_loader(loader, options = {})
-      capybara_client.loader = loader
-      capybara_client.loader_options = options
+      capybara_client(loader: loader, loader_options: options)
     end
   end
 end
