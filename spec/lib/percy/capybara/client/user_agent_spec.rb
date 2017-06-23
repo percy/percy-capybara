@@ -21,7 +21,7 @@ RSpec.describe Percy::Capybara::Client::UserAgent do
     end
 
     context 'an app with no known frameworks being used' do
-      it 'returns full environment information' do
+      it 'returns no environment information' do
         expect(environment_info).to be_empty
       end
     end
