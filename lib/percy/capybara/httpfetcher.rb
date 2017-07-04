@@ -4,7 +4,7 @@ require 'shellwords'
 module Percy
   module Capybara
     module HttpFetcher
-      class Response < Struct.new(:body, :content_type); end
+      Response = Struct.new(:body, :content_type)
 
       def self.fetch(url)
         tempfile = Tempfile.new('percy-capybara-fetch')

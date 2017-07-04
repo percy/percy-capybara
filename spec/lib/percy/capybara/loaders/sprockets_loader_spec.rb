@@ -14,7 +14,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
     File.expand_path('../../client/rails_public_test_data', __FILE__)
   end
   let(:loader) do
-    described_class.new(
+    Percy::Capybara::Loaders::SprocketsLoader.new(
       page: page,
       sprockets_environment: environment,
       sprockets_options: sprockets_options,
@@ -29,7 +29,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
   let(:sprockets_options) do
     options = double('options')
     # Set specific files we want to compile. In normal use, this would be all asset files.
-    precompile_list = [%r{(?:/|\\|\A)(base|digested)\.(css|js)$|\.map|\.png}]
+    precompile_list = [/(?:\/|\\|\A)(base|digested)\.(css|js)$|\.map|\.png/]
     allow(options).to receive(:precompile).and_return(precompile_list)
     allow(options).to receive(:digest).and_return(digest_enabled)
     options
@@ -37,7 +37,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
 
   describe '#snapshot_resources' do
     context 'Rack::Test', type: :feature do
-      before { Capybara.app = SimpleRackApp }
+      before(:each) { Capybara.app = SimpleRackApp }
 
       it 'returns the root HTML resource' do
         visit '/'
@@ -78,7 +78,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
       expect(resources.first.content).to include('.colored-by-base')
     end
     context 'Rails app' do
-      before do
+      before(:each) do
         # Pretend like we're in a Rails app right now, all we care about is Rails.public_path.
         rails_double = double('Rails')
         # Pretend like the entire test_data directory is the public/ folder.
@@ -95,7 +95,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
         expect(resource_urls).to include('/assets/images/bg-relative.png') # From asset pipeline.
         expect(resource_urls).to include('/percy-from-public.svg') # Public merged into root.
         expect(resource_urls).to include('/symlink_to_images/test.png') # Symlink in public dir.
-        expect(resource_urls).not_to include('/large-file-skipped.png') # Public merged into root.
+        expect(resource_urls).to_not include('/large-file-skipped.png') # Public merged into root.
       end
       context 'digest enabled' do
         let(:digest_enabled) { true }

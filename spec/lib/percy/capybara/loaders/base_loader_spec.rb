@@ -7,13 +7,13 @@ class RackAppWithIframe
 end
 
 RSpec.describe Percy::Capybara::Loaders::BaseLoader do
-  let(:loader) { described_class.new }
+  let(:loader) { Percy::Capybara::Loaders::BaseLoader.new }
 
   describe '#root_html_resource', type: :feature, js: true do
     it 'includes the root DOM HTML' do
       visit '/'
 
-      loader = described_class.new(page: page)
+      loader = Percy::Capybara::Loaders::BaseLoader.new(page: page)
       resource = loader.root_html_resource
 
       expect(resource.is_root).to be_truthy
@@ -27,7 +27,7 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
     it 'excludes the iframe by default' do
       visit '/test-iframe.html'
 
-      loader = described_class.new(page: page)
+      loader = Percy::Capybara::Loaders::BaseLoader.new(page: page)
       resources = loader.iframes_resources
       expect(resources).to eq([])
     end
@@ -35,7 +35,7 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
     it 'includes the iframe with DOM HTML when include_iframes true' do
       visit '/test-iframe.html'
 
-      loader = described_class.new(page: page, include_iframes: true)
+      loader = Percy::Capybara::Loaders::BaseLoader.new(page: page, include_iframes: true)
       resources = loader.iframes_resources
 
       expect(resources.size).to eq(1) # doesn't include iframe to remote host
@@ -49,7 +49,7 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
 
       expect(page).to receive(:within_frame).twice
         .and_raise(Capybara::Poltergeist::FrameNotFound, 'Hi')
-      loader = described_class.new(page: page, include_iframes: true)
+      loader = Percy::Capybara::Loaders::BaseLoader.new(page: page, include_iframes: true)
       resources = loader.iframes_resources
       expect(resources.size).to eq(0)
     end
@@ -58,7 +58,7 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
 
       expect(page).to receive(:within_frame).twice
         .and_raise(Capybara::Poltergeist::TimeoutError, 'Hi')
-      loader = described_class.new(page: page, include_iframes: true)
+      loader = Percy::Capybara::Loaders::BaseLoader.new(page: page, include_iframes: true)
       resources = loader.iframes_resources
       expect(resources.size).to eq(0)
     end
@@ -78,36 +78,36 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
       page_double = double('page')
 
       expect(page_double).to receive(:current_url).and_return('/')
-      loader = described_class.new(page: page_double)
+      loader = Percy::Capybara::Loaders::BaseLoader.new(page: page_double)
       expect(loader.current_path).to eq('/')
 
       expect(page_double).to receive(:current_url).and_return('/test')
-      loader = described_class.new(page: page_double)
+      loader = Percy::Capybara::Loaders::BaseLoader.new(page: page_double)
       expect(loader.current_path).to eq('/test')
 
       expect(page_double).to receive(:current_url).and_return('/test/a')
-      loader = described_class.new(page: page_double)
+      loader = Percy::Capybara::Loaders::BaseLoader.new(page: page_double)
       expect(loader.current_path).to eq('/test/a')
 
       # Rack::Test returns a full example.com URL, so we want to make sure it is stripped:
       expect(page_double).to receive(:current_url).and_return('http://www.example.com/')
-      loader = described_class.new(page: page_double)
+      loader = Percy::Capybara::Loaders::BaseLoader.new(page: page_double)
       expect(loader.current_path).to eq('/')
 
       expect(page_double).to receive(:current_url).and_return('about:srcdoc')
-      loader = described_class.new(page: page_double)
+      loader = Percy::Capybara::Loaders::BaseLoader.new(page: page_double)
       expect(loader.current_path).to eq('/about:srcdoc')
     end
   end
 
   context 'Rack::Test', type: :feature do
-    before { Capybara.app = RackAppWithIframe }
-    after { Capybara.app = nil }
+    before(:each) { Capybara.app = RackAppWithIframe }
+    after(:each) { Capybara.app = nil }
 
     describe '#iframes_resources' do
       it 'is silently ignored' do
         visit '/test-iframe.html'
-        loader = described_class.new(page: page)
+        loader = Percy::Capybara::Loaders::BaseLoader.new(page: page)
         expect(loader.iframes_resources).to eq([])
       end
     end
@@ -115,7 +115,8 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
 
   describe '#_uri_join' do
     it 'joins files into a uri' do
-      expect(described_class.new.send(:_uri_join, 'foo/', '/bar', 'baz')).to eq('foo/bar/baz')
+      expect(Percy::Capybara::Loaders::BaseLoader.new.send(:_uri_join, 'foo/', '/bar', 'baz'))
+        .to eq('foo/bar/baz')
     end
   end
 end

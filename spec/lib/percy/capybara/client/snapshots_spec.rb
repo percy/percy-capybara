@@ -42,7 +42,7 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
         }
       end
 
-      before do
+      before(:each) do
         setup_sprockets(capybara_client)
 
         visit '/'

@@ -27,7 +27,7 @@ RSpec.describe Percy::Capybara::Client::UserAgent do
     end
 
     context 'a loader is configured' do
-      before { client.loader = :sprockets_loader }
+      before(:each) { client.loader = :sprockets_loader }
 
       it 'includes loader information' do
         expect(environment_info).to eq('percy-capybara-loader/sprockets_loader')

@@ -1,10 +1,10 @@
 RSpec.describe Percy::Capybara do
-  before do
+  before(:each) do
     Percy::Capybara.reset!
     @original_env = ENV['TRAVIS_BUILD_ID']
     ENV['TRAVIS_BUILD_ID'] = nil
   end
-  after do
+  after(:each) do
     ENV['TRAVIS_BUILD_ID'] = @original_env
     ENV.delete('PERCY_ENABLE')
   end
@@ -41,7 +41,7 @@ RSpec.describe Percy::Capybara do
   end
   describe '#finalize_build' do
     it 'returns silently if no build is initialized' do
-      expect { Percy::Capybara.finalize_build }.not_to raise_error
+      expect { Percy::Capybara.finalize_build }.to_not raise_error
     end
     it 'delegates to Percy::Capybara::Client' do
       capybara_client = Percy::Capybara.capybara_client
@@ -55,9 +55,9 @@ RSpec.describe Percy::Capybara do
     it 'silently skips if disabled' do
       ENV['PERCY_ENABLE'] = '0'
       capybara_client = Percy::Capybara.capybara_client
-      expect(capybara_client.client).not_to receive(:create_build)
+      expect(capybara_client.client).to_not receive(:create_build)
       Percy::Capybara.initialize_build
-      expect(capybara_client).not_to receive(:finalize_current_build)
+      expect(capybara_client).to_not receive(:finalize_current_build)
       Percy::Capybara.finalize_build
     end
   end
@@ -65,7 +65,7 @@ RSpec.describe Percy::Capybara do
     it 'clears the current capybara_client' do
       capybara_client = Percy::Capybara.capybara_client
       Percy::Capybara.reset!
-      expect(Percy::Capybara.capybara_client).not_to eq(capybara_client)
+      expect(Percy::Capybara.capybara_client).to_not eq(capybara_client)
     end
   end
   describe '#disable!' do
@@ -82,7 +82,7 @@ RSpec.describe Percy::Capybara do
     class DummyLoader < Percy::Capybara::Loaders::NativeLoader; end
 
     it 'sets the current capybara client\'s loader' do
-      expect(Percy::Capybara.capybara_client.loader).not_to be
+      expect(Percy::Capybara.capybara_client.loader).to_not be
       Percy::Capybara.reset!
 
       Percy::Capybara.use_loader(DummyLoader)
