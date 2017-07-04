@@ -12,7 +12,7 @@ RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
   end
 
   let(:loader) do
-    described_class.new(
+    Percy::Capybara::Loaders::EmberCliRailsLoader.new(
       mounted_apps,
       sprockets_environment: environment,
       sprockets_options: sprockets_options,
@@ -23,7 +23,7 @@ RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
     options = instance_double('options')
     # Set specific files we want to compile. In normal use, this would be all asset files.
     # For this test we just use .svg files
-    precompile_list = [%r{(?:/|\\|\A)\.svg}]
+    precompile_list = [/(?:\/|\\|\A)\.svg/]
     allow(options).to receive(:precompile).and_return(precompile_list)
     allow(options).to receive(:digest).and_return(digest_enabled)
     options
@@ -32,7 +32,7 @@ RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
   describe 'initialize' do
     context 'all args supplied' do
       it 'successfully initializes' do
-        expect { loader }.not_to raise_error
+        expect { loader }.to_not raise_error
       end
     end
 
@@ -54,12 +54,15 @@ RSpec.describe Percy::Capybara::Loaders::EmberCliRailsLoader do
       let(:mount_path) { mounted_apps.values.first }
       let(:dist_dir) { File.join(assets_dir, 'ember-cli', ember_app.to_s) }
       let(:loader) do
-        described_class.new(mounted_apps, sprockets_environment: environment,
-                                          sprockets_options: sprockets_options,)
+        Percy::Capybara::Loaders::EmberCliRailsLoader.new(
+          mounted_apps,
+          sprockets_environment: environment,
+          sprockets_options: sprockets_options,
+        )
       end
 
       context "called '#{ember_app}' and mounted at '#{mount_path}'" do
-        before do
+        before(:each) do
           allow(loader).to receive(:_dist_path_for_app).and_return(dist_dir)
         end
 

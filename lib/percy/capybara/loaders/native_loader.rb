@@ -8,8 +8,8 @@ module Percy
       # Resource loader that uses the native Capybara browser interface to discover resources.
       # This loader uses JavaScript to discover page resources, so specs must be tagged with
       # "js: true" because the default Rack::Test driver does not support executing JavaScript.
-      class NativeLoader < BaseLoader # rubocop:disable ClassLength
-        PATH_REGEX = %r{\A/[^\\s\"']*}
+      class NativeLoader < BaseLoader
+        PATH_REGEX = /\A\/[^\\s\"']*/
         DATA_URL_REGEX = /\Adata:/
         LOCAL_HOSTNAMES = [
           'localhost',

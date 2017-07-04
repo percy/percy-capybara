@@ -2,7 +2,13 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
   let(:fake_page) { OpenStruct.new(current_url: 'http://localhost/foo') }
   let(:assets_dir) { File.expand_path('../../client/test_data', __FILE__) }
   let(:base_url) { '/url-prefix/' }
-  let(:loader) { described_class.new(base_url: base_url, assets_dir: assets_dir, page: fake_page) }
+  let(:loader) do
+    Percy::Capybara::Loaders::FilesystemLoader.new(
+      base_url: base_url,
+      assets_dir: assets_dir,
+      page: fake_page,
+    )
+  end
 
   describe 'initialize' do
     context 'assets_dir not specified' do
@@ -31,12 +37,20 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
   describe '#snapshot_resources', type: :feature, js: true do
     it 'returns the root HTML' do
       visit '/'
-      loader = described_class.new(base_url: base_url, assets_dir: assets_dir, page: page)
+      loader = Percy::Capybara::Loaders::FilesystemLoader.new(
+        base_url: base_url,
+        assets_dir: assets_dir,
+        page: page,
+      )
       expect(loader.snapshot_resources.collect(&:resource_url)).to match_array(['/'])
     end
     it 'returns the visited html resource' do
       visit '/test-css.html'
-      loader = described_class.new(base_url: base_url, assets_dir: assets_dir, page: page)
+      loader = Percy::Capybara::Loaders::FilesystemLoader.new(
+        base_url: base_url,
+        assets_dir: assets_dir,
+        page: page,
+      )
       resource_urls = loader.snapshot_resources.collect(&:resource_url)
       expect(resource_urls).to match_array(['/test-css.html'])
     end
@@ -112,19 +126,31 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
         expect(actual_urls).to match_array(expected_urls)
       end
       it 'works with different base_url configs' do
-        loader = described_class.new(base_url: '/url-prefix/', assets_dir: assets_dir)
+        loader = Percy::Capybara::Loaders::FilesystemLoader.new(
+          base_url: '/url-prefix/',
+          assets_dir: assets_dir,
+        )
         expected_urls = loader.build_resources.collect(&:resource_url)
         expect(expected_urls).to include('/url-prefix/css/font.css')
 
-        loader = described_class.new(base_url: '/url-prefix', assets_dir: assets_dir)
+        loader = Percy::Capybara::Loaders::FilesystemLoader.new(
+          base_url: '/url-prefix',
+          assets_dir: assets_dir,
+        )
         expected_urls = loader.build_resources.collect(&:resource_url)
         expect(expected_urls).to include('/url-prefix/css/font.css')
 
-        loader = described_class.new(base_url: '/', assets_dir: assets_dir)
+        loader = Percy::Capybara::Loaders::FilesystemLoader.new(
+          base_url: '/',
+          assets_dir: assets_dir,
+        )
         expected_urls = loader.build_resources.collect(&:resource_url)
         expect(expected_urls).to include('/css/font.css')
 
-        loader = described_class.new(base_url: '', assets_dir: assets_dir)
+        loader = Percy::Capybara::Loaders::FilesystemLoader.new(
+          base_url: '',
+          assets_dir: assets_dir,
+        )
         expected_urls = loader.build_resources.collect(&:resource_url)
         expect(expected_urls).to include('/css/font.css')
       end

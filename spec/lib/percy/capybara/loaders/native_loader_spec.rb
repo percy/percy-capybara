@@ -1,7 +1,9 @@
 RSpec.describe Percy::Capybara::Loaders::NativeLoader do
   let(:fake_page) { OpenStruct.new(current_url: 'http://localhost/foo') }
   let(:asset_hostnames) { nil }
-  let(:loader) { described_class.new(page: fake_page, asset_hostnames: asset_hostnames) }
+  let(:loader) do
+    Percy::Capybara::Loaders::NativeLoader.new(page: fake_page, asset_hostnames: asset_hostnames)
+  end
 
   describe '#build_resources' do
     it 'returns an empty list' do
@@ -11,12 +13,12 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
   describe '#snapshot_resources', type: :feature, js: true do
     it 'returns the root HTML' do
       visit '/'
-      loader = described_class.new(page: page)
+      loader = Percy::Capybara::Loaders::NativeLoader.new(page: page)
       expect(loader.snapshot_resources.collect(&:resource_url)).to match_array(['/'])
     end
     it 'returns the root HTML and CSS resources' do
       visit '/test-css.html'
-      loader = described_class.new(page: page)
+      loader = Percy::Capybara::Loaders::NativeLoader.new(page: page)
       resource_urls = loader.snapshot_resources.collect(&:resource_url)
       expect(resource_urls).to match_array(
         [
@@ -32,7 +34,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
     end
     it 'returns the font resources' do
       visit '/test-font.html'
-      loader = described_class.new(page: page)
+      loader = Percy::Capybara::Loaders::NativeLoader.new(page: page)
       resource_urls = loader.snapshot_resources.collect(&:resource_url)
       expect(resource_urls).to match_array(
         [
@@ -44,7 +46,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
     end
     it 'returns the root HTML and image resources' do
       visit '/test-images.html'
-      loader = described_class.new(page: page)
+      loader = Percy::Capybara::Loaders::NativeLoader.new(page: page)
       resource_urls = loader.snapshot_resources.collect(&:resource_url)
       expect(resource_urls).to match_array(
         [
@@ -65,15 +67,15 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
   describe 'nonlocal.me', type: :feature, js: true do
     let(:orig_app_host) { Capybara.app_host }
 
-    before do
+    before(:each) do
       Capybara.app_host = Capybara.app_host.gsub('http://localhost:', 'http://localtest.me:')
     end
-    after do
+    after(:each) do
       Capybara.app_host = orig_app_host
     end
     it 'returns the root HTML and image resources' do
       visit '/test-localtest-me-images.html'
-      loader = described_class.new(page: page)
+      loader = Percy::Capybara::Loaders::NativeLoader.new(page: page)
       resource_urls = loader.snapshot_resources.collect(&:resource_url)
       expect(resource_urls).to eq(
         [
@@ -159,7 +161,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
     it 'includes all linked and imported stylesheets' do
       visit '/test-css.html'
 
-      loader = described_class.new(page: page)
+      loader = Percy::Capybara::Loaders::NativeLoader.new(page: page)
       resources = loader.send(:_get_css_resources)
 
       resource = find_resource(resources, '/css/base.css')
@@ -198,7 +200,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
     it 'includes all images' do
       visit '/test-images.html'
 
-      loader = described_class.new(page: page)
+      loader = Percy::Capybara::Loaders::NativeLoader.new(page: page)
       loader.instance_variable_set(:@urls_referred_by_css, [])
       resources = loader.send(:_get_image_resources)
 
@@ -225,7 +227,7 @@ RSpec.describe Percy::Capybara::Loaders::NativeLoader do
       content = File.read(path)
       # In Ruby 1.9.3 the SVG mimetype is not registered so our mini ruby webserver doesn't serve
       # the correct content type. Allow either to work here so we can test older Rubies fully.
-      expect(resource.mimetype).to match(%r{image/svg\+xml|application/octet-stream})
+      expect(resource.mimetype).to match(/image\/svg\+xml|application\/octet-stream/)
       expected_sha = Digest::SHA256.hexdigest(content)
       expect(Digest::SHA256.hexdigest(resource.content)).to eq(expected_sha)
       expect(resource.sha).to eq(expected_sha)

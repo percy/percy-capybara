@@ -6,7 +6,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
   end
 
   describe '#initialize_build', type: :feature, js: true do
-    before { setup_sprockets(capybara_client) }
+    before(:each) { setup_sprockets(capybara_client) }
 
     context 'percy is not enabled' do
       let(:enabled) { false }
@@ -152,7 +152,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
     end
   end
   describe '#_upload_missing_build_resources', type: :feature, js: true do
-    before { setup_sprockets(capybara_client) }
+    before(:each) { setup_sprockets(capybara_client) }
 
     it 'returns 0 if there are no missing build resources to upload' do
       mock_response = {

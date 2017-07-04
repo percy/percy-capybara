@@ -40,7 +40,7 @@ module TestHelpers
     environment.append_path '.'
 
     sprockets_options = double('sprockets_options')
-    allow(sprockets_options).to receive(:precompile).and_return([%r{(?:/|\\|\A)base\.(css|js)$}])
+    allow(sprockets_options).to receive(:precompile).and_return([/(?:\/|\\|\A)base\.(css|js)$/])
     allow(sprockets_options).to receive(:digest).and_return(false)
 
     capybara_client.sprockets_environment = environment

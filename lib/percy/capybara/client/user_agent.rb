@@ -13,7 +13,7 @@ module Percy
             "sinatra/#{_sinatra_version}",
             "ember-cli-rails/#{_ember_cli_rails_version}",
           ].reject do |info|
-            info =~ %r{\/$} # reject if version is empty
+            info =~ /\/$/ # reject if version is empty
           end.join('; ')
         end
 
