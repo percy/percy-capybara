@@ -45,7 +45,7 @@ RSpec.describe Percy::Capybara do
     end
     it 'delegates to Percy::Capybara::Client' do
       capybara_client = Percy::Capybara.capybara_client
-      expect(capybara_client).to receive(:enabled?).and_return(:true)
+      expect(capybara_client).to receive(:enabled?).and_return(true)
       build_data = {'data' => {'id' => 123}}
       expect(capybara_client.client).to receive(:create_build).and_return(build_data).once
       Percy::Capybara.initialize_build
