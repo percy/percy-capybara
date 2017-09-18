@@ -78,7 +78,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
       expect(resources.first.content).to include('.colored-by-base')
     end
     context 'Rails app' do
-      before(:each) do
+      def setup_rails_double
         # Pretend like we're in a Rails app right now, all we care about is Rails.public_path.
         rails_double = double('Rails')
         # Pretend like the entire test_data directory is the public/ folder.
@@ -87,6 +87,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
         expect(loader).to receive(:_rails).at_least(:once).and_return(rails_double)
       end
       it 'includes files from the public folder (non-asset-pipeline)' do
+        setup_rails_double
         resources = loader.build_resources
         # Weak test that more things are in this list, because it merges asset pipeline with public.
         expect(resources.length).to be > 5
@@ -104,6 +105,7 @@ RSpec.describe Percy::Capybara::Loaders::SprocketsLoader do
           # This makes sure that we correctly merge already-compiled files in the assets directory
           # with ones from the asset pipeline. This means that Rails users who have
           # `config.assets.digest = true` set can safely run "rake assets:precompile" before tests.
+          setup_rails_double
           resources = loader.build_resources
           expected_digest_url = \
             '/assets/css/digested-f3420c6aee71c137a3ca39727052811bae84b2f37' \

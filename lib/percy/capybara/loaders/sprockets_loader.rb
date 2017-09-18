@@ -2,7 +2,7 @@ require 'percy/capybara/loaders/base_loader'
 require 'digest'
 require 'find'
 require 'set'
-require 'uri'
+require 'addressable/uri'
 
 module Percy
   module Capybara
@@ -52,7 +52,7 @@ module Percy
               # TODO: more robust support for Sprockets usage outside Rails, ie Sinatra.
               # How do we find the correct path in that case?
               path = sprockets_options.digest ? asset.digest_path : logical_path
-              resource_url = URI.escape("/assets/#{path}")
+              resource_url = Addressable::URI.escape("/assets/#{path}")
             end
 
             next if SKIP_RESOURCE_EXTENSIONS.include?(File.extname(resource_url))

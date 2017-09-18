@@ -38,7 +38,7 @@ RSpec.configure do |config|
     Capybara::Poltergeist::Driver.new(app, timeout: 1, url_blacklist: ['i.imgur.com'])
   end
 
-  config.before do
+  config.before(:each) do
     WebMock.disable_net_connect!(allow_localhost: true)
   end
   config.before(:each, type: :feature) do
