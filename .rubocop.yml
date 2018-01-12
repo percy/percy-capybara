@@ -2,6 +2,13 @@ inherit_gem:
   percy-style:
     - default.yml
 
+
 RSpec/InstanceVariable:
   Exclude:
     - spec/lib/percy/capybara_spec.rb
+
+RSpec/ContextWording:
+  Enabled: false
+
+AllCops:
+  TargetRubyVersion: 2.1
