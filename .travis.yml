@@ -13,5 +13,5 @@ before_install:
   - gem update --system
   - gem update bundler
 script:
-  - xvfb-run bundle exec rspec
+  - xvfb-run -a bundle exec rspec
   - bundle exec rubocop -D
