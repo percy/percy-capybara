@@ -34,7 +34,7 @@ module Percy
         @client = options[:client] || \
           Percy.client(client_info: _client_info, environment_info: _environment_info)
 
-        return unless defined?(Rails)
+        return unless defined?(Rails) && defined?(Sprockets::Rails)
 
         @sprockets_environment = options[:sprockets_environment] || Rails.application.assets
         @sprockets_options = options[:sprockets_options] || Rails.application.config.assets

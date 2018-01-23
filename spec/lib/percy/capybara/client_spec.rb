@@ -114,6 +114,62 @@ RSpec.describe Percy::Capybara::Client do
     it 'passes client info down to the lower level Percy client' do
       expect(capybara_client.client.client_info).to eq("percy-capybara/#{Percy::Capybara::VERSION}")
     end
+
+    context 'when Rails and Sprockets::Rails is defined' do
+      let(:environment) { double('environment') }
+      let(:options) { double('options') }
+
+      before(:each) do
+        rails = double(version: 5)
+
+        stub_const('Sprockets::Rails', double)
+        stub_const('Rails', rails)
+
+        allow(rails).to receive(:application) do
+          double(
+            assets: environment,
+            config: double(assets: options),
+          )
+        end
+      end
+
+      it 'assigns sprockets_environment to Rails.application.assets' do
+        expect(capybara_client.sprockets_environment).to eq environment
+      end
+
+      it 'assigns sprockets_options to Rails.application.config.assets' do
+        expect(capybara_client.sprockets_options).to eq options
+      end
+
+      context 'when sprockets_environment is passed' do
+        let(:passed_environment) { double('passed-environment') }
+        let(:capybara_client) do
+          Percy::Capybara::Client.new(
+            sprockets_environment: passed_environment,
+          )
+        end
+
+        it 'assigns sprockets_environment to the passed environment' do
+          expect(capybara_client.sprockets_environment).to eq passed_environment
+        end
+      end
+
+      context 'when sprockets_options is passed' do
+        let(:passed_options) { double('passed-options') }
+        let(:capybara_client) { Percy::Capybara::Client.new(sprockets_options: passed_options) }
+
+        it 'assigns sprockets_options to the passed options' do
+          expect(capybara_client.sprockets_options).to eq passed_options
+        end
+      end
+    end
+
+    context 'when Rails or Sprockets::Rails is not defined' do
+      it 'does not assign sprockets_environment or sprockets_options' do
+        expect(capybara_client.sprockets_environment).to_not be
+        expect(capybara_client.sprockets_options).to_not be
+      end
+    end
   end
 
   describe '#initialize_loader' do
