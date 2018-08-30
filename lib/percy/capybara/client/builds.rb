@@ -6,6 +6,7 @@ module Percy
           return unless enabled? # Silently skip if the client is disabled.
           return @current_build if build_initialized?
 
+
           # Gather build resources to upload with build.
           start = Time.now
           build_resources = options[:build_resources] || initialize_loader.build_resources
