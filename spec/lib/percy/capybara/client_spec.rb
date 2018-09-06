@@ -19,9 +19,9 @@ RSpec.describe Percy::Capybara::Client do
         expect(Percy::Capybara::Client.new.enabled?).to eq(false)
       end
 
-      it 'raises error if PERCY_TOKEN is set but PERCY_PROJECT is not' do
-        ENV.delete 'PERCY_PROJECT'
-        expect { Percy::Capybara::Client.new.enabled? }.to raise_error(RuntimeError)
+      it 'is false if PERCY_TOKEN is not set' do
+        ENV.delete 'PERCY_TOKEN'
+        expect(Percy::Capybara::Client.new.enabled?).to eq(false)
       end
     end
 

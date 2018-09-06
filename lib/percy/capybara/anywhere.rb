@@ -14,8 +14,8 @@ module Percy
     #   end
     module Anywhere
       def self.run(server, assets_dir, assets_base_url = nil)
-        unless ENV['PERCY_PROJECT'] && ENV['PERCY_TOKEN']
-          raise 'Whoops! You need to setup the PERCY_PROJECT and PERCY_TOKEN environment variables.'
+        if ENV['PERCY_TOKEN'].nil?
+          raise 'Whoops! You need to setup the PERCY_TOKEN environment variable.'
         end
 
         ::Capybara.run_server = false

@@ -50,13 +50,11 @@ module TestHelpers
   # Set the environment variables required by Percy::Client
   def set_required_env_variables
     ENV['PERCY_TOKEN'] = 'aa'
-    ENV['PERCY_PROJECT'] = 'aa'
   end
 
   # Clear the environment variables required by Percy::Client
   def clear_percy_env_variables
     ENV.delete('PERCY_TOKEN')
-    ENV.delete('PERCY_PROJECT')
     ENV.delete('PERCY_ENABLE')
   end
 end

@@ -16,7 +16,7 @@ module Percy
           Percy.logger.debug { "All build resources loaded (#{Time.now - start}s)" }
 
           rescue_connection_failures do
-            @current_build = client.create_build(client.config.repo, options)
+            @current_build = client.create_build(options)
             _upload_missing_build_resources(build_resources) unless build_resources.empty?
           end
           if failed?

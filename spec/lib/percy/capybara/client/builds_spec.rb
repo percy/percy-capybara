@@ -1,9 +1,7 @@
 RSpec.describe Percy::Capybara::Client::Builds do
   let(:enabled) { true }
   let(:capybara_client) { Percy::Capybara::Client.new(enabled: enabled) }
-  let(:builds_api_url) do
-    "https://percy.io/api/v1/repos/#{Percy::Client::Environment.repo}/builds/"
-  end
+  let(:builds_api_url) { "https://percy.io/api/v1/builds/" }
 
   describe '#initialize_build', type: :feature, js: true do
     before(:each) { setup_sprockets(capybara_client) }
@@ -104,7 +102,7 @@ RSpec.describe Percy::Capybara::Client::Builds do
     it 'returns the current build' do
       mock_double = double('build')
       expect(capybara_client.client).to receive(:create_build)
-        .with(capybara_client.client.config.repo, {})
+        .with({})
         .and_return(mock_double)
         .once
       capybara_client.initialize_build

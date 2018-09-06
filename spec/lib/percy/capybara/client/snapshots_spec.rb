@@ -47,8 +47,7 @@ RSpec.describe Percy::Capybara::Client::Snapshots, type: :feature do
 
         visit '/'
         loader # Force evaluation now.
-        repo = Percy::Client::Environment.repo
-        stub_request(:post, "https://percy.io/api/v1/repos/#{repo}/builds/")
+        stub_request(:post, "https://percy.io/api/v1/builds/")
           .to_return(status: 201, body: mock_build_response.to_json)
         stub_request(:post, 'https://percy.io/api/v1/builds/123/snapshots/')
           .to_return(status: 201, body: mock_snapshot_response.to_json)
