@@ -1,8 +1,12 @@
-IFRAME_PATH = File.expand_path('../../client/test_data/test-iframe.html', __FILE__)
+DIRECTORY_PATH = File.expand_path('../../client/test_data/', __FILE__)
 
 class RackAppWithIframe
   def self.call(_env)
-    [200, {}, File.read(IFRAME_PATH)]
+    [
+      404,
+      { 'Content-Type'  => 'text/html' },
+      ['404 - page not found']
+    ]
   end
 end
 
@@ -38,16 +42,21 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
       loader = Percy::Capybara::Loaders::BaseLoader.new(page: page, include_iframes: true)
       resources = loader.iframes_resources
 
-      expect(resources.size).to eq(1) # doesn't include iframe to remote host
+      expect(resources.size).to eq(2) # doesn't include iframe to remote host
+      first_resource = resources.first
+      expect(first_resource.resource_url).to eq('/iframe.html')
+      expect(first_resource.mimetype).to eq('text/html')
+      expect(first_resource.content).to include('Inside iframe')
+
       last_resource = resources.last
-      expect(last_resource.resource_url).to eq('/iframe.html')
+      expect(last_resource.resource_url).to eq('/iframe/')
       expect(last_resource.mimetype).to eq('text/html')
-      expect(last_resource.content).to include('Inside iframe')
+      expect(last_resource.content).to include('Inside directory iframe')
     end
     it 'skips poltergeist frame not found errors when include_iframes true' do
       visit '/test-iframe.html'
 
-      expect(page).to receive(:within_frame).twice
+      expect(page).to receive(:within_frame).thrice
         .and_raise(Capybara::Poltergeist::FrameNotFound, 'Hi')
       loader = Percy::Capybara::Loaders::BaseLoader.new(page: page, include_iframes: true)
       resources = loader.iframes_resources
@@ -56,7 +65,7 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
     it 'skips poltergeist timeout errors when include_iframes true' do
       visit '/test-iframe.html'
 
-      expect(page).to receive(:within_frame).twice
+      expect(page).to receive(:within_frame).thrice
         .and_raise(Capybara::Poltergeist::TimeoutError, 'Hi')
       loader = Percy::Capybara::Loaders::BaseLoader.new(page: page, include_iframes: true)
       resources = loader.iframes_resources
@@ -101,7 +110,24 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
   end
 
   context 'Rack::Test', type: :feature do
-    before(:each) { Capybara.app = RackAppWithIframe }
+    before(:each) do
+      Capybara.app = Rack::Builder.new do |builder|
+        use Rack::Static, 
+        :urls => {
+          '/' => 'test-iframe.html',
+          '/iframe/' => './iframe/index.html',
+          '/iframe.html' => './iframe.html',
+        }
+        run lambda { |env|
+          [
+            404,
+            { 'Content-Type'  => 'text/html' },
+            ['404 - page not found']
+          ]
+        }
+      end
+    end
+
     after(:each) { Capybara.app = nil }
 
     describe '#iframes_resources' do
