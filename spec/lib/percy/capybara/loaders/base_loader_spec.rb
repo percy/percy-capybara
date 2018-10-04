@@ -1,15 +1,5 @@
 DIRECTORY_PATH = File.expand_path('../../client/test_data/', __FILE__)
 
-class RackAppWithIframe
-  def self.call(_env)
-    [
-      404,
-      { 'Content-Type'  => 'text/html' },
-      ['404 - page not found']
-    ]
-  end
-end
-
 RSpec.describe Percy::Capybara::Loaders::BaseLoader do
   let(:loader) { Percy::Capybara::Loaders::BaseLoader.new }
 
