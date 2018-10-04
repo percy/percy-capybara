@@ -74,6 +74,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
           '/css/level2-imports.css',
           '/css/simple-imports.css',
           '/iframe.html',
+          '/iframe/index.html',
           '/images/bg-relative-to-root.png',
           '/images/bg-relative.png',
           '/images/bg-stacked.png',
