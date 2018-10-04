@@ -107,6 +107,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
           '/url-prefix/css/simple-imports.css',
           '/url-prefix/css/font.css',
           '/url-prefix/iframe.html',
+          '/url-prefix/iframe/index.html',
           '/url-prefix/images/bg-relative-to-root.png',
           '/url-prefix/images/bg-relative.png',
           '/url-prefix/images/bg-stacked.png',
