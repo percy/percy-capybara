@@ -105,8 +105,8 @@ RSpec.describe Percy::Capybara::Loaders::BaseLoader do
         use Rack::Static, 
         :urls => {
           '/' => 'test-iframe.html',
-          '/iframe/' => './iframe/index.html',
           '/iframe.html' => './iframe.html',
+          '/iframe/' => './iframe/index.html',
         }
         run lambda { |env|
           [
