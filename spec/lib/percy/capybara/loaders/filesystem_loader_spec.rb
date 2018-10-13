@@ -54,6 +54,19 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
       resource_urls = loader.snapshot_resources.collect(&:resource_url)
       expect(resource_urls).to match_array(['/test-css.html'])
     end
+    it 'finds non-static iframe resource' do
+      visit '/test-dynamic-iframe.html'
+      loader = Percy::Capybara::Loaders::FilesystemLoader.new(
+        base_url: base_url,
+        assets_dir: assets_dir,
+        page: page,
+        include_iframes: true
+      )
+      resource_urls = loader.snapshot_resources.collect(&:resource_url)
+      # /dynamic-iframe/ does not match any static asset so won't be discovered
+      # already by #build_resources
+      expect(resource_urls).to match_array(['/test-dynamic-iframe.html', '/dynamic-iframe/'])
+    end
   end
 
   describe '#build_resources' do
@@ -89,6 +102,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
           '/test-css.html',
           '/test-font.html',
           '/test-iframe.html',
+          '/test-dynamic-iframe.html',
           '/test-images.html',
           '/test-localtest-me-images.html',
         ]
@@ -122,6 +136,7 @@ RSpec.describe Percy::Capybara::Loaders::FilesystemLoader do
           '/url-prefix/test-css.html',
           '/url-prefix/test-font.html',
           '/url-prefix/test-iframe.html',
+          '/url-prefix/test-dynamic-iframe.html',
           '/url-prefix/test-images.html',
           '/url-prefix/test-localtest-me-images.html',
         ]

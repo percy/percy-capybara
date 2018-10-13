@@ -25,7 +25,7 @@ module Percy
         end
 
         def snapshot_resources
-          [root_html_resource]
+          [root_html_resource] + iframes_resources
         end
 
         def build_resources
