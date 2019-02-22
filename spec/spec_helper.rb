@@ -1,9 +1,9 @@
 require 'capybara/rspec'
-require 'capybara/poltergeist'
 require 'webmock/rspec'
 require 'support/test_helpers'
 require 'percy'
 require 'percy/capybara'
+require 'selenium-webdriver'
 
 RSpec.configure do |config|
   config.include TestHelpers
@@ -32,11 +32,9 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 
-  # Comment this out to test the default Selenium/Firefox flow:
-  Capybara.javascript_driver = :poltergeist
-  Capybara.register_driver :poltergeist do |app|
-    Capybara::Poltergeist::Driver.new(app, timeout: 1, url_blacklist: ['i.imgur.com'])
-  end
+  # See https://github.com/teamcapybara/capybara#selecting-the-driver for other options
+  Capybara.default_driver = :selenium_chrome_headless
+  Capybara.javascript_driver = :selenium_chrome_headless
 
   config.before(:each) do
     WebMock.disable_net_connect!(allow_localhost: true)

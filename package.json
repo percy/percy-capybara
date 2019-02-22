@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "vendorize": "npm install && mkdir -p vendor && cp node_modules/@percy/agent/dist/public/percy-agent.js vendor/percy-agent.js"
+  },
+  "devDependencies": {
+    "@percy/agent": "^0.1.15"
+  }
+}

@@ -1,60 +1,77 @@
+require 'net/http'
+require 'uri'
+require 'json'
 require 'percy'
-require 'percy/capybara/version'
-require 'percy/capybara/httpfetcher'
-require 'percy/capybara/client'
+require 'percy/capybara/environment'
 
 module Percy
-  module Capybara
-    # @see Percy::Capybara::Client
-    def self.capybara_client(options = {})
-      @capybara_client ||= Percy::Capybara::Client.new(options)
+  AGENT_HOST = "localhost"
+  # Technically, the port is configurable when you run the agent. One day we might want
+  # to make the port configurable in this SDK as well.
+  AGENT_PORT = 5338
+  AGENT_JS_PATH= File.join(File.dirname(__FILE__), "../../vendor/percy-agent.js")
+
+  def self.snapshot(page, options = {})
+    return unless self._is_agent_running?
+
+    domSnapshot = self._make_dom_snapshot(page)
+    return unless domSnapshot
+
+    if !options.has_key?(:name)
+      options[:name] = page.current_url
     end
 
-    # {include:Percy::Capybara::Client::Snapshots#snapshot}
-    # @param (see Percy::Capybara::Client::Snapshots#snapshot)
-    # @option (see Percy::Capybara::Client::Snapshots#snapshot)
-    # @see Percy::Capybara::Client::Snapshots#snapshot
-    def self.snapshot(page, options = {})
-      capybara_client.snapshot(page, options)
-    end
+    body = {
+      url: page.current_url,
+      domSnapshot: domSnapshot,
+      clientInfo: Percy::Capybara.client_info,
+      environmentInfo: Percy::Capybara.environment_info,
+    }
+    body = body.merge(options)
+    self._post_snapshot_to_agent(body)
+  end
 
-    # Creates a new build.
-    #
-    # This usually does not need to be called explictly because the build is automatically created
-    # the first time a snapshot is created. However, this method might be useful in situations like
-    # multi-process tests where a single build must be created before forking.
-    #
-    # @see Percy::Capybara::Client::Builds#initialize_build
-    def self.initialize_build(options = {})
-      capybara_client.initialize_build(options)
+  private
+  def self._get_agent_js
+    begin
+      return File.read(AGENT_JS_PATH)
+    rescue => e
+      Percy.logger.error { "Could not read percy-agent.js. Snapshots won't work. Error: #{e}" }
+      return nil
     end
+  end
 
-    # Finalize the current build.
-    #
-    # This must be called to indicate that the build is complete after all snapshots have been
-    # taken. It will silently return if no build or snapshots were created.
-    #
-    # @see Percy::Capybara::Client::Builds#finalize_current_build
-    def self.finalize_build
-      return unless capybara_client.build_initialized?
-      capybara_client.finalize_current_build
+  def self._make_dom_snapshot(page)
+    agent_js = self._get_agent_js
+    return unless agent_js
+
+    page.execute_script(agent_js)
+    dom_snapshot_js = <<-JS
+    (function() {
+      var percyAgentClient = new PercyAgent({ handleAgentCommunication: false });
+      return percyAgentClient.snapshot('unused');
+    })()
+    JS
+    page.evaluate_script(dom_snapshot_js)
+  end
+
+  def self._post_snapshot_to_agent(body)
+    http = Net::HTTP.new(AGENT_HOST, AGENT_PORT)
+    request = Net::HTTP::Post.new('/percy/snapshot', { 'Content-Type': 'application/json' })
+    request.body = body.to_json
+    begin
+      response = http.request(request)
+    rescue => e
+      Percy.logger.error { "Agent rejected snapshot request. Error: #{e}" }
     end
+  end
 
-    # Reset the global Percy::Capybara module state.
-    def self.reset!
-      @capybara_client = nil
-    end
-    # The 'reset' method is deprecated and will be removed: use the reset! method instead.
-    class << self; alias reset reset!; end
-
-    # Manually disable Percy for the current capybara client. This can also be done with the
-    # PERCY_ENABLE=0 environment variable.
-    def self.disable!
-      capybara_client.disable!
-    end
-
-    def self.use_loader(loader, options = {})
-      capybara_client(loader: loader, loader_options: options)
+  def self._is_agent_running?
+    begin
+      Net::HTTP.get(AGENT_HOST, '/percy/healthcheck', AGENT_PORT)
+      return true
+    rescue
+      return false
     end
   end
 end

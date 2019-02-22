@@ -12,28 +12,34 @@ default_steps: &default_steps
     - run: gem update --system
     # We need this specific version of bundler for our Gemfile. (v2 doesn't work)
     - run: gem install bundler --version '1.7'
+    - run: npm install
     - run: bundle install
-    - run: bundle exec rspec
+    - run: bundle exec rake snapshots
     - run: bundle exec rubocop -D
 
 jobs:
-  ruby_latest:
+  ruby_latest_with_percy:
+    # This is the one environment where we'll capture and upload snapshots in CI.
     docker:
       - image: circleci/ruby:latest-node-browsers
     <<: *default_steps
   ruby_25:
     docker:
       - image: circleci/ruby:2.5-node-browsers
+    environment:
+      PERCY_ENABLE: 0
     <<: *default_steps
   ruby_24:
     docker:
       - image: circleci/ruby:2.4-node-browsers
+    environment:
+      PERCY_ENABLE: 0
     <<: *default_steps
 
 workflows:
   version: 2
   test:
     jobs:
-      - ruby_latest
+      - ruby_latest_with_percy
       - ruby_25
       - ruby_24
