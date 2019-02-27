@@ -4,7 +4,8 @@ default_steps: &default_steps
   steps:
     - checkout
     - run: gem update --system
-    - run: gem update bundler
+    # We need this specific version of bundler for our Gemfile. (v2 doesn't work)
+    - run: gem install bundler --version '1.7'
     - run: bundle install
     - run: xvfb-run bundle exec rspec
     - run: bundle exec rubocop -D
@@ -24,7 +25,7 @@ jobs:
     <<: *default_steps
   ruby_22:
     docker:
-      - image: circleci/ruby:2.2-node-browsers
+      - image: circleci/ruby:2.2.6-node-browsers
     <<: *default_steps
 
 workflows:
