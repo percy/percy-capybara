@@ -1,5 +1,4 @@
 require 'capybara/rspec'
-require 'webmock/rspec'
 require 'support/test_helpers'
 require 'percy'
 require 'percy/capybara'
@@ -36,13 +35,6 @@ RSpec.configure do |config|
   Capybara.default_driver = :selenium_chrome_headless
   Capybara.javascript_driver = :selenium_chrome_headless
 
-  config.before(:each) do
-    WebMock.disable_net_connect!(allow_localhost: true)
-  end
-  config.before(:each, type: :feature) do
-    WebMock.disable_net_connect!(allow_localhost: true, allow: [/i.imgur.com/])
-  end
-
   # Cover all debug messages by outputting them in this gem's tests.
   Percy.config.debug = true
 
@@ -64,8 +56,7 @@ RSpec.configure do |config|
     )
 
     # Block until the server is up.
-    WebMock.disable_net_connect!(allow_localhost: true)
-    verify_server_up(Capybara.app_host)
+    verify_server_up('localhost', port)
   end
   config.after(:all, type: :feature) { Process.kill('INT', @process.pid) }
 end

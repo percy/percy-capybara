@@ -1,3 +1,4 @@
+require 'net/http'
 require 'socket'
 require 'timeout'
 require 'sprockets'
@@ -13,17 +14,16 @@ module TestHelpers
     port
   end
 
-  def verify_server_up(host)
-    http = HTTPClient.new
+  def verify_server_up(host, port)
     4.times do
       begin
-        http.get(host)
+        Net::HTTP.get(host, '/', port)
         return true
       rescue Errno::ECONNREFUSED, Errno::EADDRNOTAVAIL
         sleep 0.5
       end
     end
-    raise ServerDown, "Server failed to start: #{host}"
+    raise ServerDown, "Server failed to start: #{host}:#{port}"
   end
 
   def find_resource(resources, regex)
