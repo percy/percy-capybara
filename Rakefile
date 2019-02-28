@@ -8,6 +8,5 @@ task :snapshots do
     abort "Could not find #{AGENT_BIN}. Please run npm install and try again."
     return
   end
-  # TODO: Update this to just 'rspec'
-  sh %{ #{AGENT_BIN} exec -- bundle exec rspec spec/lib/percy/capybara_spec.rb  }
+  sh %{ #{AGENT_BIN} exec -- bundle exec rspec  }
 end
