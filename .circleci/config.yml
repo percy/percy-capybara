@@ -9,7 +9,7 @@ default_steps: &default_steps
     # We need this specific version of bundler for our Gemfile. (v2 doesn't work)
     - run: gem install bundler --version '1.7'
     - run: bundle install
-    - run: xvfb-run bundle exec rspec
+    - run: bundle exec rspec
     - run: bundle exec rubocop -D
 
 jobs:
