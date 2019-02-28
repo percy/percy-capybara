@@ -19,7 +19,7 @@ module TestHelpers
       begin
         http.get(host)
         return true
-      rescue Errno::ECONNREFUSED
+      rescue Errno::ECONNREFUSED, Errno::EADDRNOTAVAIL
         sleep 0.5
       end
     end
