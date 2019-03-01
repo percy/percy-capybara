@@ -5,12 +5,18 @@ require 'json'
 require 'percy/capybara/environment'
 
 module Percy
-  AGENT_HOST = "localhost"
-  # Technically, the port is configurable when you run the agent. One day we might want
-  # to make the port configurable in this SDK as well.
-  AGENT_PORT = 5338
-  AGENT_JS_PATH= File.join(File.dirname(__FILE__), "../../vendor/percy-agent.js")
-
+  # Takes a snapshot of the given page HTML and its assets.
+  #
+  # See https://docs.percy.io/v1/docs/configuration for detailed documentation on
+  # snapshot options.
+  #
+  # @param [Capybara::Session] page The Capybara page to snapshot.
+  # @param [Hash] options
+  # @option options [String] :name A unique name for the current page that identifies
+  #   it across builds. By default this is the URL of the page, but can be customized if the
+  #   URL does not entirely identify the current state.
+  # @option options [Array(Number)] :widths Widths, in pixels, that you'd like to capture for
+  #   this snapshot.
   def self.snapshot(page, options = {})
     return unless self._is_agent_running?
 
@@ -32,6 +38,13 @@ module Percy
   end
 
   private
+
+  AGENT_HOST = "localhost"
+  # Technically, the port is configurable when you run the agent. One day we might want
+  # to make the port configurable in this SDK as well.
+  AGENT_PORT = 5338
+  AGENT_JS_PATH= File.join(File.dirname(__FILE__), "../../vendor/percy-agent.js")
+
   def self._logger
     unless defined?(@logger)
       @logger = Logger.new(STDOUT)
