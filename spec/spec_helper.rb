@@ -1,6 +1,5 @@
 require 'capybara/rspec'
 require 'support/test_helpers'
-require 'percy/capybara'
 require 'selenium-webdriver'
 
 RSpec.configure do |config|
