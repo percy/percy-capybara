@@ -6,7 +6,6 @@ desc 'Run all tests and upload snapshots'
 task :snapshots do
   unless File.exist?(AGENT_BIN)
     abort "Could not find #{AGENT_BIN}. Please run npm install and try again."
-    return
   end
   sh %( #{AGENT_BIN} exec -- bundle exec rspec  )
 end
