@@ -18,35 +18,28 @@ RSpec.describe Percy, type: :feature do
         Percy.snapshot(page)
       end
     end
-    context 'with local sites' do
+    context 'with different options' do
       it 'can get a default name' do
-        visit '/'
+        visit 'http://example.com'
         Percy.snapshot(page)
       end
       it 'uses query params and fragment for default name' do
-        visit '/?with_query'
+        visit 'http://example.com/?with_query'
         Percy.snapshot(page)
-        visit '/?with_query_params#and-fragment'
+        visit 'http://example.com/?with_query_params#and-fragment'
         Percy.snapshot(page)
       end
       it 'uses provided name' do
-        visit '/'
+        visit 'http://example.com'
         Percy.snapshot(page, name: 'My very special snapshot 🌟')
       end
       it 'recognizes requested widths' do
-        visit '/'
+        visit 'http://example.com'
         Percy.snapshot(page, { name: 'widths', widths: [768, 992, 1200] })
       end
       it 'recognizes minHeight' do
-        visit '/'
+        visit 'http://example.com'
         Percy.snapshot(page, { name: 'minHeight', minHeight: 2000 })
-      end
-      it 'works with all of our test case pages' do
-        Dir.glob(TEST_CASE_GLOB) do |fname|
-          case_name = File.basename(fname)
-          visit case_name
-          Percy.snapshot(page, name: case_name)
-        end
       end
     end
   end
