@@ -1,6 +1,5 @@
 require 'capybara/rspec'
 require 'support/test_helpers'
-require 'percy'
 require 'percy/capybara'
 require 'selenium-webdriver'
 
@@ -34,9 +33,6 @@ RSpec.configure do |config|
   # See https://github.com/teamcapybara/capybara#selecting-the-driver for other options
   Capybara.default_driver = :selenium_chrome_headless
   Capybara.javascript_driver = :selenium_chrome_headless
-
-  # Cover all debug messages by outputting them in this gem's tests.
-  Percy.config.debug = true
 
   # Start a temp webserver that serves the test_data directory.
   # You can test this server manually by running:

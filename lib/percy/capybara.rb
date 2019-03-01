@@ -1,7 +1,7 @@
+require 'logger'
 require 'net/http'
 require 'uri'
 require 'json'
-require 'percy'
 require 'percy/capybara/environment'
 
 module Percy
@@ -32,11 +32,21 @@ module Percy
   end
 
   private
+  def self._logger
+    unless defined?(@logger)
+      @logger = Logger.new(STDOUT)
+      @logger.formatter = proc do |_severity, _datetime, _progname, msg|
+        "[percy] #{msg} \n"
+      end
+    end
+    return @logger
+  end
+
   def self._get_agent_js
     begin
       return File.read(AGENT_JS_PATH)
     rescue => e
-      Percy.logger.error { "Could not read percy-agent.js. Snapshots won't work. Error: #{e}" }
+      self._logger.error { "Could not read percy-agent.js. Snapshots won't work. Error: #{e}" }
       return nil
     end
   end
@@ -62,7 +72,7 @@ module Percy
     begin
       response = http.request(request)
     rescue => e
-      Percy.logger.error { "Agent rejected snapshot request. Error: #{e}" }
+      self._logger.error { "Agent rejected snapshot request. Error: #{e}" }
     end
   end
 
