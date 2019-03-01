@@ -27,7 +27,7 @@ module Percy
       clientInfo: Percy::Capybara.client_info,
       environmentInfo: Percy::Capybara.environment_info,
     }
-    body = body.merge(options)
+    body = body.merge(self._keys_to_json(options))
     self._post_snapshot_to_agent(body)
   end
 
@@ -73,5 +73,19 @@ module Percy
     rescue
       return false
     end
+  end
+
+  # For backwards-compatibility, transform select option keys from snake_case to camelCase.
+  def self._keys_to_json(options)
+    {
+      enable_javascript: :enableJavascript,
+      minimum_height: :minHeight,
+    }.each do |ruby_key, json_key|
+      if options.has_key? ruby_key
+        options[json_key] = options[ruby_key]
+        options.delete(ruby_key)
+      end
+    end
+    return options
   end
 end
