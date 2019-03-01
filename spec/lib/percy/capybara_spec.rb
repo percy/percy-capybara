@@ -2,6 +2,7 @@ require 'percy/capybara'
 
 RSpec.describe Percy, type: :feature do
   TEST_CASE_GLOB =  File.join(File.dirname(__FILE__), "./capybara/client/test_data/test-*.html")
+
   describe '#snapshot', type: :feature, js: true do
     context 'with live sites' do
       it 'snapshots simple HTTPS site' do
@@ -20,6 +21,12 @@ RSpec.describe Percy, type: :feature do
     context 'with local sites' do
       it 'can get a default name' do
         visit '/'
+        Percy.snapshot(page)
+      end
+      it 'uses query params and fragment for default name' do
+        visit '/?with_query'
+        Percy.snapshot(page)
+        visit '/?with_query_params#and-fragment'
         Percy.snapshot(page)
       end
       it 'uses provided name' do
