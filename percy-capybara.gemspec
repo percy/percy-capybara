@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'capybara', '~> 2.4'
   spec.add_development_dependency 'poltergeist'
   spec.add_development_dependency 'selenium-webdriver'
-  spec.add_development_dependency 'webmock', '~> 1'
+  spec.add_development_dependency 'webmock', '~> 3'
   spec.add_development_dependency 'mime-types', '< 3' # For Ruby 1.9 testing support.
   spec.add_development_dependency 'faraday', '>= 0.8'
   spec.add_development_dependency 'httpclient', '~> 2.8'
