@@ -68,14 +68,19 @@ module Percy
     agent_js = self._get_agent_js
     return unless agent_js
 
-    page.execute_script(agent_js)
-    dom_snapshot_js = <<-JS
-    (function() {
-      var percyAgentClient = new PercyAgent({ handleAgentCommunication: false });
-      return percyAgentClient.snapshot('unused');
-    })()
-    JS
-    page.evaluate_script(dom_snapshot_js)
+    begin
+      page.execute_script(agent_js)
+      dom_snapshot_js = <<-JS
+      (function() {
+        var percyAgentClient = new PercyAgent({ handleAgentCommunication: false });
+        return percyAgentClient.snapshot('unused');
+      })()
+      JS
+      return page.evaluate_script(dom_snapshot_js)
+    rescue => e
+      self._logger.error { "Snapshotting failed. Note that Poltergeist and Rake::Test are no longer supported by percy-capybara. Error: #{e}"}
+      return nil
+    end
   end
 
   def self._post_snapshot_to_agent(body)
