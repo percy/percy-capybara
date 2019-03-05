@@ -39,11 +39,11 @@ module Percy
 
   private
 
-  AGENT_HOST = "localhost"
+  AGENT_HOST = 'localhost'
   # Technically, the port is configurable when you run the agent. One day we might want
   # to make the port configurable in this SDK as well.
   AGENT_PORT = 5338
-  AGENT_JS_PATH= File.join(File.dirname(__FILE__), "../vendor/percy-agent.js")
+  AGENT_JS_PATH= '/percy-agent.js'
 
   def self._logger
     unless defined?(@logger)
@@ -57,9 +57,9 @@ module Percy
 
   def self._get_agent_js
     begin
-      return File.read(AGENT_JS_PATH)
+      return Net::HTTP.get(AGENT_HOST, AGENT_JS_PATH, AGENT_PORT)
     rescue => e
-      self._logger.error { "Could not read percy-agent.js. Snapshots won't work. Error: #{e}" }
+      self._logger.error { "Could not load #{AGENT_JS_PATH}. Error: #{e}"}
       return nil
     end
   end
