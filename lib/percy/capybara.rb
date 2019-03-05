@@ -98,7 +98,7 @@ module Percy
     end
   end
 
-  # For backwards-compatibility, transform select option keys from snake_case to camelCase.
+  # For Ruby style, require snake_case args but transform them into camelCase for percy-agent.
   def self._keys_to_json(options)
     {
       enable_javascript: :enableJavascript,
