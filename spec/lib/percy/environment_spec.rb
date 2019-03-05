@@ -1,8 +1,8 @@
-RSpec.describe Percy::Capybara do
-  subject(:our_module) { Percy::Capybara }
+RSpec.describe Percy do
+  subject(:our_module) { Percy }
 
   describe '#environment_info' do
-    subject(:environment_info) { Percy::Capybara.environment_info }
+    subject(:environment_info) { Percy.environment_info }
 
     context 'an app with Rails, Sinatra and Ember Cli Rails' do
       it 'returns full environment information' do
@@ -22,10 +22,10 @@ RSpec.describe Percy::Capybara do
   end
 
   describe '#client_info' do
-    subject(:client_info) { Percy::Capybara.client_info }
+    subject(:client_info) { Percy.client_info }
 
     it 'includes client information' do
-      expect(client_info).to eq("percy-capybara/#{Percy::Capybara::VERSION}")
+      expect(client_info).to eq("percy-capybara/#{Percy::VERSION}")
     end
   end
 end

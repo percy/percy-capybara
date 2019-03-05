@@ -1,5 +1,3 @@
-require 'percy/capybara'
-
 RSpec.describe Percy, type: :feature do
   TEST_CASE_GLOB =  File.join(File.dirname(__FILE__), "./capybara/client/test_data/test-*.html")
 

@@ -1,5 +1,6 @@
 require 'capybara/rspec'
 require 'selenium-webdriver'
+require 'percy'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|

@@ -1,14 +1,14 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'percy/capybara/version'
+require 'version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'percy-capybara'
-  spec.version       = Percy::Capybara::VERSION
+  spec.version       = Percy::VERSION
   spec.authors       = ['Perceptual Inc.']
   spec.email         = ['team@percy.io']
-  spec.summary       = %q{Percy::Capybara}
+  spec.summary       = %q{Percy}
   spec.description   = %q{}
   spec.homepage      = ''
   spec.license       = 'MIT'

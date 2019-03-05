@@ -2,7 +2,7 @@ require 'logger'
 require 'net/http'
 require 'uri'
 require 'json'
-require 'percy/capybara/environment'
+require 'environment'
 
 module Percy
   # Takes a snapshot of the given page HTML and its assets.
@@ -30,8 +30,8 @@ module Percy
     body = {
       url: page.current_url,
       domSnapshot: domSnapshot,
-      clientInfo: Percy::Capybara.client_info,
-      environmentInfo: Percy::Capybara.environment_info,
+      clientInfo: Percy.client_info,
+      environmentInfo: Percy.environment_info,
     }
     body = body.merge(self._keys_to_json(options))
     self._post_snapshot_to_agent(body)
@@ -43,7 +43,7 @@ module Percy
   # Technically, the port is configurable when you run the agent. One day we might want
   # to make the port configurable in this SDK as well.
   AGENT_PORT = 5338
-  AGENT_JS_PATH= File.join(File.dirname(__FILE__), "../../vendor/percy-agent.js")
+  AGENT_JS_PATH= File.join(File.dirname(__FILE__), "../vendor/percy-agent.js")
 
   def self._logger
     unless defined?(@logger)
