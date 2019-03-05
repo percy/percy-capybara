@@ -8,7 +8,7 @@ default_steps: &default_steps
     - run: gem install bundler --version '1.7'
     - run: npm install
     - run: bundle install
-    - run: bundle exec rake snapshots
+    - run: npx percy exec -- bundle exec rspec
     - run: bundle exec rubocop -D
 
 jobs:
