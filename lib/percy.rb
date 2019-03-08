@@ -59,7 +59,7 @@ module Percy
     begin
       return Net::HTTP.get(AGENT_HOST, AGENT_JS_PATH, AGENT_PORT)
     rescue => e
-      self._logger.error { "Could not load #{AGENT_JS_PATH}. Error: #{e}"}
+      self._logger.error { "Could not load #{AGENT_JS_PATH}. Error: #{e}" }
       return nil
     end
   end
@@ -78,7 +78,7 @@ module Percy
       JS
       return page.evaluate_script(dom_snapshot_js)
     rescue => e
-      self._logger.error { "Snapshotting failed. Note that Poltergeist and Rake::Test are no longer supported by percy-capybara. Error: #{e}"}
+      self._logger.error { "Snapshotting failed. Note that Poltergeist and Rake::Test are no longer supported by percy-capybara. Error: #{e}" }
       return nil
     end
   end
