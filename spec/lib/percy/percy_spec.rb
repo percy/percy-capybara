@@ -44,12 +44,12 @@ RSpec.describe Percy, type: :feature do
 
   describe '_keys_to_json' do
     it 'transforms keys from snake_case to JSON-style' do
-      original = { enable_javascript: true, minimum_height: 2000 }
+      original = { enable_javascript: true, min_height: 2000 }
       transformed = Percy._keys_to_json(original)
       expect(transformed.has_key? 'enableJavascript')
       expect(transformed.has_key? 'minHeight')
       expect(transformed['enableJavascript']).to eq(original[:enable_javascript])
-      expect(transformed['minHeight']).to eq(original[:minimum_height])
+      expect(transformed['minHeight']).to eq(original[:min_height])
     end
   end
 end

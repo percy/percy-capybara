@@ -107,7 +107,7 @@ module Percy
   def self._keys_to_json(options)
     {
       enable_javascript: :enableJavascript,
-      minimum_height: :minHeight,
+      min_height: :minHeight,
     }.each do |ruby_key, json_key|
       if options.has_key? ruby_key
         options[json_key] = options[ruby_key]
