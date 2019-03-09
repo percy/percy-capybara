@@ -1,3 +1,5 @@
+require 'version'
+
 module Percy
   def self.client_info
     "percy-capybara/#{VERSION}"
