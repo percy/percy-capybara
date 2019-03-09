@@ -1,13 +1,8 @@
 require 'capybara/rspec'
-require 'capybara/poltergeist'
-require 'webmock/rspec'
-require 'support/test_helpers'
+require 'selenium-webdriver'
 require 'percy'
-require 'percy/capybara'
 
 RSpec.configure do |config|
-  config.include TestHelpers
-
   config.expect_with :rspec do |expectations|
     # This option will default to `true` in RSpec 4.
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
@@ -32,42 +27,7 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 
-  # Comment this out to test the default Selenium/Firefox flow:
-  Capybara.javascript_driver = :poltergeist
-  Capybara.register_driver :poltergeist do |app|
-    Capybara::Poltergeist::Driver.new(app, timeout: 1, url_blacklist: ['i.imgur.com'])
-  end
-
-  config.before(:each) do
-    WebMock.disable_net_connect!(allow_localhost: true)
-  end
-  config.before(:each, type: :feature) do
-    WebMock.disable_net_connect!(allow_localhost: true, allow: [/i.imgur.com/])
-  end
-
-  # Cover all debug messages by outputting them in this gem's tests.
-  Percy.config.debug = true
-
-  # Start a temp webserver that serves the test_data directory.
-  # You can test this server manually by running:
-  # ruby -run -e httpd spec/lib/percy/capybara/client/test_data/ -p 9090
-  config.before(:all, type: :feature) do
-    port = random_open_port
-    Capybara.app = nil
-    Capybara.app_host = "http://localhost:#{port}"
-    Capybara.run_server = false
-
-    # Note: using this form of popen to keep stdout and stderr silent and captured.
-    dir = File.expand_path('../lib/percy/capybara/client/test_data/', __FILE__)
-    @process = IO.popen(
-      [
-        'ruby', '-run', '-e', 'httpd', dir, '-p', port.to_s, err: [:child, :out],
-      ].flatten,
-    )
-
-    # Block until the server is up.
-    WebMock.disable_net_connect!(allow_localhost: true)
-    verify_server_up(Capybara.app_host)
-  end
-  config.after(:all, type: :feature) { Process.kill('INT', @process.pid) }
+  # See https://github.com/teamcapybara/capybara#selecting-the-driver for other options
+  Capybara.default_driver = :selenium_chrome_headless
+  Capybara.javascript_driver = :selenium_chrome_headless
 end
