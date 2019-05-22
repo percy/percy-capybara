@@ -106,7 +106,7 @@ module Percy
   # For Ruby style, require snake_case args but transform them into camelCase for percy-agent.
   def self._keys_to_json(options)
     {
-      enable_javascript: :enableJavascript,
+      enable_javascript: :enableJavaScript,
       min_height: :minHeight,
     }.each do |ruby_key, json_key|
       if options.has_key? ruby_key
