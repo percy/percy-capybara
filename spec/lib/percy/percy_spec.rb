@@ -1,3 +1,4 @@
+# coding: utf-8
 RSpec.describe Percy, type: :feature do
   TEST_CASE_GLOB =  File.join(File.dirname(__FILE__), "./capybara/client/test_data/test-*.html")
 
@@ -38,6 +39,10 @@ RSpec.describe Percy, type: :feature do
       it 'recognizes minHeight' do
         visit 'http://example.com'
         Percy.snapshot(page, { name: 'minHeight', minHeight: 2000 })
+      end
+      it 'recognizes enableJavascript' do
+        visit 'http://example.com'
+        Percy.snapshot(page, { name: 'enableJavaScript', enable_javascript: true })
       end
     end
   end
