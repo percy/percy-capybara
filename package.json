@@ -1,6 +1,6 @@
 {
   "private": true,
   "devDependencies": {
-    "@percy/agent": "^0.1.15"
+    "@percy/agent": "~0"
   }
 }

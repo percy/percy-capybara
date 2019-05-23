@@ -39,6 +39,10 @@ RSpec.describe Percy, type: :feature do
         visit 'http://example.com'
         Percy.snapshot(page, { name: 'minHeight', minHeight: 2000 })
       end
+      it 'recognizes enable_javascript' do
+        visit 'http://example.com'
+        Percy.snapshot(page, { name: 'enableJavaScript', enable_javascript: true })
+      end
     end
   end
 
@@ -46,9 +50,9 @@ RSpec.describe Percy, type: :feature do
     it 'transforms keys from snake_case to JSON-style' do
       original = { enable_javascript: true, min_height: 2000 }
       transformed = Percy._keys_to_json(original)
-      expect(transformed.has_key? 'enableJavascript')
+      expect(transformed.has_key? 'enableJavaScript')
       expect(transformed.has_key? 'minHeight')
-      expect(transformed['enableJavascript']).to eq(original[:enable_javascript])
+      expect(transformed['enableJavaScript']).to eq(original[:enable_javascript])
       expect(transformed['minHeight']).to eq(original[:min_height])
     end
   end
