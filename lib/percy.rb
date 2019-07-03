@@ -66,6 +66,11 @@ module Percy
 
   def self._make_dom_snapshot(page)
     agent_js = self._get_agent_js
+
+    if self._is_debug?
+      self._logger.info { "agent_js file: #{agent_js}" }
+    end
+
     return unless agent_js
 
     begin
@@ -99,7 +104,10 @@ module Percy
       Net::HTTP.get(AGENT_HOST, '/percy/healthcheck', AGENT_PORT)
       return true
     rescue => e
-      self._logger.error { "Healthcheck failed, agent is not running: #{e}" }
+      if self._is_debug?
+        self._logger.error { "Healthcheck failed, agent is not running: #{e}" }
+      end
+
       return false
     end
   end
@@ -116,5 +124,9 @@ module Percy
       end
     end
     return options
+  end
+
+  def self._is_debug?
+    ENV['LOG_LEVEL'] == 'debug'
   end
 end
