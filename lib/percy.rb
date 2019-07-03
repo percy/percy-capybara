@@ -98,7 +98,8 @@ module Percy
     begin
       Net::HTTP.get(AGENT_HOST, '/percy/healthcheck', AGENT_PORT)
       return true
-    rescue
+    rescue => e
+      self._logger.error { "Healthcheck failed, agent is not running: #{e}" }
       return false
     end
   end
