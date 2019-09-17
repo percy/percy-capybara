@@ -43,17 +43,23 @@ RSpec.describe Percy, type: :feature do
         visit 'http://example.com'
         Percy.snapshot(page, { name: 'enableJavaScript', enable_javascript: true })
       end
+      it 'recognizes percy_css' do
+        visit 'http://example.com'
+        Percy.snapshot(page, { name: 'percyCSS', percy_css: "body {background-color: purple }" })
+      end
     end
   end
 
   describe '_keys_to_json' do
     it 'transforms keys from snake_case to JSON-style' do
-      original = { enable_javascript: true, min_height: 2000 }
+      original = { enable_javascript: true, min_height: 2000, percy_css: "iframe { display: none; }" }
       transformed = Percy._keys_to_json(original)
       expect(transformed.has_key? 'enableJavaScript')
+      expect(transformed.has_key? 'percyCSS')
       expect(transformed.has_key? 'minHeight')
       expect(transformed['enableJavaScript']).to eq(original[:enable_javascript])
       expect(transformed['minHeight']).to eq(original[:min_height])
+      expect(transformed['percyCSS']).to eq(original[:percy_css])
     end
   end
 end
