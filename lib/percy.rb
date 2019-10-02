@@ -33,7 +33,14 @@ module Percy
       clientInfo: Percy.client_info,
       environmentInfo: Percy.environment_info,
     }
+
     body = body.merge(self._keys_to_json(options))
+
+    if self._is_debug?
+      self._logger.info { "passed snapshot options: #{options}" }
+      self._logger.info { "snapshot object to POST: #{body}" }
+    end
+
     self._post_snapshot_to_agent(body)
   end
 
@@ -94,6 +101,10 @@ module Percy
     request.body = body.to_json
     begin
       response = http.request(request)
+
+      if self._is_debug?
+        self._logger.info { "Response from agent: #{response}" }
+      end
     rescue => e
       self._logger.error { "Agent rejected snapshot request. Error: #{e}" }
     end
