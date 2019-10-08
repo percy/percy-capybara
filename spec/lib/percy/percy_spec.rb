@@ -1,3 +1,4 @@
+# coding: utf-8
 RSpec.describe Percy, type: :feature do
   TEST_CASE_GLOB =  File.join(File.dirname(__FILE__), "./capybara/client/test_data/test-*.html")
 
@@ -52,7 +53,12 @@ RSpec.describe Percy, type: :feature do
 
   describe '_keys_to_json' do
     it 'transforms keys from snake_case to JSON-style' do
-      original = { enable_javascript: true, min_height: 2000, percy_css: "iframe { display: none; }" }
+      original = {
+        enable_javascript: true,
+        min_height: 2000,
+        percy_css: "iframe { display: none; }",
+        request_headers: { Authorization: "Basic abc123=" },
+      }
       transformed = Percy._keys_to_json(original)
       expect(transformed.has_key? 'enableJavaScript')
       expect(transformed.has_key? 'percyCSS')
@@ -60,6 +66,7 @@ RSpec.describe Percy, type: :feature do
       expect(transformed['enableJavaScript']).to eq(original[:enable_javascript])
       expect(transformed['minHeight']).to eq(original[:min_height])
       expect(transformed['percyCSS']).to eq(original[:percy_css])
+      expect(transformed['requestHeaders']).to eq(original[:request_headers])
     end
   end
 end
