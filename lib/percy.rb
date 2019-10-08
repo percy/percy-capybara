@@ -129,6 +129,7 @@ module Percy
       enable_javascript: :enableJavaScript,
       min_height: :minHeight,
       percy_css: :percyCSS,
+      request_headers: :requestHeaders,
     }.each do |ruby_key, json_key|
       if options.has_key? ruby_key
         options[json_key] = options[ruby_key]
