@@ -3,9 +3,7 @@ version: 2.1
 default_steps: &default_steps
   steps:
     - checkout
-    - run: gem update --system
-    # We need this specific version of bundler for our Gemfile. (v2 doesn't work)
-    - run: gem install bundler --version '1.7'
+    - run: sudo gem update --system
     - run: yarn
     - run: bundle install
     - run: yarn percy exec -- bundle exec rspec
