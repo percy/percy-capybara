@@ -28,5 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 3.5'
   spec.add_development_dependency 'capybara', '~> 2.4'
   spec.add_development_dependency 'selenium-webdriver'
-  spec.add_development_dependency 'percy-style', '~> 0.5.0'
+  spec.add_development_dependency 'percy-style', '~> 0.7.0'
 end
