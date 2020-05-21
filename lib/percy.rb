@@ -20,12 +20,12 @@ module Percy
   def self.snapshot(page, options = {})
     return unless self._is_agent_running?
 
-    domSnapshot = self._make_dom_snapshot(page)
-    return unless domSnapshot
-
     if !options.has_key?(:name)
       options[:name] = page.current_url
     end
+
+    domSnapshot = self._make_dom_snapshot(page, self._keys_to_json(options))
+    return unless domSnapshot
 
     body = {
       url: page.current_url,
@@ -71,7 +71,7 @@ module Percy
     end
   end
 
-  def self._make_dom_snapshot(page)
+  def self._make_dom_snapshot(page, options)
     agent_js = self._get_agent_js
 
     if self._is_debug?
@@ -82,12 +82,8 @@ module Percy
 
     begin
       page.execute_script(agent_js)
-      dom_snapshot_js = <<-JS
-      (function() {
-        var percyAgentClient = new PercyAgent({ handleAgentCommunication: false });
-        return percyAgentClient.snapshot('unused');
-      })()
-      JS
+      dom_snapshot_js = "new window.PercyAgent({ handleAgentCommunication: false }).domSnapshot(document, #{options.to_json})"
+
       return page.evaluate_script(dom_snapshot_js)
     rescue => e
       self._logger.error { "Snapshotting failed. Note that Poltergeist and Rake::Test are no longer supported by percy-capybara. Error: #{e}" }
