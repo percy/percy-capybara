@@ -28,6 +28,6 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 
   # See https://github.com/teamcapybara/capybara#selecting-the-driver for other options
-  Capybara.default_driver = :selenium_chrome_headless
-  Capybara.javascript_driver = :selenium_chrome_headless
+  Capybara.default_driver = :selenium_headless
+  Capybara.javascript_driver = :selenium_headless
 end
