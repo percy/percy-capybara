@@ -73,20 +73,21 @@ module Percy
 
   def self._make_dom_snapshot(page, options)
     agent_js = self._get_agent_js
-
-    if self._is_debug?
-      self._logger.info { "agent_js file: #{agent_js}" }
-    end
-
     return unless agent_js
 
     begin
       page.execute_script(agent_js)
       dom_snapshot_js = "new window.PercyAgent({ handleAgentCommunication: false }).domSnapshot(document, #{options.to_json})"
 
-      return page.evaluate_script(dom_snapshot_js)
+      if self._is_capybara?
+        dom_snapshot = page.evaluate_script(dom_snapshot_js)
+      else
+        dom_snapshot = page.execute_script(dom_snapshot_js)
+      end
+
+      return dom_snapshot
     rescue => e
-      self._logger.error { "Snapshotting failed. Note that Poltergeist and Rake::Test are no longer supported by percy-capybara. Error: #{e}" }
+      self._logger.error { "DOM snapshotting failed. Error: #{e}" }
       return nil
     end
   end
@@ -95,14 +96,11 @@ module Percy
     http = Net::HTTP.new(AGENT_HOST, AGENT_PORT)
     request = Net::HTTP::Post.new('/percy/snapshot', { 'Content-Type': 'application/json' })
     request.body = body.to_json
+
     begin
       response = http.request(request)
-
-      if self._is_debug?
-        self._logger.info { "Response from agent: #{response}" }
-      end
     rescue => e
-      self._logger.error { "Agent rejected snapshot request. Error: #{e}" }
+      self._logger.error { "Percy rejected snapshot request. Error: #{e}" }
     end
   end
 
@@ -112,7 +110,7 @@ module Percy
       return true
     rescue => e
       if self._is_debug?
-        self._logger.error { "Healthcheck failed, agent is not running: #{e}" }
+        self._logger.error { "Healthcheck failed, Percy is not running: #{e}" }
       end
 
       return false
@@ -137,5 +135,9 @@ module Percy
 
   def self._is_debug?
     ENV['LOG_LEVEL'] == 'debug'
+  end
+
+  def self._is_capybara?
+    Percy.capybara_version.length > 0
   end
 end

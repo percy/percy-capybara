@@ -9,11 +9,16 @@ module Percy
     env_strings = [
       "rails/#{self._rails_version}",
       "sinatra/#{self._sinatra_version}",
+      "capybara/#{self.capybara_version}",
       "ember-cli-rails/#{self._ember_cli_rails_version}",
     ].reject do |info|
       info =~ /\/$/ # reject if version is empty
     end
     env_strings.empty? ? 'unknown' : env_strings.join('; ')
+  end
+
+  def self.capybara_version
+    Capybara::VERSION if defined? Capybara
   end
 
   def self._ember_cli_rails_version
