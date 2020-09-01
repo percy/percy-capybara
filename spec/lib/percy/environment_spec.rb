@@ -8,15 +8,10 @@ RSpec.describe Percy do
       it 'returns full environment information' do
         expect(our_module).to receive(:_rails_version).at_least(:once).times.and_return('4.2')
         expect(our_module).to receive(:_sinatra_version).at_least(:once).and_return('2.0.0')
+        expect(our_module).to receive(:capybara_version).at_least(:once).and_return(Capybara::VERSION)
         expect(our_module).to receive(:_ember_cli_rails_version).at_least(:once).and_return('0.9')
 
-        expect(environment_info).to eq('rails/4.2; sinatra/2.0.0; ember-cli-rails/0.9')
-      end
-    end
-
-    context 'an app with no known frameworks being used' do
-      it 'returns unknown environment information' do
-        expect(environment_info).to eq('unknown')
+        expect(environment_info).to eq("rails/4.2; sinatra/2.0.0; capybara/#{Capybara::VERSION}; ember-cli-rails/0.9")
       end
     end
   end

@@ -4,6 +4,7 @@ default_steps: &default_steps
   steps:
     - checkout
     - run: sudo gem update --system
+    - run: ruby -v
     - run: yarn
     - run: bundle install
     - run: yarn percy exec -- bundle exec rspec
