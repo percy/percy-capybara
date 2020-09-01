@@ -77,15 +77,7 @@ module Percy
 
     begin
       page.execute_script(agent_js)
-      dom_snapshot_js = "new window.PercyAgent({ handleAgentCommunication: false }).domSnapshot(document, #{options.to_json})"
-
-      if self._is_capybara?
-        dom_snapshot = page.evaluate_script(dom_snapshot_js)
-      else
-        dom_snapshot = page.execute_script(dom_snapshot_js)
-      end
-
-      return dom_snapshot
+      page.execute_script("return new window.PercyAgent({ handleAgentCommunication: false }).domSnapshot(document, #{options.to_json})")
     rescue => e
       self._logger.error { "DOM snapshotting failed. Error: #{e}" }
       return nil
@@ -135,9 +127,5 @@ module Percy
 
   def self._is_debug?
     ENV['LOG_LEVEL'] == 'debug'
-  end
-
-  def self._is_capybara?
-    Percy.capybara_version.length > 0
   end
 end
