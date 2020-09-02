@@ -77,7 +77,18 @@ module Percy
 
     begin
       page.execute_script(agent_js)
-      page.execute_script("return new window.PercyAgent({ handleAgentCommunication: false }).domSnapshot(document, #{options.to_json})")
+      domsnapshot_js = "(function() { return new window.PercyAgent({ handleAgentCommunication: false }).domSnapshot(document, #{options.to_json}) })()"
+
+      # If we can use evalaute, use it (generally for capybara drivers)
+      # `execute_script` should work, but some Capybara drivers specifically return nil from this method
+      if page.respond_to?('evaluate_script')
+        dom_snapshot = page.evaluate_script(domsnapshot_js)
+      else
+        # if the driver doesn't have evaluate, it's probably a selenium driver
+        dom_snapshot = page.execute_script(domsnapshot_js)
+      end
+
+      return dom_snapshot
     rescue => e
       self._logger.error { "DOM snapshotting failed. Error: #{e}" }
       return nil
