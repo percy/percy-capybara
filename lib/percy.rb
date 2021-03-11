@@ -2,7 +2,8 @@ require 'logger'
 require 'net/http'
 require 'uri'
 require 'json'
-require 'environment'
+require 'percy/version'
+require 'percy/environment'
 
 module Percy
   # Takes a snapshot of the given page HTML and its assets.
