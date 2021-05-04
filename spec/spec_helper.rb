@@ -1,4 +1,10 @@
+# This must be required & started before any app code (for proper coverage)
+require 'simplecov'
+SimpleCov.start
+SimpleCov.minimum_coverage 100
+
 require 'capybara/rspec'
+require 'webmock/rspec'
 require 'percy'
 
 RSpec.configure do |config|
@@ -29,4 +35,9 @@ RSpec.configure do |config|
   # See https://github.com/teamcapybara/capybara#selecting-the-driver for other options
   Capybara.default_driver = :selenium_headless
   Capybara.javascript_driver = :selenium_headless
+
+  # Setup for Capybara to test Jekyll static files served by Rack
+  Capybara.server_port = 3003
+  Capybara.server = :puma, { Silent: true }
+  Capybara.app = Rack::File.new(File.join(File.dirname(__FILE__), 'fixture'))
 end

@@ -6,7 +6,7 @@ module PercyCapybara
   include Capybara::DSL
 
   CLIENT_INFO = "percy-capybara/#{VERSION}".freeze
-  ENV_INFO = "selenium/#{Capybara::VERSION} ruby/#{RUBY_VERSION}".freeze
+  ENV_INFO = "capybara/#{Capybara::VERSION} ruby/#{RUBY_VERSION}".freeze
 
   PERCY_DEBUG = ENV['PERCY_LOGLEVEL'] == 'debug'
   PERCY_SERVER_ADDRESS = ENV['PERCY_SERVER_ADDRESS'] || 'http://localhost:5338'
@@ -38,14 +38,13 @@ module PercyCapybara
     end
   end
 
-  def _clear_cache!
+  def __percy_clear_cache!
     @percy_dom = nil
     @percy_enabled = nil
   end
 
-  private
   # Determine if the Percy server is running, caching the result so it is only checked once
-  def percy_enabled?
+  private def percy_enabled?
     return @percy_enabled unless @percy_enabled.nil?
 
     begin
@@ -79,20 +78,20 @@ module PercyCapybara
   end
 
   # Fetch the @percy/dom script, caching the result so it is only fetched once
-  def fetch_percy_dom
+  private def fetch_percy_dom
     return @percy_dom unless @percy_dom.nil?
 
     response = fetch('percy/dom.js')
     @percy_dom = response.body
   end
 
-  def log(msg)
+  private def log(msg)
     puts "#{LABEL} #{msg}"
   end
 
   # Make an HTTP request (GET,POST) using Ruby's Net::HTTP. If `data` is present,
   # `fetch` will POST as JSON.
-  def fetch(url, data = nil)
+  private def fetch(url, data = nil)
     uri = URI("#{PERCY_SERVER_ADDRESS}/#{url}")
 
     response = if data
