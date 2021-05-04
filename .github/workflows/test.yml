@@ -1,0 +1,26 @@
+name: Test
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  test:
+    name: Test
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        ruby: ['2.6', '2.7']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{matrix.ruby}}
+          bundler-cache: true
+      - uses: actions/cache@v2
+        with:
+          path: "./vendor/bundle"
+          key: v1/${{ runner.os }}/ruby-${{ matrix.ruby }}/${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: v1/${{ runner.os }}/ruby-${{ matrix.ruby }}/
+      - run: bundle exec rspec

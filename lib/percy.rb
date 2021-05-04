@@ -1,142 +1,114 @@
-require 'logger'
 require 'net/http'
 require 'uri'
-require 'json'
-require 'environment'
+require 'capybara/dsl'
 
-module Percy
-  # Takes a snapshot of the given page HTML and its assets.
-  #
-  # See https://docs.percy.io/v1/docs/configuration for detailed documentation on
-  # snapshot options.
-  #
-  # @param [Capybara::Session] page The Capybara page to snapshot.
-  # @param [Hash] options
-  # @option options [String] :name A unique name for the current page that identifies
-  #   it across builds. By default this is the URL of the page, but can be customized if the
-  #   URL does not entirely identify the current state.
-  # @option options [Array(Number)] :widths Widths, in pixels, that you'd like to capture for
-  #   this snapshot.
-  def self.snapshot(page, options = {})
-    return unless self._is_agent_running?
+module PercyCapybara
+  include Capybara::DSL
 
-    if !options.has_key?(:name)
-      options[:name] = page.current_url
+  CLIENT_INFO = "percy-capybara/#{VERSION}".freeze
+  ENV_INFO = "selenium/#{Capybara::VERSION} ruby/#{RUBY_VERSION}".freeze
+
+  PERCY_DEBUG = ENV['PERCY_LOGLEVEL'] == 'debug'
+  PERCY_SERVER_ADDRESS = ENV['PERCY_SERVER_ADDRESS'] || 'http://localhost:5338'
+  LABEL = "[\u001b[35m" + (PERCY_DEBUG ? 'percy:capybara' : 'percy') + "\u001b[39m]"
+
+  # Take a DOM snapshot and post it to the snapshot endpoint
+  def percy_snapshot(name, options = {})
+    return unless percy_enabled?
+
+    begin
+      page.evaluate_script(fetch_percy_dom)
+      dom_snapshot =
+        page.evaluate_script("(function() { return PercyDOM.serialize(#{options.to_json}) })()")
+
+      response = fetch('percy/snapshot',
+        name: name,
+        url: page.current_url,
+        dom_snapshot: dom_snapshot,
+        client_info: CLIENT_INFO,
+        environment_info: ENV_INFO,)
+
+      unless response.body.to_json['success']
+        raise StandardError, data['error']
+      end
+    rescue StandardError => e
+      log("Could not take DOM snapshot '#{name}'")
+
+      if PERCY_DEBUG then log(e) end
     end
+  end
 
-    domSnapshot = self._make_dom_snapshot(page, self._keys_to_json(options))
-    return unless domSnapshot
-
-    body = {
-      url: page.current_url,
-      domSnapshot: domSnapshot,
-      clientInfo: Percy.client_info,
-      environmentInfo: Percy.environment_info,
-    }
-
-    body = body.merge(self._keys_to_json(options))
-
-    if self._is_debug?
-      self._logger.info { "passed snapshot options: #{options}" }
-      self._logger.info { "snapshot object to POST: #{body}" }
-    end
-
-    self._post_snapshot_to_agent(body)
+  def _clear_cache!
+    @percy_dom = nil
+    @percy_enabled = nil
   end
 
   private
-
-  AGENT_HOST = 'localhost'
-  # Technically, the port is configurable when you run the agent. One day we might want
-  # to make the port configurable in this SDK as well.
-  AGENT_PORT = 5338
-  AGENT_JS_PATH= '/percy-agent.js'
-
-  def self._logger
-    unless defined?(@logger)
-      @logger = Logger.new(STDOUT)
-      @logger.formatter = proc do |_severity, _datetime, _progname, msg|
-        "[percy] #{msg} \n"
-      end
-    end
-    return @logger
-  end
-
-  def self._get_agent_js
-    begin
-      return Net::HTTP.get(AGENT_HOST, AGENT_JS_PATH, AGENT_PORT)
-    rescue => e
-      self._logger.error { "Could not load #{AGENT_JS_PATH}. Error: #{e}" }
-      return nil
-    end
-  end
-
-  def self._make_dom_snapshot(page, options)
-    agent_js = self._get_agent_js
-    return unless agent_js
+  # Determine if the Percy server is running, caching the result so it is only checked once
+  def percy_enabled?
+    return @percy_enabled unless @percy_enabled.nil?
 
     begin
-      page.execute_script(agent_js)
-      domsnapshot_js = "return new window.PercyAgent({ handleAgentCommunication: false }).domSnapshot(document, #{options.to_json})"
+      response = fetch('percy/healthcheck')
+      version = response['x-percy-core-version']
 
-      # If we can use evalaute, use it (generally for capybara drivers)
-      # `execute_script` should work, but some Capybara drivers specifically return nil from this method
-      if page.respond_to?('evaluate_script')
-        dom_snapshot = page.evaluate_script("(function() { #{domsnapshot_js} })()")
-      else
-        # if the driver doesn't have evaluate, it's probably a selenium driver
-        dom_snapshot = page.execute_script(domsnapshot_js)
+      if version.nil?
+        log('You may be using @percy/agent ' \
+            'which is no longer supported by this SDK. ' \
+            'Please uninstall @percy/agent and install @percy/cli instead. ' \
+            'https://docs.percy.io/docs/migrating-to-percy-cli')
+        @percy_enabled = false
+        return false
       end
 
-      return dom_snapshot
-    rescue => e
-      self._logger.error { "DOM snapshotting failed. Error: #{e}" }
-      return nil
-    end
-  end
-
-  def self._post_snapshot_to_agent(body)
-    http = Net::HTTP.new(AGENT_HOST, AGENT_PORT)
-    request = Net::HTTP::Post.new('/percy/snapshot', { 'Content-Type': 'application/json' })
-    request.body = body.to_json
-
-    begin
-      response = http.request(request)
-    rescue => e
-      self._logger.error { "Percy rejected snapshot request. Error: #{e}" }
-    end
-  end
-
-  def self._is_agent_running?
-    begin
-      Net::HTTP.get(AGENT_HOST, '/percy/healthcheck', AGENT_PORT)
-      return true
-    rescue => e
-      if self._is_debug?
-        self._logger.error { "Healthcheck failed, Percy is not running: #{e}" }
+      if version.split('.')[0] != '1'
+        log("Unsupported Percy CLI version, #{version}")
+        @percy_enabled = false
+        return false
       end
 
-      return false
+      @percy_enabled = true
+      true
+    rescue StandardError => e
+      log('Percy is not running, disabling snapshots')
+
+      if PERCY_DEBUG then log(e) end
+      @percy_enabled = false
+      false
     end
   end
 
-  # For Ruby style, require snake_case args but transform them into camelCase for percy-agent.
-  def self._keys_to_json(options)
-    {
-      enable_javascript: :enableJavaScript,
-      min_height: :minHeight,
-      percy_css: :percyCSS,
-      request_headers: :requestHeaders,
-    }.each do |ruby_key, json_key|
-      if options.has_key? ruby_key
-        options[json_key] = options[ruby_key]
-        options.delete(ruby_key)
-      end
-    end
-    return options
+  # Fetch the @percy/dom script, caching the result so it is only fetched once
+  def fetch_percy_dom
+    return @percy_dom unless @percy_dom.nil?
+
+    response = fetch('percy/dom.js')
+    @percy_dom = response.body
   end
 
-  def self._is_debug?
-    ENV['LOG_LEVEL'] == 'debug'
+  def log(msg)
+    puts "#{LABEL} #{msg}"
+  end
+
+  # Make an HTTP request (GET,POST) using Ruby's Net::HTTP. If `data` is present,
+  # `fetch` will POST as JSON.
+  def fetch(url, data = nil)
+    uri = URI("#{PERCY_SERVER_ADDRESS}/#{url}")
+
+    response = if data
+      Net::HTTP.post(uri, data.to_json)
+    else
+      Net::HTTP.get_response(uri)
+    end
+
+    unless response.is_a? Net::HTTPSuccess
+      raise StandardError, "Failed with HTTP error code: #{response.code}"
+    end
+
+    response
   end
 end
+
+# Add the `percy_snapshot` method to the the Capybara session class
+# `page.percy_snapshot('name', { options })`
+Capybara::Session.class_eval { include PercyCapybara }

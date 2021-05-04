@@ -1,0 +1,22 @@
+name: Lint
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6
+          bundler-cache: true
+      - uses: actions/cache@v2
+        with:
+          path: "./vendor/bundle"
+          key: v1/${{ runner.os }}/ruby-2.6/${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: v1/${{ runner.os }}/ruby-2.6/
+      - run: bundle exec rubocop
