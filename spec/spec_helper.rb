@@ -5,7 +5,7 @@ SimpleCov.minimum_coverage 100
 
 require 'capybara/rspec'
 require 'webmock/rspec'
-require 'percy'
+require 'percy/capybara'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
@@ -41,3 +41,11 @@ RSpec.configure do |config|
   Capybara.server = :puma, { Silent: true }
   Capybara.app = Rack::File.new(File.join(File.dirname(__FILE__), 'fixture'))
 end
+
+## Add cache clearing methods for tests
+Capybara::Session.class_eval {
+  def __percy_clear_cache!
+    @percy_dom = nil
+    @percy_enabled = nil
+  end
+}

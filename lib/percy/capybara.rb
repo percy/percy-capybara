@@ -38,11 +38,6 @@ module PercyCapybara
     end
   end
 
-  def __percy_clear_cache!
-    @percy_dom = nil
-    @percy_enabled = nil
-  end
-
   # Determine if the Percy server is running, caching the result so it is only checked once
   private def percy_enabled?
     return @percy_enabled unless @percy_enabled.nil?
