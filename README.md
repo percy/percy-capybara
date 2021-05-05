@@ -1,5 +1,5 @@
 # percy-capybara
-[![Gem Version](https://badge.fury.io/rb/percy-selenium.svg)](https://badge.fury.io/rb/percy-capybara)
+[![Gem Version](https://badge.fury.io/rb/percy-capybara.svg)](https://badge.fury.io/rb/percy-capybara)
 ![Test](https://github.com/percy/percy-capybara/workflows/Test/badge.svg)
 
 [Percy](https://percy.io) visual testing for Ruby Selenium.
@@ -82,7 +82,7 @@ statement.
 
 #### Installing `@percy/cli` & removing `@percy/agent`
 
-If you're coming from a pre-3.0 version of this package, make sure to install `@percy/cli` after
+If you're coming from a 4.x version of this package, make sure to install `@percy/cli` after
 upgrading to retain any existing scripts that reference the Percy CLI
 command. You will also want to uninstall `@percy/agent`, as it's been replaced
 by `@percy/cli`.
