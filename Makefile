@@ -1,3 +1,3 @@
 release:
 	rake build
-	gem push pkg/percy-selenium-*
+	gem push pkg/percy-capybara-*

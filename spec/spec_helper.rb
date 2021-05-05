@@ -36,7 +36,7 @@ RSpec.configure do |config|
   Capybara.default_driver = :selenium_headless
   Capybara.javascript_driver = :selenium_headless
 
-  # Setup for Capybara to test Jekyll static files served by Rack
+  # Setup for Capybara to test static files served by Rack
   Capybara.server_port = 3003
   Capybara.server = :puma, { Silent: true }
   Capybara.app = Rack::File.new(File.join(File.dirname(__FILE__), 'fixture'))
