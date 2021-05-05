@@ -10,7 +10,7 @@ RSpec.describe PercyCapybara, type: :feature do
         .to_return(status: 200, body: '', headers: {'x-percy-core-version': '0.1.0'})
 
       expect { page.percy_snapshot('Name') }
-        .to output("#{PercyCapybara::LABEL} Unsupported Percy CLI version, 0.1.0\n").to_stdout
+        .to output("#{PercyCapybara::PERCY_LABEL} Unsupported Percy CLI version, 0.1.0\n").to_stdout
     end
 
     it 'disables when healthcheck version is missing' do
@@ -19,7 +19,7 @@ RSpec.describe PercyCapybara, type: :feature do
 
       expect { page.percy_snapshot('Name') }
         .to output(
-          "#{PercyCapybara::LABEL} You may be using @percy/agent which" \
+          "#{PercyCapybara::PERCY_LABEL} You may be using @percy/agent which" \
           ' is no longer supported by this SDK. Please uninstall' \
           ' @percy/agent and install @percy/cli instead.' \
           " https://docs.percy.io/docs/migrating-to-percy-cli\n",
@@ -31,7 +31,7 @@ RSpec.describe PercyCapybara, type: :feature do
         .to_return(status: 500, body: '', headers: {})
 
       expect { page.percy_snapshot('Name') }
-        .to output("#{PercyCapybara::LABEL} Percy is not running, disabling snapshots\n").to_stdout
+        .to output("#{PercyCapybara::PERCY_LABEL} Percy is not running, disabling snapshots\n").to_stdout
     end
 
     it 'disables when healthcheck fails to connect' do
@@ -39,7 +39,7 @@ RSpec.describe PercyCapybara, type: :feature do
         .to_raise(StandardError)
 
       expect { page.percy_snapshot('Name') }
-        .to output("#{PercyCapybara::LABEL} Percy is not running, disabling snapshots\n").to_stdout
+        .to output("#{PercyCapybara::PERCY_LABEL} Percy is not running, disabling snapshots\n").to_stdout
     end
 
     it 'throws an error when name is not provided' do
@@ -64,7 +64,7 @@ RSpec.describe PercyCapybara, type: :feature do
         .to_return(status: 200, body: '', headers: {})
 
       expect { page.percy_snapshot('Name') }
-        .to output("#{PercyCapybara::LABEL} Could not take DOM snapshot 'Name'\n").to_stdout
+        .to output("#{PercyCapybara::PERCY_LABEL} Could not take DOM snapshot 'Name'\n").to_stdout
     end
 
     it 'sends snapshots to the local server' do

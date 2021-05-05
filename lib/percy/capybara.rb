@@ -10,7 +10,10 @@ module PercyCapybara
 
   PERCY_DEBUG = ENV['PERCY_LOGLEVEL'] == 'debug'
   PERCY_SERVER_ADDRESS = ENV['PERCY_SERVER_ADDRESS'] || 'http://localhost:5338'
-  LABEL = "[\u001b[35m" + (PERCY_DEBUG ? 'percy:capybara' : 'percy') + "\u001b[39m]"
+  PERCY_LABEL = "[\u001b[35m" + (PERCY_DEBUG ? 'percy:capybara' : 'percy') + "\u001b[39m]"
+
+  private_constant :CLIENT_INFO
+  private_constant :ENV_INFO
 
   # Take a DOM snapshot and post it to the snapshot endpoint
   def percy_snapshot(name, options = {})
@@ -81,7 +84,7 @@ module PercyCapybara
   end
 
   private def log(msg)
-    puts "#{LABEL} #{msg}"
+    puts "#{PERCY_LABEL} #{msg}"
   end
 
   # Make an HTTP request (GET,POST) using Ruby's Net::HTTP. If `data` is present,
