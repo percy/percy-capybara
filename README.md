@@ -12,7 +12,7 @@ npm install `@percy/cli`:
 $ npm install --save-dev @percy/cli
 ```
 
-gem install Percy selenium package:
+gem install `percy-capybara` package:
 
 ```ssh-session
 $ gem install percy-capybara
@@ -23,24 +23,22 @@ $ gem install percy-capybara
 In your test setup file, require `percy/capybara`. For example if you're using
 rspec, you would add the following to your `spec_helper.rb` file:
 
-
 ``` ruby
 require 'percy/capybara'
 ```
 
 Now you can use `page.percy_snapshot` to capture snapshots.
 
-> Note: Percy requires JS to be enabled for snapshots to be captured.
+> Note: you may need to add `js: true` to your specs, depending on your driver setup
 
 ```ruby
-describe 'my feature, type: :feature, js: true do
+describe 'my feature, type: :feature do
   it 'renders the page' do
     visit 'https://example.com'
-    page.percy_snapshot('Example snapshot')
+    page.percy_snapshot('Capybara snapshot')
   end
 end
 ```
-
 
 Running the test above normally will result in the following log:
 
@@ -57,7 +55,7 @@ $ export PERCY_TOKEN=[your-project-token]
 $ percy exec -- [test command]
 [percy] Percy has started!
 [percy] Created build #1: https://percy.io/[your-project]
-[percy] Snapshot taken "Ruby example"
+[percy] Snapshot taken "Capybara example"
 [percy] Stopping percy...
 [percy] Finalized build #1: https://percy.io/[your-project]
 [percy] Done!
@@ -77,8 +75,8 @@ $ percy exec -- [test command]
 #### Require change
 
 The name of the require has changed from `require 'percy'` to `require
-'percy/capybara'`. This is to avoid conflict with our [Ruby Selenium SDK's require](https://github.com/percy/percy-selenium-ruby)
-statement.
+'percy/capybara'`. This is to avoid conflict with our [Ruby Selenium SDK's](https://github.com/percy/percy-selenium-ruby)
+require statement.
 
 #### Installing `@percy/cli` & removing `@percy/agent`
 

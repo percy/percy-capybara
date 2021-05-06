@@ -6,7 +6,7 @@ RSpec.describe PercyCapybara, type: :feature do
     page.__percy_clear_cache!
   end
 
-  describe 'snapshot', type: :feature, js: true do
+  describe 'snapshot', type: :feature do
     it 'disables when healthcheck version is incorrect' do
       stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/healthcheck")
         .to_return(status: 200, body: '', headers: {'x-percy-core-version': '0.1.0'})
