@@ -1,6 +1,11 @@
+# This must be required & started before any app code (for proper coverage)
+require 'simplecov'
+SimpleCov.start
+SimpleCov.minimum_coverage 100
+
 require 'capybara/rspec'
-require 'selenium-webdriver'
-require 'percy'
+require 'webmock/rspec'
+require 'percy/capybara'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
@@ -30,4 +35,17 @@ RSpec.configure do |config|
   # See https://github.com/teamcapybara/capybara#selecting-the-driver for other options
   Capybara.default_driver = :selenium_headless
   Capybara.javascript_driver = :selenium_headless
+
+  # Setup for Capybara to test static files served by Rack
+  Capybara.server_port = 3003
+  Capybara.server = :puma, { Silent: true }
+  Capybara.app = Rack::File.new(File.join(File.dirname(__FILE__), 'fixture'))
 end
+
+## Add cache clearing methods for tests
+Capybara::Session.class_eval {
+  def __percy_clear_cache!
+    @percy_dom = nil
+    @percy_enabled = nil
+  end
+}
