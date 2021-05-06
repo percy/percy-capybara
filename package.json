@@ -1,7 +1,0 @@
-{
-  "private": true,
-  "devDependencies": {},
-  "dependencies": {
-    "@percy/cli": "^1.0.0-beta.48"
-  }
-}
