@@ -1,6 +1,7 @@
 require 'net/http'
 require 'uri'
 require 'capybara/dsl'
+require_relative './version'
 
 module PercyCapybara
   include Capybara::DSL
