@@ -78,6 +78,25 @@ The name of the require has changed from `require 'percy'` to `require
 'percy/capybara'`. This is to avoid conflict with our [Ruby Selenium SDK's](https://github.com/percy/percy-selenium-ruby)
 require statement.
 
+#### API change
+
+The previous version of this SDK had the following function signature:
+
+``` ruby
+Percy.snapshot(driver, name, options)
+```
+
+v5.x of this SDK has a significant change to the API. There no longer is a stand
+alone module to call and you no longer need to pass the page/driver. It's
+available on the current Capybara session (`page`):
+
+``` ruby
+page.percy_snapshot(name, options)
+```
+
+If you were using this SDK outside of Capybara, you'll likely find the [Ruby
+Selenium SDK a better fit](https://github.com/percy/percy-selenium-ruby)
+
 #### Installing `@percy/cli` & removing `@percy/agent`
 
 If you're coming from a 4.x version of this package, make sure to install `@percy/cli` after
