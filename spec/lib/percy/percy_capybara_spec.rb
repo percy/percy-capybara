@@ -98,6 +98,7 @@ RSpec.describe PercyCapybara, type: :feature do
             environment_info: "capybara/#{Capybara::VERSION} ruby/#{RUBY_VERSION}",
           }.to_json,
         ).once
+      expect(page).to have_current_path('/index.html')
     end
   end
 end

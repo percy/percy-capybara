@@ -4,8 +4,6 @@ require 'capybara/dsl'
 require_relative './version'
 
 module PercyCapybara
-  include Capybara::DSL
-
   CLIENT_INFO = "percy-capybara/#{VERSION}".freeze
   ENV_INFO = "capybara/#{Capybara::VERSION} ruby/#{RUBY_VERSION}".freeze
 
@@ -20,10 +18,12 @@ module PercyCapybara
   def percy_snapshot(name, options = {})
     return unless percy_enabled?
 
+    page = Capybara.current_session
+
     begin
       page.evaluate_script(fetch_percy_dom)
-      dom_snapshot =
-        page.evaluate_script("(function() { return PercyDOM.serialize(#{options.to_json}) })()")
+      dom_snapshot = page
+        .evaluate_script("(function() { return PercyDOM.serialize(#{options.to_json}) })()")
 
       response = fetch('percy/snapshot',
         name: name,
