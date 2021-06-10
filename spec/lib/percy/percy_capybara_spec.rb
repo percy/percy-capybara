@@ -84,7 +84,7 @@ RSpec.describe PercyCapybara, type: :feature do
         .to_return(status: 200, body: '{"success": "true" }', headers: {})
 
       visit 'index.html'
-      page.percy_snapshot('Name')
+      page.percy_snapshot('Name', widths: [375])
 
       expect(WebMock)
         .to have_requested(:post, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/snapshot")
@@ -96,6 +96,7 @@ RSpec.describe PercyCapybara, type: :feature do
               "<html><head><title>I am a page</title></head><body>Snapshot me\n</body></html>",
             client_info: "percy-capybara/#{PercyCapybara::VERSION}",
             environment_info: "capybara/#{Capybara::VERSION} ruby/#{RUBY_VERSION}",
+            widths: [375],
           }.to_json,
         ).once
       expect(page).to have_current_path('/index.html')

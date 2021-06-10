@@ -30,7 +30,8 @@ module PercyCapybara
         url: page.current_url,
         dom_snapshot: dom_snapshot,
         client_info: CLIENT_INFO,
-        environment_info: ENV_INFO,)
+        environment_info: ENV_INFO,
+        **options,)
 
       unless response.body.to_json['success']
         raise StandardError, data['error']
