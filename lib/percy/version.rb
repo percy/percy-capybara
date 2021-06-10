@@ -1,3 +1,3 @@
 module PercyCapybara
-  VERSION = '5.0.0.pre.4'.freeze
+  VERSION = '5.0.0.pre.5'.freeze
 end
