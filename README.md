@@ -70,6 +70,23 @@ $ percy exec -- [test command]
 
 ## Upgrading
 
+### Automatically with `@percy/migrate`
+
+We built a tool to help automate migrating to the new CLI toolchain! Migrating
+can be done by running the following commands and following the prompts:
+
+``` shell
+$ npx @percy/migrate
+? Are you currently using percy-capybara? Yes
+? Install @percy/cli (required to run percy)? Yes
+? Migrate Percy config file? Yes
+? Upgrade SDK to percy-capybara@^5.0.0? Yes
+? The Capybara API has breaking changes, automatically convert to the new API? Yes
+```
+
+This will automatically run the changes described below for you, with the
+exception of changing the `require`.
+
 ### Manually
 
 #### Require change
