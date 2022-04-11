@@ -6,6 +6,7 @@ SimpleCov.minimum_coverage 100
 require 'capybara/rspec'
 require 'webmock/rspec'
 require 'percy/capybara'
+require 'selenium-webdriver'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
@@ -40,6 +41,9 @@ RSpec.configure do |config|
   Capybara.server_port = 3003
   Capybara.server = :puma, { Silent: true }
   Capybara.app = Rack::File.new(File.join(File.dirname(__FILE__), 'fixture'))
+
+  # Ignore warning until Capybara releases an update solving their warning
+  Selenium::WebDriver.logger.ignore(:browser_options)
 end
 
 ## Add cache clearing methods for tests
