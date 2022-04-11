@@ -18,7 +18,7 @@ jobs:
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
-      - uses: actions/cache@v3.0.1
+      - uses: actions/cache@v3.0.2
         with:
           path: "./vendor/bundle"
           key: v1/${{ runner.os }}/ruby-${{ matrix.ruby }}/${{ hashFiles('**/Gemfile.lock') }}
