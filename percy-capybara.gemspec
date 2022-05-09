@@ -28,6 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler', '>= 2.0'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.5'
-  spec.add_development_dependency 'capybara', '~> 3.36.0'
+  spec.add_development_dependency 'capybara', '>= 3'
   spec.add_development_dependency 'percy-style', '~> 0.7.0'
 end
