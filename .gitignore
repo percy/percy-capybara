@@ -13,5 +13,4 @@
 *.rbc
 mkmf.log
 .DS_Store
-Gemfile.lock
 node_modules/
