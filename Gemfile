@@ -10,7 +10,7 @@ gem 'guard-rspec', require: false
 
 group :test, :development do
   gem 'pry'
-  gem 'puma', '5.6.4'
+  gem 'puma', '5.6.5'
   gem 'webmock'
   gem 'simplecov', require: false
 end
