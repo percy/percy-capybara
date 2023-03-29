@@ -1,5 +1,6 @@
 LABEL = PercyCapybara::PERCY_LABEL
 
+# rubocop:disable RSpec/MultipleDescribes
 RSpec.describe PercyCapybara, type: :feature do
   before(:each) do
     WebMock.disable_net_connect!(allow: '127.0.0.1', disallow: 'localhost')
@@ -128,5 +129,5 @@ RSpec.describe PercyCapybara, type: :feature do
       expect(snap['widths']).to eq([375])
     end
   end
-
 end
+# rubocop:enable RSpec/MultipleDescribes
