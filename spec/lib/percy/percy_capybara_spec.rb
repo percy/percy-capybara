@@ -114,7 +114,7 @@ RSpec.describe PercyCapybara, type: :feature do
     it 'sends snapshots to percy server' do
       visit 'index.html'
       page.percy_snapshot('Name', widths: [375])
-      sleep 2 # wait for percy server to process
+      sleep 5 # wait for percy server to process
       resp = Net::HTTP.get_response(URI("#{PercyCapybara::PERCY_SERVER_ADDRESS}/test/requests"))
       requests = JSON.parse(resp.body)['requests']
       healthcheck = requests[0]
