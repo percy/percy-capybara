@@ -109,6 +109,7 @@ RSpec.describe PercyCapybara, type: :feature do
   before(:each) do
     WebMock.reset!
     WebMock.allow_net_connect!
+    page.__percy_clear_cache!
   end
 
   describe 'integration', type: :feature do
