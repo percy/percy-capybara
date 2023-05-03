@@ -16,6 +16,14 @@ jobs:
         ruby: ['2.6', '2.7']
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions-ecosystem/action-regex-match@v2
+        id: regex-match
+        with:
+          text: ${{ github.event.inputs.branch }}
+          regex: '^[a-zA-Z0-9_/\-]+$'
+      - name: Break on invalid branch name
+        run: exit 1
+        if: ${{ steps.regex-match.outputs.match == '' }}
       - uses: actions/checkout@v3
       - uses: ruby/setup-ruby@v1
         with:
