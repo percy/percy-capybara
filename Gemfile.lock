@@ -74,7 +74,7 @@ GEM
       coderay (~> 1.1)
       method_source (~> 1.0)
     public_suffix (4.0.6)
-    puma (5.6.6)
+    puma (5.6.7)
       nio4r (~> 2.0)
     racc (1.6.0)
     rack (2.2.3)
@@ -142,7 +142,7 @@ DEPENDENCIES
   percy-capybara!
   percy-style (~> 0.7.0)
   pry
-  puma (= 5.6.6)
+  puma (= 5.6.7)
   rake (~> 13.0)
   rspec (~> 3.5)
   selenium-webdriver (>= 4.0.0)
