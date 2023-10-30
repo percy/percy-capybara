@@ -35,7 +35,7 @@ jobs:
           path: "./vendor/bundle"
           key: v1/${{ runner.os }}/ruby-${{ matrix.ruby }}/${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: v1/${{ runner.os }}/ruby-${{ matrix.ruby }}/
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 14
       - name: Get yarn cache directory path
