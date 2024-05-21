@@ -32,7 +32,7 @@ Now you can use `page.percy_snapshot` to capture snapshots.
 > Note: you may need to add `js: true` to your specs, depending on your driver setup
 
 ```ruby
-describe 'my feature, type: :feature do
+describe 'my feature', type: :feature do
   it 'renders the page' do
     visit 'https://example.com'
     page.percy_snapshot('Capybara snapshot')
