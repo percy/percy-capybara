@@ -66,7 +66,7 @@ $ percy exec -- [test command]
 `page.snapshot(name[, options])`
 
 - `name` (**required**) - The snapshot name; must be unique to each snapshot
-- `options` - [See per-snapshot configuration options](https://docs.percy.io/docs/cli-configuration#per-snapshot-configuration)
+- `options` - [See per-snapshot configuration options](https://www.browserstack.com/docs/percy/take-percy-snapshots/overview#per-snapshot-configuration)
 
 ## Upgrading
 

@@ -37,7 +37,7 @@ jobs:
           restore-keys: v1/${{ runner.os }}/ruby-${{ matrix.ruby }}/
       - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 16
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"

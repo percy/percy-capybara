@@ -55,7 +55,7 @@ module PercyCapybara
         log('You may be using @percy/agent ' \
             'which is no longer supported by this SDK. ' \
             'Please uninstall @percy/agent and install @percy/cli instead. ' \
-            'https://docs.percy.io/docs/migrating-to-percy-cli')
+            'https://www.browserstack.com/docs/percy/migration/migrate-to-cli')
         @percy_enabled = false
         return false
       end
