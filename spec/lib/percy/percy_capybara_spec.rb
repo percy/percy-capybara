@@ -25,7 +25,7 @@ RSpec.describe PercyCapybara, type: :feature do
           "#{LABEL} You may be using @percy/agent which" \
           ' is no longer supported by this SDK. Please uninstall' \
           ' @percy/agent and install @percy/cli instead.' \
-          " https://docs.percy.io/docs/migrating-to-percy-cli\n",
+          " https://www.browserstack.com/docs/percy/migration/migrate-to-cli\n",
         ).to_stdout
     end
 
