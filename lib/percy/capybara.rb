@@ -22,8 +22,19 @@ module PercyCapybara
 
     begin
       page.evaluate_script(fetch_percy_dom)
+
+      # Readiness gate — runs before serialize when CLI supports it (PER-7348).
+      # Uses evaluate_async_script with a callback signal so the SDK can block
+      # on PercyDOM.waitForReady. In-browser typeof guard makes this a no-op on
+      # older CLIs that lack waitForReady.
+      readiness_diagnostics = wait_for_ready(page, options)
+
       dom_snapshot = page
         .evaluate_script("(function() { return PercyDOM.serialize(#{options.to_json}) })()")
+
+      if readiness_diagnostics && dom_snapshot.is_a?(Hash)
+        dom_snapshot['readiness_diagnostics'] = readiness_diagnostics
+      end
 
       response = fetch('percy/snapshot',
         name: name,
@@ -83,6 +94,33 @@ module PercyCapybara
 
     response = fetch('percy/dom.js')
     @percy_dom = response.body
+  end
+
+  # Readiness gate (PER-7348): runs PercyDOM.waitForReady before serialize.
+  #
+  # Returns diagnostics to attach to the domSnapshot, or nil.
+  # Config precedence: options[:readiness] / options['readiness'] > {} (the
+  # CLI applies its balanced preset default when passed {}). preset='disabled'
+  # skips the script entirely. Any StandardError is caught at debug level.
+  private def wait_for_ready(page, options)
+    readiness_config = options[:readiness] || options['readiness'] || {}
+    return nil if readiness_config.is_a?(Hash) && (
+      readiness_config[:preset] == 'disabled' || readiness_config['preset'] == 'disabled'
+    )
+    begin
+      page.evaluate_async_script(<<~JS)
+        var cfg = #{readiness_config.to_json};
+        var done = arguments[arguments.length - 1];
+        try {
+          if (typeof PercyDOM !== 'undefined' && typeof PercyDOM.waitForReady === 'function') {
+            PercyDOM.waitForReady(cfg).then(function(r){ done(r); }).catch(function(){ done(); });
+          } else { done(); }
+        } catch (e) { done(); }
+      JS
+    rescue StandardError => e
+      if PERCY_DEBUG then log("waitForReady failed, proceeding to serialize: #{e}") end
+      nil
+    end
   end
 
   private def log(msg)

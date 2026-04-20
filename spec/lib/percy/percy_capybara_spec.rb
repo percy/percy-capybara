@@ -102,6 +102,52 @@ RSpec.describe PercyCapybara, type: :feature do
         ).once
       expect(page).to have_current_path('/index.html')
     end
+
+    # --- Readiness gate (PER-7348) ----------------------------------------
+
+    it 'calls evaluate_async_script with waitForReady before serialize' do
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/healthcheck")
+        .to_return(status: 200, body: '', headers: {'x-percy-core-version': '1.0.0'})
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/dom.js")
+        .to_return(
+          status: 200,
+          body: 'window.PercyDOM = { serialize: () => ({html: "<html></html>"}), ' \
+                'waitForReady: (cfg) => Promise.resolve({ok: true}) };',
+          headers: {},
+        )
+      stub_request(:post, 'http://localhost:5338/percy/snapshot')
+        .to_return(status: 200, body: '{"success": "true"}', headers: {})
+
+      visit 'index.html'
+      page.percy_snapshot('readiness-balanced')
+
+      # The snapshot POST body should include readiness_diagnostics from the mock
+      expect(WebMock).to have_requested(
+        :post, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/snapshot"
+      ).with { |req|
+        body = JSON.parse(req.body)
+        body.dig('dom_snapshot', 'readiness_diagnostics') == {'ok' => true}
+      }.once
+    end
+
+    it 'skips evaluate_async_script when preset is disabled' do
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/healthcheck")
+        .to_return(status: 200, body: '', headers: {'x-percy-core-version': '1.0.0'})
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/dom.js")
+        .to_return(
+          status: 200,
+          body: 'window.PercyDOM = { serialize: () => ({html: "<html></html>"}) };',
+          headers: {},
+        )
+      stub_request(:post, 'http://localhost:5338/percy/snapshot')
+        .to_return(status: 200, body: '{"success": "true"}', headers: {})
+
+      # Spy on evaluate_async_script — it must NOT be called when preset=disabled
+      expect(page).to_not receive(:evaluate_async_script)
+
+      visit 'index.html'
+      page.percy_snapshot('readiness-disabled', readiness: { preset: 'disabled' })
+    end
   end
 end
 
