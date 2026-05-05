@@ -1,3 +1,4 @@
+require 'json'
 require 'net/http'
 require 'uri'
 require 'capybara/dsl'
@@ -29,8 +30,12 @@ module PercyCapybara
       # older CLIs that lack waitForReady.
       readiness_diagnostics = wait_for_ready(page, options)
 
+      # Merge .percy.yml config options with snapshot options (snapshot options take priority)
+      config_options = @cli_config&.dig('snapshot') || {}
+      merged_options = config_options.merge(options)
+
       dom_snapshot = page
-        .evaluate_script("(function() { return PercyDOM.serialize(#{options.to_json}) })()")
+        .evaluate_script("(function() { return PercyDOM.serialize(#{merged_options.to_json}) })()")
 
       if readiness_diagnostics && dom_snapshot.is_a?(Hash)
         dom_snapshot['readiness_diagnostics'] = readiness_diagnostics
@@ -77,6 +82,8 @@ module PercyCapybara
         return false
       end
 
+      body = JSON.parse(response.body)
+      @cli_config = body['config'] || {}
       @percy_enabled = true
       true
     rescue StandardError => e
