@@ -10,6 +10,7 @@ gem 'guard-rspec', require: false
 
 group :test, :development do
   gem 'pry'
+  gem 'public_suffix', '< 7'
   gem 'puma', '>= 6.0'
   gem 'webmock'
   gem 'simplecov', require: false
