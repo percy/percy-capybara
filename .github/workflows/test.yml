@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        ruby: ['2.6', '2.7']
+        ruby: ['3.2', '3.3']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions-ecosystem/action-regex-match@v2
