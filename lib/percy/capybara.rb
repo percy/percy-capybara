@@ -39,7 +39,8 @@ module PercyCapybara
         environment_info: ENV_INFO,
         **options,)
 
-      unless response.body.to_json['success']
+      data = JSON.parse(response.body)
+      unless data['success']
         raise StandardError, data['error']
       end
     rescue StandardError => e
