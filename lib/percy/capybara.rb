@@ -111,7 +111,7 @@ module PercyCapybara
     uri = URI.parse(url)
     raise URI::InvalidURIError, "no host in #{url}" if uri.host.nil?
 
-    default_ports = { 'http' => 80, 'https' => 443 }
+    default_ports = {'http' => 80, 'https' => 443}
     netloc = uri.host.to_s
     netloc += ":#{uri.port}" if uri.port && uri.port != default_ports[uri.scheme]
     "#{uri.scheme}://#{netloc}"
@@ -159,11 +159,13 @@ module PercyCapybara
       return nil
     end
 
-    log("Successfully captured cross-origin iframe: #{frame_url} " \
-        "(percyElementId: #{percy_element_id})") if PERCY_DEBUG
+    if PERCY_DEBUG
+      log("Successfully captured cross-origin iframe: #{frame_url} " \
+          "(percyElementId: #{percy_element_id})")
+    end
 
     {
-      'iframeData' => { 'percyElementId' => percy_element_id },
+      'iframeData' => {'percyElementId' => percy_element_id},
       'iframeSnapshot' => iframe_snapshot,
       'frameUrl' => frame_url,
     }

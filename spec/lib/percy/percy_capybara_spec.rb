@@ -220,16 +220,16 @@ RSpec.describe PercyCapybara do
     let(:mock_frame) { double('frame_element') }
     let(:percy_dom_script) { 'window.PercyDOM = { serialize: function() { return {}; } };' }
 
-    before do
+    before(:each) do
       allow(mock_frame).to receive(:attribute).with('src').and_return('https://other.com/embed')
     end
 
     it 'returns nil when percyElementId is missing' do
       allow(mock_driver).to receive(:switch_to).and_return(double(
-        frame: nil,
-        default_content: nil,
-      ))
-      allow(mock_driver).to receive(:execute_script).and_return(nil, { 'html' => '<html></html>' })
+                                                             frame: nil,
+                                                             default_content: nil,
+                                                           ))
+      allow(mock_driver).to receive(:execute_script).and_return(nil, {'html' => '<html></html>'})
       allow(mock_frame).to receive(:attribute).with('data-percy-element-id').and_return(nil)
 
       result = test_instance.send(:process_frame, mock_driver, mock_frame, {}, percy_dom_script)
@@ -243,17 +243,17 @@ RSpec.describe PercyCapybara do
       allow(mock_driver).to receive(:switch_to).and_return(switch_to_mock)
       allow(mock_driver).to receive(:execute_script).and_return(
         nil,
-        { 'html' => '<html>iframe</html>', 'resources' => [], 'warnings' => [] },
+        {'html' => '<html>iframe</html>', 'resources' => [], 'warnings' => []},
       )
       allow(mock_frame).to receive(:attribute).with('data-percy-element-id').and_return('percy-id-1')
 
       result = test_instance.send(:process_frame, mock_driver, mock_frame, {}, percy_dom_script)
 
       expect(result).to eq({
-        'iframeData' => { 'percyElementId' => 'percy-id-1' },
-        'iframeSnapshot' => { 'html' => '<html>iframe</html>', 'resources' => [], 'warnings' => [] },
-        'frameUrl' => 'https://other.com/embed',
-      })
+                             'iframeData' => {'percyElementId' => 'percy-id-1'},
+                             'iframeSnapshot' => {'html' => '<html>iframe</html>', 'resources' => [], 'warnings' => []},
+                             'frameUrl' => 'https://other.com/embed',
+                           })
     end
 
     it 'returns nil when switching to frame fails' do

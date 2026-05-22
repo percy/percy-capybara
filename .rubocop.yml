@@ -11,3 +11,8 @@ AllCops:
   Include:
     - lib/**/*.rb
     - spec/lib/**/*.rb
+
+Layout/LineLength:
+  Max: 120
+  Exclude:
+    - spec/**/*
