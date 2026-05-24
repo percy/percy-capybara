@@ -4,6 +4,6 @@
     "test": "percy exec --testing -- bundle exec rspec"
   },
   "devDependencies": {
-    "@percy/cli": "^1.16.0"
+    "@percy/cli": "1.31.14"
   }
 }
