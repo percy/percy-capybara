@@ -39,7 +39,15 @@ module PercyCapybara
         environment_info: ENV_INFO,
         **options,)
 
-      data = JSON.parse(response.body)
+      data =
+        begin
+          JSON.parse(response.body)
+        rescue JSON::ParserError => e
+          log("Could not parse snapshot response for '#{name}': invalid JSON")
+          if PERCY_DEBUG then log(e) end
+          return
+        end
+
       unless data['success']
         raise StandardError, data['error']
       end

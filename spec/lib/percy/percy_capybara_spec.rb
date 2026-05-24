@@ -67,7 +67,7 @@ RSpec.describe PercyCapybara, type: :feature do
         .to_return(status: 200, body: '', headers: {})
 
       expect { page.percy_snapshot('Name') }
-        .to output("#{LABEL} Could not take DOM snapshot 'Name'\n").to_stdout
+        .to output("#{LABEL} Could not parse snapshot response for 'Name': invalid JSON\n").to_stdout
     end
 
     it 'sends snapshots to the local server' do
