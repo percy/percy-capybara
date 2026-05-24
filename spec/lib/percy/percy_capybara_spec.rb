@@ -382,6 +382,21 @@ RSpec.describe PercyCapybara do
       expect(result).to_not have_key('corsIframes')
     end
 
+    it 'skips CORS iframes that are missing data-percy-element-id pre-flight' do
+      stub_const('PercyCapybara::PERCY_DEBUG', true)
+      page = build_page(
+        current_url: 'https://example.com/',
+        iframes: [build_iframe(src: 'https://other.com/cors', percy_id: nil)],
+      )
+      # process_frame must not be called when the pre-flight check skips the frame
+      expect(driver).to_not receive(:switch_to)
+
+      expect {
+        result = test_instance.send(:get_serialized_dom, page, {}, percy_dom_script)
+        expect(result).to_not have_key('corsIframes')
+      }.to output(/no data-percy-element-id found/).to_stdout
+    end
+
     it 'swallows iframe-loop failures and tries to restore default_content' do
       stub_const('PercyCapybara::PERCY_DEBUG', true)
       page = double('page', current_url: 'https://example.com/')

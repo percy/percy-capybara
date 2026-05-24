@@ -81,6 +81,14 @@ module PercyCapybara
           next
         end
 
+        # Pre-flight check: avoid the switch/serialize round-trip if there's no
+        # data-percy-element-id, since process_frame would discard the snapshot
+        # anyway and we'd silently waste a frame switch.
+        unless frame.attribute('data-percy-element-id')
+          log("Skipping iframe #{frame_src}: no data-percy-element-id found") if PERCY_DEBUG
+          next
+        end
+
         result = process_frame(driver, frame, options, percy_dom_script)
         processed_frames << result if result
       end
