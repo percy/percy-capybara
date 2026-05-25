@@ -150,6 +150,30 @@ RSpec.describe PercyCapybara, type: :feature do
       visit 'index.html'
       page.percy_snapshot('readiness-disabled', readiness: {preset: 'disabled'})
     end
+
+    it 'still posts the snapshot when evaluate_async_script raises' do
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/healthcheck")
+        .to_return(status: 200, body: '', headers: {'x-percy-core-version': '1.0.0'})
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/dom.js")
+        .to_return(
+          status: 200,
+          body: 'window.PercyDOM = { serialize: () => ({html: "<html></html>"}) };',
+          headers: {},
+        )
+      stub_request(:post, 'http://localhost:5338/percy/snapshot')
+        .to_return(status: 200, body: '{"success": "true"}', headers: {})
+
+      # Force the readiness gate to raise -- the SDK must catch it and still
+      # POST the snapshot from the serialize path.
+      allow(page).to receive(:evaluate_async_script).and_raise(StandardError, 'boom')
+
+      visit 'index.html'
+      page.percy_snapshot('readiness-raise', readiness: {})
+
+      expect(WebMock)
+        .to have_requested(:post, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/snapshot")
+        .once
+    end
   end
 end
 

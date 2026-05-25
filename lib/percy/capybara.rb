@@ -108,8 +108,6 @@ module PercyCapybara
   private def wait_for_ready(page, options)
     return nil unless options.key?(:readiness) || options.key?('readiness')
 
-    # :nocov: opt-in readiness gate; exercised only by the WebMock specs
-    # that drive evaluate_async_script through Capybara::Session mocks.
     readiness_config = options[:readiness] || options['readiness'] || {}
     return nil if readiness_config.is_a?(Hash) && (
       readiness_config[:preset] == 'disabled' || readiness_config['preset'] == 'disabled'
@@ -129,7 +127,6 @@ module PercyCapybara
       if PERCY_DEBUG then log("waitForReady failed, proceeding to serialize: #{e}") end
       nil
     end
-    # :nocov:
   end
 
   private def log(msg)
