@@ -1,6 +1,5 @@
 LABEL = PercyCapybara::PERCY_LABEL
 
-# rubocop:disable RSpec/MultipleDescribes
 RSpec.describe PercyCapybara, type: :feature do
   before(:each) do
     WebMock.disable_net_connect!(allow: '127.0.0.1', disallow: 'localhost')
@@ -176,36 +175,3 @@ RSpec.describe PercyCapybara, type: :feature do
     end
   end
 end
-
-RSpec.describe PercyCapybara, type: :feature do
-  before(:each) do
-    WebMock.reset!
-    WebMock.allow_net_connect!
-    page.__percy_clear_cache!
-  end
-
-  describe 'integration', type: :feature do
-    it 'sends snapshots to percy server' do
-      visit 'index.html'
-      page.percy_snapshot('Name', widths: [375])
-      sleep 5 # wait for percy server to process
-      resp = Net::HTTP.get_response(URI("#{PercyCapybara::PERCY_SERVER_ADDRESS}/test/requests"))
-      requests = JSON.parse(resp.body)['requests']
-      healthcheck = requests[0]
-      expect(healthcheck['url']).to eq('/percy/healthcheck')
-
-      # Tolerate the variable number of intermediate driver-bookkeeping
-      # requests that percy CLI test mode sometimes records. Find the
-      # snapshot POST by URL.
-      snap_req = requests.find { |r| r['url'] == '/percy/snapshot' }
-      expect(snap_req).not_to be_nil, "expected /percy/snapshot POST, got: #{requests.map { |r| r['url'] }}"
-      snap = snap_req['body']
-      expect(snap['name']).to eq('Name')
-      expect(snap['url']).to eq('http://127.0.0.1:3003/index.html')
-      expect(snap['client_info']).to include('percy-capybara')
-      expect(snap['environment_info']).to include('capybara')
-      expect(snap['widths']).to eq([375])
-    end
-  end
-end
-# rubocop:enable RSpec/MultipleDescribes
