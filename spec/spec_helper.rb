@@ -1,10 +1,10 @@
 # This must be required & started before any app code (for proper coverage)
 require 'simplecov'
 SimpleCov.start
-# PER-7348: integration spec is skipped on this branch (flaky against the
-# real Percy CLI test server). The 87.9% measured here equals the coverage
-# of every code path *not* gated by that integration spec; matches what we
-# observe locally.
+# Integration spec is skipped on this branch (flaky against the real Percy
+# CLI test server). The 87.9% measured here equals the coverage of every
+# code path *not* gated by that integration spec; matches what we observe
+# locally.
 SimpleCov.minimum_coverage 87
 
 require 'capybara/rspec'

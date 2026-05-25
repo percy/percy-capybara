@@ -23,7 +23,7 @@ module PercyCapybara
     begin
       page.evaluate_script(fetch_percy_dom)
 
-      # Readiness gate -- runs before serialize when CLI supports it (PER-7348).
+      # Readiness gate -- runs before serialize when CLI supports it.
       # Uses evaluate_async_script with a callback signal so the SDK can block
       # on PercyDOM.waitForReady. In-browser typeof guard makes this a no-op on
       # older CLIs that lack waitForReady.
@@ -96,7 +96,7 @@ module PercyCapybara
     @percy_dom = response.body
   end
 
-  # Readiness gate (PER-7348): runs PercyDOM.waitForReady before serialize.
+  # Readiness gate: runs PercyDOM.waitForReady before serialize.
   #
   # Returns diagnostics to attach to the domSnapshot, or nil.
   # Config precedence: options[:readiness] / options['readiness'] > {} (the

@@ -103,7 +103,7 @@ RSpec.describe PercyCapybara, type: :feature do
       expect(page).to have_current_path('/index.html')
     end
 
-    # --- Readiness gate (PER-7348) ----------------------------------------
+    # --- Readiness gate ----------------------------------------
 
     it 'calls evaluate_async_script with waitForReady before serialize' do
       stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/healthcheck")
@@ -161,9 +161,9 @@ RSpec.describe PercyCapybara, type: :feature do
   end
 
   describe 'integration', type: :feature do
-    # Skipped under PER-7348: this test depends on real Percy CLI behavior
-    # and is flaky on this branch (consistently sees fewer than 3 requests
-    # via /test/requests). It is unrelated to the readiness gate -- the
+    # Skipped: this test depends on real Percy CLI behavior and is flaky on
+    # this branch (consistently sees fewer than 3 requests via
+    # /test/requests). It is unrelated to the readiness gate -- the
     # readiness contract is verified by the two WebMock-driven specs above.
     xit 'sends snapshots to percy server' do
       visit 'index.html'
