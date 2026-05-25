@@ -119,11 +119,13 @@ RSpec.describe PercyCapybara, type: :feature do
         .to_return(status: 200, body: '{"success": "true"}', headers: {})
 
       visit 'index.html'
-      page.percy_snapshot('readiness-balanced')
+      # Opt-in via `readiness: {}` so the SDK runs the gate (matches the
+      # opt-in guard added in lib/percy/capybara.rb).
+      page.percy_snapshot('readiness-balanced', readiness: {})
 
       # The snapshot POST body should include readiness_diagnostics from the mock
       expect(WebMock).to have_requested(
-        :post, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/snapshot"
+        :post, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/snapshot",
       ).with { |req|
         body = JSON.parse(req.body)
         body.dig('dom_snapshot', 'readiness_diagnostics') == {'ok' => true}
@@ -142,11 +144,11 @@ RSpec.describe PercyCapybara, type: :feature do
       stub_request(:post, 'http://localhost:5338/percy/snapshot')
         .to_return(status: 200, body: '{"success": "true"}', headers: {})
 
-      # Spy on evaluate_async_script — it must NOT be called when preset=disabled
+      # Spy on evaluate_async_script -- it must NOT be called when preset=disabled
       expect(page).to_not receive(:evaluate_async_script)
 
       visit 'index.html'
-      page.percy_snapshot('readiness-disabled', readiness: { preset: 'disabled' })
+      page.percy_snapshot('readiness-disabled', readiness: {preset: 'disabled'})
     end
   end
 end
