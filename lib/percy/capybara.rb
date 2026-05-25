@@ -23,7 +23,7 @@ module PercyCapybara
     begin
       page.evaluate_script(fetch_percy_dom)
 
-      # Readiness gate — runs before serialize when CLI supports it (PER-7348).
+      # Readiness gate -- runs before serialize when CLI supports it (PER-7348).
       # Uses evaluate_async_script with a callback signal so the SDK can block
       # on PercyDOM.waitForReady. In-browser typeof guard makes this a no-op on
       # older CLIs that lack waitForReady.
@@ -101,12 +101,18 @@ module PercyCapybara
   # Returns diagnostics to attach to the domSnapshot, or nil.
   # Config precedence: options[:readiness] / options['readiness'] > {} (the
   # CLI applies its balanced preset default when passed {}). preset='disabled'
-  # skips the script entirely. Any StandardError is caught at debug level.
+  # skips the script entirely. Opt-in: only runs when the caller explicitly
+  # passes a `readiness` option -- keeps non-opting tests insulated from
+  # Capybara drivers that don't implement evaluate_async_script.
+  # Any StandardError is caught at debug level.
   private def wait_for_ready(page, options)
+    return nil unless options.key?(:readiness) || options.key?('readiness')
+
     readiness_config = options[:readiness] || options['readiness'] || {}
     return nil if readiness_config.is_a?(Hash) && (
       readiness_config[:preset] == 'disabled' || readiness_config['preset'] == 'disabled'
     )
+
     begin
       page.evaluate_async_script(<<~JS)
         var cfg = #{readiness_config.to_json};
