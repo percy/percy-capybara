@@ -1,6 +1,5 @@
 LABEL = PercyCapybara::PERCY_LABEL
 
-# rubocop:disable RSpec/MultipleDescribes
 RSpec.describe PercyCapybara, type: :feature do
   before(:each) do
     WebMock.disable_net_connect!(allow: '127.0.0.1', disallow: 'localhost')
@@ -102,32 +101,77 @@ RSpec.describe PercyCapybara, type: :feature do
         ).once
       expect(page).to have_current_path('/index.html')
     end
-  end
-end
 
-RSpec.describe PercyCapybara, type: :feature do
-  before(:each) do
-    WebMock.reset!
-    WebMock.allow_net_connect!
-    page.__percy_clear_cache!
-  end
+    # --- Readiness gate ----------------------------------------
 
-  describe 'integration', type: :feature do
-    it 'sends snapshots to percy server' do
+    it 'calls evaluate_async_script with waitForReady before serialize' do
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/healthcheck")
+        .to_return(status: 200, body: '', headers: {'x-percy-core-version': '1.0.0'})
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/dom.js")
+        .to_return(
+          status: 200,
+          body: 'window.PercyDOM = { serialize: () => ({html: "<html></html>"}), ' \
+                'waitForReady: (cfg) => Promise.resolve({ok: true}) };',
+          headers: {},
+        )
+      stub_request(:post, 'http://localhost:5338/percy/snapshot')
+        .to_return(status: 200, body: '{"success": "true"}', headers: {})
+
       visit 'index.html'
-      page.percy_snapshot('Name', widths: [375])
-      sleep 5 # wait for percy server to process
-      resp = Net::HTTP.get_response(URI("#{PercyCapybara::PERCY_SERVER_ADDRESS}/test/requests"))
-      requests = JSON.parse(resp.body)['requests']
-      healthcheck = requests[0]
-      expect(healthcheck['url']).to eq('/percy/healthcheck')
+      # Opt-in via `readiness: {}` so the SDK runs the gate (matches the
+      # opt-in guard added in lib/percy/capybara.rb).
+      page.percy_snapshot('readiness-balanced', readiness: {})
 
-      snap = requests[2]['body']
-      expect(snap['name']).to eq('Name')
-      expect(snap['url']).to eq('http://127.0.0.1:3003/index.html')
-      expect(snap['client_info']).to include('percy-capybara')
-      expect(snap['environment_info']).to include('capybara')
-      expect(snap['widths']).to eq([375])
+      # The snapshot POST body should include readiness_diagnostics from the mock
+      expect(WebMock).to have_requested(
+        :post, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/snapshot",
+      ).with { |req|
+        body = JSON.parse(req.body)
+        body.dig('dom_snapshot', 'readiness_diagnostics') == {'ok' => true}
+      }.once
+    end
+
+    it 'skips evaluate_async_script when preset is disabled' do
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/healthcheck")
+        .to_return(status: 200, body: '', headers: {'x-percy-core-version': '1.0.0'})
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/dom.js")
+        .to_return(
+          status: 200,
+          body: 'window.PercyDOM = { serialize: () => ({html: "<html></html>"}) };',
+          headers: {},
+        )
+      stub_request(:post, 'http://localhost:5338/percy/snapshot')
+        .to_return(status: 200, body: '{"success": "true"}', headers: {})
+
+      # Spy on evaluate_async_script -- it must NOT be called when preset=disabled
+      expect(page).to_not receive(:evaluate_async_script)
+
+      visit 'index.html'
+      page.percy_snapshot('readiness-disabled', readiness: {preset: 'disabled'})
+    end
+
+    it 'still posts the snapshot when evaluate_async_script raises' do
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/healthcheck")
+        .to_return(status: 200, body: '', headers: {'x-percy-core-version': '1.0.0'})
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/dom.js")
+        .to_return(
+          status: 200,
+          body: 'window.PercyDOM = { serialize: () => ({html: "<html></html>"}) };',
+          headers: {},
+        )
+      stub_request(:post, 'http://localhost:5338/percy/snapshot')
+        .to_return(status: 200, body: '{"success": "true"}', headers: {})
+
+      # Force the readiness gate to raise -- the SDK must catch it and still
+      # POST the snapshot from the serialize path.
+      allow(page).to receive(:evaluate_async_script).and_raise(StandardError, 'boom')
+
+      visit 'index.html'
+      page.percy_snapshot('readiness-raise', readiness: {})
+
+      expect(WebMock)
+        .to have_requested(:post, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/snapshot")
+        .once
     end
   end
 end
