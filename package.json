@@ -1,9 +1,9 @@
 {
-  "private": true,
-  "scripts": {
-    "test": "percy exec --testing -- bundle exec rspec"
-  },
-  "devDependencies": {
-    "@percy/cli": "1.31.14"
+    "private": true,
+    "scripts": {
+      "test": "percy exec --testing -- bundle exec rspec"
+    },
+    "devDependencies": {
+      "@percy/cli": "^1.31.15-beta.0"
+    }
   }
-}
