@@ -6,12 +6,16 @@ RSpec/InstanceVariable:
     -
 RSpec/ContextWording:
   Enabled: false
+RSpec/MultipleDescribes:
+  Enabled: false
+Style/BracesAroundHashParameters:
+  Enabled: false
 AllCops:
   TargetRubyVersion: 2.4
   Include:
     - lib/**/*.rb
     - spec/lib/**/*.rb
 
-Layout/LineLength:
+Metrics/LineLength:
   Exclude:
     - spec/**/*

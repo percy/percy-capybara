@@ -477,4 +477,3 @@ RSpec.describe PercyCapybara do
     end
   end
 end
-# rubocop:enable RSpec/MultipleDescribes
