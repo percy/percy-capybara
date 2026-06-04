@@ -24,10 +24,15 @@ jobs:
           if [ -z "$RUBYGEMS_API_KEY" ]; then
             echo "❌ ERROR: RUBYGEMS_API_KEY is empty or missing in Settings → Secrets!"
             exit 1
-          else
-            echo "✅ RUBYGEMS_API_KEY is present (length: ${#RUBYGEMS_API_KEY})."
           fi
+          # Detect trailing whitespace/newline (the prime suspect for the
+          # gem push 401) WITHOUT disclosing the value or its length.
+          case "$RUBYGEMS_API_KEY" in
+            *[![:space:]]) echo "✅ RUBYGEMS_API_KEY present, no trailing whitespace." ;;
+            *) echo "⚠️ RUBYGEMS_API_KEY present but has trailing whitespace/newline — re-set it with printf (no newline)." ;;
+          esac
       - name: Build and publish gem to RubyGems
+        if: github.event_name == 'release'
         run: make release
         env:
           GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
