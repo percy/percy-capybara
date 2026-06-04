@@ -16,7 +16,7 @@ jobs:
           path: "./vendor/bundle"
           key: v1/${{ runner.os }}/ruby-2.6/${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: v1/${{ runner.os }}/ruby-2.6/
-      - uses: cadwallion/publish-rubygems-action@master
+      - name: Build and publish gem to RubyGems
+        run: make release
         env:
-          RUBYGEMS_API_KEY: ${{secrets.RUBYGEMS_API_KEY}}
-          RELEASE_COMMAND: make release
+          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
