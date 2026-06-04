@@ -2,6 +2,7 @@ name: Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -16,6 +17,16 @@ jobs:
           path: "./vendor/bundle"
           key: v1/${{ runner.os }}/ruby-2.6/${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: v1/${{ runner.os }}/ruby-2.6/
+      - name: Debug secret presence
+        env:
+          RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+        run: |
+          if [ -z "$RUBYGEMS_API_KEY" ]; then
+            echo "❌ ERROR: RUBYGEMS_API_KEY is empty or missing in Settings → Secrets!"
+            exit 1
+          else
+            echo "✅ RUBYGEMS_API_KEY is present (length: ${#RUBYGEMS_API_KEY})."
+          fi
       - name: Build and publish gem to RubyGems
         run: make release
         env:
