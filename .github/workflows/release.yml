@@ -2,7 +2,6 @@ name: Release
 on:
   release:
     types: [published]
-  workflow_dispatch:
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -17,22 +16,7 @@ jobs:
           path: "./vendor/bundle"
           key: v1/${{ runner.os }}/ruby-2.6/${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: v1/${{ runner.os }}/ruby-2.6/
-      - name: Debug secret presence
-        env:
-          RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
-        run: |
-          if [ -z "$RUBYGEMS_API_KEY" ]; then
-            echo "❌ ERROR: RUBYGEMS_API_KEY is empty or missing in Settings → Secrets!"
-            exit 1
-          fi
-          # Detect trailing whitespace/newline (the prime suspect for the
-          # gem push 401) WITHOUT disclosing the value or its length.
-          case "$RUBYGEMS_API_KEY" in
-            *[![:space:]]) echo "✅ RUBYGEMS_API_KEY present, no trailing whitespace." ;;
-            *) echo "⚠️ RUBYGEMS_API_KEY present but has trailing whitespace/newline — re-set it with printf (no newline)." ;;
-          esac
       - name: Build and publish gem to RubyGems
-        if: github.event_name == 'release'
         run: |
           mkdir -p ~/.gem
           cat << EOF > ~/.gem/credentials
