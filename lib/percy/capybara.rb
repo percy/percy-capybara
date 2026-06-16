@@ -34,8 +34,11 @@ module PercyCapybara
       config_options = @cli_config&.dig('snapshot') || {}
       merged_options = config_options.merge(options.transform_keys(&:to_s))
 
+      # Strip the SDK-internal `readiness` key so it does not leak into serialize.
+      serialize_options = merged_options.reject { |k, _| k == 'readiness' }
+
       dom_snapshot = page
-        .evaluate_script("(function() { return PercyDOM.serialize(#{merged_options.to_json}) })()")
+        .evaluate_script("(function() { return PercyDOM.serialize(#{serialize_options.to_json}) })()")
 
       if readiness_diagnostics && dom_snapshot.is_a?(Hash)
         dom_snapshot['readiness_diagnostics'] = readiness_diagnostics
@@ -49,9 +52,8 @@ module PercyCapybara
         environment_info: ENV_INFO,
         **options,)
 
-      unless response.body.to_json['success']
-        raise StandardError, data['error']
-      end
+      parsed = (JSON.parse(response.body) rescue {})
+      raise StandardError, (parsed['error'] || 'Unknown error') unless parsed['success']
     rescue StandardError => e
       log("Could not take DOM snapshot '#{name}'")
 
