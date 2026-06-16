@@ -226,5 +226,51 @@ RSpec.describe PercyCapybara, type: :feature do
       # No duplicate percyCSS key (string vs symbol collision avoided).
       expect(json.scan(/"percyCSS"/).size).to eq(1)
     end
+
+    it 'deep-merges nested config blocks with per-call options (per-call wins at leaves)' do
+      # Config has a nested discovery block; the per-call discovery overrides
+      # only one leaf. A shallow merge would drop networkIdleTimeout entirely;
+      # the deep merge must keep it while applying the per-call disableCache.
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/healthcheck")
+        .to_return(
+          status: 200,
+          body: {
+            config: {
+              'snapshot' => {
+                'discovery' => {
+                  'networkIdleTimeout' => 50,
+                  'disableCache' => false,
+                },
+              },
+            },
+          }.to_json,
+          headers: {'x-percy-core-version': '1.0.0'},
+        )
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/dom.js")
+        .to_return(
+          status: 200,
+          body: 'window.PercyDOM = { serialize: () => ({html: "<html></html>"}) };',
+          headers: {},
+        )
+      stub_request(:post, 'http://localhost:5338/percy/snapshot')
+        .to_return(status: 200, body: '{"success": "true"}', headers: {})
+
+      serialize_script = nil
+      allow(page).to receive(:evaluate_script) do |script|
+        serialize_script = script if script.include?('PercyDOM.serialize')
+        {'html' => '<html></html>'}
+      end
+
+      page.percy_snapshot('deep-merge', discovery: {disableCache: true})
+
+      expect(serialize_script).to_not be_nil
+      json = serialize_script[/PercyDOM\.serialize\((\{.*?\})\)/m, 1]
+      merged = JSON.parse(json)
+
+      # Nested config-only leaf survives the deep merge.
+      expect(merged.dig('discovery', 'networkIdleTimeout')).to eq(50)
+      # Per-call leaf overrides the nested config value.
+      expect(merged.dig('discovery', 'disableCache')).to eq(true)
+    end
   end
 end
