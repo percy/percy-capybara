@@ -34,11 +34,8 @@ module PercyCapybara
       config_options = @cli_config&.dig('snapshot') || {}
       merged_options = config_options.merge(options.transform_keys(&:to_s))
 
-      # Strip the SDK-internal `readiness` key so it does not leak into serialize.
-      serialize_options = merged_options.reject { |k, _| k == 'readiness' }
-
       dom_snapshot = page
-        .evaluate_script("(function() { return PercyDOM.serialize(#{serialize_options.to_json}) })()")
+        .evaluate_script("(function() { return PercyDOM.serialize(#{merged_options.to_json}) })()")
 
       if readiness_diagnostics && dom_snapshot.is_a?(Hash)
         dom_snapshot['readiness_diagnostics'] = readiness_diagnostics
@@ -52,8 +49,9 @@ module PercyCapybara
         environment_info: ENV_INFO,
         **options,)
 
-      parsed = (JSON.parse(response.body) rescue {})
-      raise StandardError, (parsed['error'] || 'Unknown error') unless parsed['success']
+      unless response.body.to_json['success']
+        raise StandardError, data['error']
+      end
     rescue StandardError => e
       log("Could not take DOM snapshot '#{name}'")
 
@@ -84,17 +82,8 @@ module PercyCapybara
         return false
       end
 
-      parsed = if response.body.to_s.empty?
-        {}
-      else
-        begin
-          JSON.parse(response.body)
-        rescue JSON::ParserError
-          {}
-        end
-      end
-      config = parsed.is_a?(Hash) ? parsed['config'] : nil
-      @cli_config = config.is_a?(Hash) ? config : {}
+      body = response.body.to_s.empty? ? {} : JSON.parse(response.body)
+      @cli_config = body['config'] || {}
       @percy_enabled = true
       true
     rescue StandardError => e
