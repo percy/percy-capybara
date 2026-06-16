@@ -173,5 +173,56 @@ RSpec.describe PercyCapybara, type: :feature do
         .to have_requested(:post, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/snapshot")
         .once
     end
+
+    # --- .percy.yml config <-> per-snapshot merge precedence ----
+
+    it 'merges .percy.yml config with per-call options (per-call wins, no dup keys)' do
+      # Healthcheck returns a config with a snapshot block: a config-only key
+      # (enableJavaScript) plus a percyCSS the per-call option will override.
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/healthcheck")
+        .to_return(
+          status: 200,
+          body: {
+            config: {
+              'snapshot' => {
+                'enableJavaScript' => true,
+                'percyCSS' => 'FROM_CONFIG',
+              },
+            },
+          }.to_json,
+          headers: {'x-percy-core-version': '1.0.0'},
+        )
+      stub_request(:get, "#{PercyCapybara::PERCY_SERVER_ADDRESS}/percy/dom.js")
+        .to_return(
+          status: 200,
+          body: 'window.PercyDOM = { serialize: () => ({html: "<html></html>"}) };',
+          headers: {},
+        )
+      stub_request(:post, 'http://localhost:5338/percy/snapshot')
+        .to_return(status: 200, body: '{"success": "true"}', headers: {})
+
+      # Capture the JS string passed to PercyDOM.serialize without a real browser.
+      # evaluate_script is called twice: once to inject @percy/dom (fetch_percy_dom),
+      # then once for the serialize call we want to inspect.
+      serialize_script = nil
+      allow(page).to receive(:evaluate_script) do |script|
+        serialize_script = script if script.include?('PercyDOM.serialize')
+        {'html' => '<html></html>'}
+      end
+
+      page.percy_snapshot('merge-precedence', percyCSS: 'FROM_CALL')
+
+      expect(serialize_script).not_to be_nil
+      # Extract the JSON object handed to PercyDOM.serialize.
+      json = serialize_script[/PercyDOM\.serialize\((\{.*\})\)/m, 1]
+      merged = JSON.parse(json)
+
+      # Config-only key survives the merge.
+      expect(merged['enableJavaScript']).to eq(true)
+      # Per-call option overrides the config value.
+      expect(merged['percyCSS']).to eq('FROM_CALL')
+      # No duplicate percyCSS key (string vs symbol collision avoided).
+      expect(json.scan(/"percyCSS"/).size).to eq(1)
+    end
   end
 end
