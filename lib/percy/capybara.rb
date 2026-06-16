@@ -82,8 +82,17 @@ module PercyCapybara
         return false
       end
 
-      body = response.body.to_s.empty? ? {} : JSON.parse(response.body)
-      @cli_config = body['config'] || {}
+      parsed = if response.body.to_s.empty?
+        {}
+      else
+        begin
+          JSON.parse(response.body)
+        rescue JSON::ParserError
+          {}
+        end
+      end
+      config = parsed.is_a?(Hash) ? parsed['config'] : nil
+      @cli_config = config.is_a?(Hash) ? config : {}
       @percy_enabled = true
       true
     rescue StandardError => e
