@@ -32,7 +32,7 @@ module PercyCapybara
 
       # Merge .percy.yml config options with snapshot options (snapshot options take priority)
       config_options = @cli_config&.dig('snapshot') || {}
-      merged_options = config_options.merge(options)
+      merged_options = config_options.merge(options.transform_keys(&:to_s))
 
       dom_snapshot = page
         .evaluate_script("(function() { return PercyDOM.serialize(#{merged_options.to_json}) })()")
@@ -82,7 +82,7 @@ module PercyCapybara
         return false
       end
 
-      body = JSON.parse(response.body)
+      body = response.body.to_s.empty? ? {} : JSON.parse(response.body)
       @cli_config = body['config'] || {}
       @percy_enabled = true
       true
