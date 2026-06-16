@@ -212,9 +212,11 @@ RSpec.describe PercyCapybara, type: :feature do
 
       page.percy_snapshot('merge-precedence', percyCSS: 'FROM_CALL')
 
-      expect(serialize_script).not_to be_nil
+      expect(serialize_script).to_not be_nil
       # Extract the JSON object handed to PercyDOM.serialize.
-      json = serialize_script[/PercyDOM\.serialize\((\{.*\})\)/m, 1]
+      # Non-greedy so we stop at the matching close brace and don't swallow the
+      # trailing `) })()` from the wrapping IIFE.
+      json = serialize_script[/PercyDOM\.serialize\((\{.*?\})\)/m, 1]
       merged = JSON.parse(json)
 
       # Config-only key survives the merge.
