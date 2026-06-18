@@ -40,7 +40,8 @@ RSpec.configure do |config|
   # Setup for Capybara to test static files served by Rack
   Capybara.server_port = 3003
   Capybara.server = :puma, { Silent: true }
-  Capybara.app = Rack::File.new(File.join(File.dirname(__FILE__), 'fixture'))
+  rack_file_server = defined?(Rack::Files) ? Rack::Files : Rack::File
+  Capybara.app = rack_file_server.new(File.join(File.dirname(__FILE__), 'fixture'))
 
   # Ignore warning until Capybara releases an update solving their warning
   Selenium::WebDriver.logger.ignore(:browser_options)
