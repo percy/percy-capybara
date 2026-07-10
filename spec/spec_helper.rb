@@ -52,5 +52,6 @@ Capybara::Session.class_eval {
   def __percy_clear_cache!
     @percy_dom = nil
     @percy_enabled = nil
+    @cli_config = nil
   end
 }

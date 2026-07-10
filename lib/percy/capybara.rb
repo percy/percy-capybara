@@ -1,3 +1,4 @@
+require 'json'
 require 'net/http'
 require 'uri'
 require 'capybara/dsl'
@@ -38,8 +39,14 @@ module PercyCapybara
       # older CLIs that lack waitForReady.
       readiness_diagnostics = wait_for_ready(page, options)
 
+      # Merge .percy.yml config options with snapshot options (snapshot options take priority).
+      # Deep merge with consistent string keys at all levels: nested Hashes merge
+      # recursively, per-call wins at leaves, arrays/scalars replace.
+      config_options = @cli_config&.dig('snapshot') || {}
+      merged_options = deep_merge_options(config_options, deep_stringify(options))
+
       dom_snapshot = page
-        .evaluate_script("(function() { return PercyDOM.serialize(#{options.to_json}) })()")
+        .evaluate_script("(function() { return PercyDOM.serialize(#{merged_options.to_json}) })()")
 
       if readiness_diagnostics && dom_snapshot.is_a?(Hash)
         dom_snapshot['readiness_diagnostics'] = readiness_diagnostics
@@ -224,6 +231,8 @@ module PercyCapybara
         return false
       end
 
+      body = response.body.to_s.empty? ? {} : JSON.parse(response.body)
+      @cli_config = body['config'] || {}
       @percy_enabled = true
       true
     rescue StandardError => e
@@ -273,6 +282,24 @@ module PercyCapybara
     rescue StandardError => e
       if PERCY_DEBUG then log("waitForReady failed, proceeding to serialize: #{e}") end
       nil
+    end
+  end
+
+  # Recursively stringify all Hash keys so per-call options match the
+  # string-keyed config parsed from .percy.yml JSON at every nesting level.
+  private def deep_stringify(obj)
+    case obj
+    when Hash then obj.each_with_object({}) { |(k, v), h| h[k.to_s] = deep_stringify(v) }
+    when Array then obj.map { |e| deep_stringify(e) }
+    else obj
+    end
+  end
+
+  # Deep-merge two string-keyed Hashes: nested Hashes merge recursively,
+  # per-call (override) wins at the leaves, arrays/scalars replace.
+  private def deep_merge_options(base, override)
+    base.merge(override) do |_key, old_val, new_val|
+      old_val.is_a?(Hash) && new_val.is_a?(Hash) ? deep_merge_options(old_val, new_val) : new_val
     end
   end
 
