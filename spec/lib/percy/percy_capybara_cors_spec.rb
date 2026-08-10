@@ -286,6 +286,109 @@ RSpec.describe PercyCapybara do
     end
   end
 
+  # Mirrors capybara-playwright-driver, which declares `private def browser`.
+  def build_private_browser_driver
+    klass = Class.new do
+      def browser
+        raise 'browser must never be reached on a non-Selenium driver'
+      end
+    end
+    klass.send(:private, :browser)
+    klass.new
+  end
+
+  describe '#selenium_browser' do
+    it 'returns nil when the driver keeps #browser private (playwright driver)' do
+      page = double('page', driver: build_private_browser_driver)
+      expect(test_instance.send(:selenium_browser, page)).to be_nil
+    end
+
+    it 'returns nil when the driver has no #browser at all (rack-test)' do
+      page = double('page', driver: double('rack_test_driver'))
+      expect(test_instance.send(:selenium_browser, page)).to be_nil
+    end
+
+    it 'returns nil when #browser exists but is not a Selenium browser' do
+      stub_const('PercyCapybara::PERCY_DEBUG', true)
+      page = double('page', driver: double('cap_driver', browser: double('not_selenium')))
+
+      expect {
+        expect(test_instance.send(:selenium_browser, page)).to be_nil
+      }.to output(/driver is not Selenium-backed/).to_stdout
+    end
+
+    it 'returns nil and logs when reading #browser raises' do
+      stub_const('PercyCapybara::PERCY_DEBUG', true)
+      cap_driver = double('cap_driver')
+      allow(cap_driver).to receive(:browser).and_raise(StandardError.new('no session'))
+      page = double('page', driver: cap_driver)
+
+      expect {
+        expect(test_instance.send(:selenium_browser, page)).to be_nil
+      }.to output(/Skipping cross-origin iframe capture: no session/).to_stdout
+    end
+
+    it 'returns the browser for a Selenium-backed driver' do
+      browser = double('browser', find_elements: [], switch_to: nil)
+      page = double('page', driver: double('cap_driver', browser: browser))
+      expect(test_instance.send(:selenium_browser, page)).to be(browser)
+    end
+  end
+
+  describe '#get_serialized_dom on a non-Selenium driver' do
+    let(:percy_dom_script) { 'window.PercyDOM = {};' }
+
+    # Regression guard for PER-10430: percy-capybara 5.0.1 called
+    # `page.driver.browser` unguarded, so any driver keeping that method private
+    # raised NoMethodError out of get_serialized_dom and the whole snapshot was
+    # dropped by percy_snapshot's rescue.
+    it 'returns the serialized DOM instead of raising' do
+      page = double(
+        'page',
+        current_url: 'https://example.com/',
+        driver: build_private_browser_driver,
+      )
+      allow(page).to receive(:evaluate_script).and_return('html' => '<page/>')
+
+      result = nil
+      expect {
+        result = test_instance.send(:get_serialized_dom, page, {}, percy_dom_script)
+      }.to_not raise_error
+
+      expect(result).to eq('html' => '<page/>')
+      expect(result).to_not have_key('corsIframes')
+    end
+  end
+
+  describe '#percy_snapshot cross-origin iframe payload' do
+    # get_serialized_dom's return value -- including corsIframes -- must be what
+    # is POSTed. 5.0.1 overwrote it with a second bare serialize, so captured
+    # cross-origin iframes never reached the CLI.
+    it 'posts the corsIframes captured by get_serialized_dom' do
+      instance = Class.new { include PercyCapybara }.new
+      allow(instance).to receive(:percy_enabled?).and_return(true)
+      allow(instance).to receive(:fetch_percy_dom).and_return('window.PercyDOM={};')
+
+      session = double('session', current_url: 'https://example.com/')
+      allow(session).to receive(:evaluate_script).and_return('html' => '<x/>')
+      allow(Capybara).to receive(:current_session).and_return(session)
+
+      allow(instance).to receive(:get_serialized_dom)
+        .and_return('html' => '<x/>', 'corsIframes' => [{'frameUrl' => 'https://other.com/f'}])
+
+      posted = nil
+      allow(instance).to receive(:fetch) do |_url, data = nil|
+        posted = data
+        instance_double('Net::HTTPResponse', body: '{"success":true}')
+      end
+
+      instance.percy_snapshot('Name')
+
+      expect(posted[:dom_snapshot]['corsIframes'])
+        .to eq([{'frameUrl' => 'https://other.com/f'}])
+    end
+  end
+
   describe '#percy_snapshot error propagation' do
     it 'logs when the server returns success: false' do
       stub_const('PercyCapybara::PERCY_DEBUG', true)
