@@ -287,11 +287,11 @@ RSpec.describe PercyCapybara do
   end
 
   # Mirrors capybara-playwright-driver, which declares `private def browser`.
+  # The body is intentionally empty: selenium_browser must never invoke it, and
+  # a body with a statement in it would be permanently uncovered.
   def build_private_browser_driver
     klass = Class.new do
-      def browser
-        raise 'browser must never be reached on a non-Selenium driver'
-      end
+      def browser; end
     end
     klass.send(:private, :browser)
     klass.new
@@ -299,7 +299,13 @@ RSpec.describe PercyCapybara do
 
   describe '#selenium_browser' do
     it 'returns nil when the driver keeps #browser private (playwright driver)' do
-      page = double('page', driver: build_private_browser_driver)
+      driver = build_private_browser_driver
+      # The mechanism under test: a private #browser is invisible to respond_to?,
+      # which is what makes `page.driver.browser` raise NoMethodError.
+      expect(driver.respond_to?(:browser)).to be false
+      expect(driver.private_methods).to include(:browser)
+
+      page = double('page', driver: driver)
       expect(test_instance.send(:selenium_browser, page)).to be_nil
     end
 
