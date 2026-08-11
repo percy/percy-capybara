@@ -30,8 +30,6 @@ module PercyCapybara
     begin
       percy_dom_script = fetch_percy_dom
       page.evaluate_script(percy_dom_script)
-      dom_snapshot = get_serialized_dom(page, options, percy_dom_script)
-      page.evaluate_script(fetch_percy_dom)
 
       # Readiness gate -- runs before serialize when CLI supports it.
       # Uses evaluate_async_script with a callback signal so the SDK can block
@@ -45,8 +43,9 @@ module PercyCapybara
       config_options = @cli_config&.dig('snapshot') || {}
       merged_options = deep_merge_options(config_options, deep_stringify(options))
 
-      dom_snapshot = page
-        .evaluate_script("(function() { return PercyDOM.serialize(#{merged_options.to_json}) })()")
+      # Single serialize pass -- get_serialized_dom serializes the page with the
+      # merged options and attaches any captured cross-origin iframes.
+      dom_snapshot = get_serialized_dom(page, merged_options, percy_dom_script)
 
       if readiness_diagnostics && dom_snapshot.is_a?(Hash)
         dom_snapshot['readiness_diagnostics'] = readiness_diagnostics
@@ -83,7 +82,9 @@ module PercyCapybara
     dom_snapshot = page
       .evaluate_script("(function() { return PercyDOM.serialize(#{options.to_json}) })()")
 
-    driver = page.driver.browser
+    driver = selenium_browser(page)
+    return dom_snapshot if driver.nil?
+
     begin
       page_origin = get_origin(page.current_url)
       iframes = driver.find_elements(:tag_name, 'iframe')
@@ -136,6 +137,22 @@ module PercyCapybara
     end
 
     dom_snapshot
+  end
+
+  private def selenium_browser(page)
+    driver = page.driver
+    return nil unless driver.respond_to?(:browser)
+
+    browser = driver.browser
+    unless browser.respond_to?(:find_elements) && browser.respond_to?(:switch_to)
+      log('Skipping cross-origin iframe capture: driver is not Selenium-backed') if PERCY_DEBUG
+      return nil
+    end
+
+    browser
+  rescue StandardError => e
+    log("Skipping cross-origin iframe capture: #{e}") if PERCY_DEBUG
+    nil
   end
 
   private def unsupported_iframe_src?(src)
