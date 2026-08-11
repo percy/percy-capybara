@@ -139,18 +139,6 @@ module PercyCapybara
     dom_snapshot
   end
 
-  # Return the underlying Selenium browser for the current driver, or nil when
-  # the driver isn't Selenium-backed.
-  #
-  # Cross-origin iframe capture drives the browser through Selenium's
-  # frame-switching API (`switch_to`, `find_elements`). Other Capybara drivers
-  # don't offer it: capybara-playwright-driver keeps `browser` private, and
-  # rack-test has no browser at all. Those drivers must fall back to the plain
-  # serialized DOM rather than lose the snapshot entirely, so probe for the
-  # capability instead of assuming it.
-  #
-  # `respond_to?` is deliberately the first check -- it is false for a private
-  # method, which is exactly the capybara-playwright-driver case.
   private def selenium_browser(page)
     driver = page.driver
     return nil unless driver.respond_to?(:browser)
