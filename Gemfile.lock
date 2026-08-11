@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    percy-capybara (5.0.1)
+    percy-capybara (5.0.2.pre.0)
       capybara (>= 3)
 
 GEM
