@@ -88,7 +88,7 @@ RSpec.describe PercyCapybara do
 
     it 'detects a BiDi session only from a string webSocketUrl' do
       allow(driver).to receive(:respond_to?).and_return(true)
-      allow(driver).to receive(:capabilities).and_return(web_socket_url: 'ws://x')
+      allow(driver).to receive(:capabilities).and_return(web_socket_url: 'wss://x')
       expect(call(:bidi_session?, driver)).to be true
       allow(driver).to receive(:capabilities).and_return('webSocketUrl' => true)
       expect(call(:bidi_session?, driver)).to be false
@@ -169,12 +169,19 @@ RSpec.describe PercyCapybara do
 
   describe '#expose_closed_shadow_roots_bidi' do
     let(:ws) { double('ws') }
+    # Same signature and body as Selenium's BiDi#send_cmd(method, **params), so
+    # a positional Hash raises like it would against the real binding (which
+    # the Ruby 2.x CI rows' Selenium predates).
     let(:bidi) do
-      if defined?(Selenium::WebDriver::BiDi)
-        b = Selenium::WebDriver::BiDi.allocate
-        b.instance_variable_set(:@ws, ws)
-        b
-      end
+      Class.new do
+        def initialize(ws)
+          @ws = ws
+        end
+
+        def send_cmd(method, **params)
+          @ws.send_cmd(method: method, params: params.compact)['result']
+        end
+      end.new(ws)
     end
 
     def node(id, mode = nil)
@@ -188,13 +195,10 @@ RSpec.describe PercyCapybara do
     end
 
     before(:each) do
-      skip 'binding has no BiDi' unless bidi
       allow(driver).to receive(:window_handle).and_return('ctx-1')
       allow(driver).to receive(:bidi).and_return(bidi)
     end
 
-    # Goes through the real BiDi#send_cmd(method, **params) so keyword
-    # arguments are enforced.
     it 'exposes closed roots and recurses into each one' do
       calls = []
       allow(ws).to receive(:send_cmd) do |method:, params:|
