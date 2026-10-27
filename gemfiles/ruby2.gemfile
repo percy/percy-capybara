@@ -1,0 +1,3 @@
+# selenium-webdriver >= 4.50 and the gems locked alongside it need Ruby >= 3.3,
+# so the Ruby 2.x CI rows install from this lockfile (the pre-4.50 one) instead.
+eval_gemfile File.expand_path('../Gemfile', __dir__)
