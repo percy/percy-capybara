@@ -79,10 +79,12 @@ module PercyCapybara
   end
 
   private def get_serialized_dom(page, options, percy_dom_script)
+    driver = selenium_browser(page)
+    expose_closed_shadow_roots(driver, options) unless driver.nil?
+
     dom_snapshot = page
       .evaluate_script("(function() { return PercyDOM.serialize(#{options.to_json}) })()")
 
-    driver = selenium_browser(page)
     return dom_snapshot if driver.nil?
 
     begin
@@ -137,6 +139,210 @@ module PercyCapybara
     end
 
     dom_snapshot
+  end
+
+  CHROMIUM_BROWSERS = %w[chrome chromium msedge microsoftedge chrome-headless-shell].freeze
+  NON_CDP_BROWSERS = %w[firefox safari].freeze
+  LOCAL_HOSTS = %w[localhost 127.0.0.1 ::1].freeze
+  CLOSED_SHADOW_MAX_HOSTS = 200
+  CLOSED_SHADOW_SET_FN = 'function(shadowRoot) { ' \
+    'window.__percyClosedShadowRoots = window.__percyClosedShadowRoots || new WeakMap(); ' \
+    'window.__percyClosedShadowRoots.set(this, shadowRoot); }'.freeze
+  BIDI_SHADOW_CANDIDATES_FN = '(root) => { const out = []; ' \
+    'const hostable = ' \
+    '/^(article|aside|blockquote|body|div|footer|h[1-6]|header|main|nav|p|section|span)$/; ' \
+    'const walk = (r) => { for (const e of r.querySelectorAll("*")) { ' \
+    'if (e.shadowRoot) walk(e.shadowRoot); ' \
+    'else if (e.localName.includes("-") || hostable.test(e.localName)) out.push(e); } }; ' \
+    'walk(root || document); return out; }'.freeze
+  BIDI_SHADOW_SET_FN = '(pairs) => { ' \
+    'const m = window.__percyClosedShadowRoots = ' \
+    'window.__percyClosedShadowRoots || new WeakMap(); ' \
+    'for (const [h, s] of pairs) m.set(h, s); }'.freeze
+  CLASSIC_SHADOW_CANDIDATES_JS = 'const out = []; ' \
+    'const walk = (r) => { for (const e of r.querySelectorAll("*")) { ' \
+    'if (e.shadowRoot) walk(e.shadowRoot); else if (e.localName.includes("-")) out.push(e); } }; ' \
+    'walk(arguments[0] || document); return out;'.freeze
+  CLASSIC_SHADOW_SET_JS = '(window.__percyClosedShadowRoots = ' \
+    'window.__percyClosedShadowRoots || new WeakMap()).set(arguments[0], arguments[1]);'.freeze
+
+  # Mirrors percy-selenium-ruby's expose_closed_shadow_roots (same strategies
+  # and order) without depending on that gem. @percy/dom reads closed roots
+  # from window.__percyClosedShadowRoots because page JS cannot reach them.
+  private def expose_closed_shadow_roots(driver, options)
+    return if options['disableShadowDOM'] || options[:disableShadowDOM]
+    return if chromium_with_cdp?(driver) && expose_closed_shadow_roots_cdp(driver)
+    return if bidi_session?(driver) && expose_closed_shadow_roots_bidi(driver)
+
+    expose_closed_shadow_roots_classic(driver) if closed_shadow_classic_allowed?(driver)
+  rescue StandardError => e
+    log("Could not expose closed shadow roots: #{e}")
+  end
+
+  private def browser_name(driver)
+    driver.capabilities.browser_name.to_s.downcase
+  rescue StandardError
+    ''
+  end
+
+  private def chromium_with_cdp?(driver)
+    return false unless driver.respond_to?(:execute_cdp)
+
+    name = browser_name(driver)
+    CHROMIUM_BROWSERS.include?(name) || !NON_CDP_BROWSERS.include?(name)
+  end
+
+  # Only a session started with `webSocketUrl: true` has a BiDi socket.
+  private def bidi_session?(driver)
+    return false unless driver.respond_to?(:bidi) && driver.respond_to?(:capabilities)
+
+    caps = driver.capabilities
+    (caps[:web_socket_url] || caps['webSocketUrl']).is_a?(String)
+  rescue StandardError
+    false
+  end
+
+  private def expose_closed_shadow_roots_cdp(driver)
+    driver.execute_cdp('DOM.enable')
+    root = driver.execute_cdp('DOM.getDocument', depth: -1, pierce: true)&.dig('root')
+    return false if root.nil?
+
+    closed_shadow_pairs(root).each do |host_id, shadow_id|
+      host = driver.execute_cdp('DOM.resolveNode', backendNodeId: host_id).dig('object', 'objectId')
+      shadow = driver.execute_cdp('DOM.resolveNode', backendNodeId: shadow_id)
+        .dig('object', 'objectId')
+      next unless host && shadow
+
+      driver.execute_cdp(
+        'Runtime.callFunctionOn',
+        functionDeclaration: CLOSED_SHADOW_SET_FN, objectId: host, arguments: [{objectId: shadow}],
+      )
+    end
+    true
+  rescue StandardError => e
+    log("Could not expose closed shadow roots via CDP: #{e}") if PERCY_DEBUG
+    false
+  end
+
+  # Child frame documents are skipped: their closed roots would need the
+  # WeakMap in the frame's own realm.
+  private def closed_shadow_pairs(node, pairs = [])
+    return pairs if node.nil? || node['contentDocument']
+
+    (node['shadowRoots'] || []).each do |shadow|
+      if shadow['shadowRootType'] == 'closed'
+        pairs << [node['backendNodeId'], shadow['backendNodeId']]
+      end
+      closed_shadow_pairs(shadow, pairs)
+    end
+    (node['children'] || []).each { |child| closed_shadow_pairs(child, pairs) }
+    pairs
+  end
+
+  # Selenium Ruby has no typed script module, so this uses the raw BiDi command.
+  private def expose_closed_shadow_roots_bidi(driver)
+    context = driver.window_handle
+    scopes = [nil]
+    exposed = 0
+    until scopes.empty?
+      scope = scopes.shift
+      args = scope ? [{sharedId: scope}] : []
+      nodes = bidi_call_function(driver, context, BIDI_SHADOW_CANDIDATES_FN, args)['value'] || []
+      pairs = nodes.map do |node|
+        shadow = node.dig('value', 'shadowRoot')
+        [node['sharedId'], shadow['sharedId']] if shadow && shadow.dig('value', 'mode') == 'closed'
+      end.compact
+      next if pairs.empty?
+
+      refs = pairs.map do |host, shadow|
+        {type: 'array', value: [{sharedId: host}, {sharedId: shadow}]}
+      end
+      bidi_call_function(driver, context, BIDI_SHADOW_SET_FN, [{type: 'array', value: refs}])
+      exposed += pairs.length
+      break if exposed >= closed_shadow_max_hosts
+
+      scopes.concat(pairs.map(&:last))
+    end
+    true
+  rescue StandardError => e
+    log("Could not expose closed shadow roots via BiDi: #{e}") if PERCY_DEBUG
+    false
+  end
+
+  private def bidi_call_function(driver, context, function, args)
+    response = driver.bidi.send_cmd(
+      'script.callFunction',
+      functionDeclaration: function, awaitPromise: false, target: {context: context},
+      arguments: args, resultOwnership: 'none',
+      serializationOptions: {maxDomDepth: 0, includeShadowTree: 'all'},
+    )
+    unless response['type'] == 'success'
+      raise StandardError, "script.callFunction #{response['type']}"
+    end
+
+    response['result'] || {}
+  end
+
+  # W3C Get Element Shadow Root returns closed roots too. It costs one round
+  # trip per candidate, hence the cap and the local-only default.
+  private def expose_closed_shadow_roots_classic(driver)
+    max_hosts = closed_shadow_max_hosts
+    checked = 0
+    scopes = [nil]
+    capped = false
+    until scopes.empty? || capped
+      hosts = driver.execute_script(CLASSIC_SHADOW_CANDIDATES_JS, scopes.shift) || []
+      hosts.each do |host|
+        capped = checked >= max_hosts
+        break if capped
+
+        checked += 1
+        shadow = element_shadow_root(host)
+        next if shadow.nil?
+
+        driver.execute_script(CLASSIC_SHADOW_SET_JS, host, shadow)
+        scopes << shadow
+      end
+    end
+    return unless capped && PERCY_DEBUG
+
+    log("Closed shadow root scan stopped at #{max_hosts} hosts (PERCY_CLOSED_SHADOW_MAX_HOSTS)")
+  end
+
+  # NoSuchShadowRoot means "not a host"; Safari answers null, which the
+  # binding cannot wrap. Both mean skip.
+  private def element_shadow_root(host)
+    host.shadow_root
+  rescue StandardError
+    nil
+  end
+
+  private def closed_shadow_max_hosts
+    value = Integer(ENV['PERCY_CLOSED_SHADOW_MAX_HOSTS'] || CLOSED_SHADOW_MAX_HOSTS)
+    value > 0 ? value : CLOSED_SHADOW_MAX_HOSTS
+  rescue ArgumentError, TypeError
+    CLOSED_SHADOW_MAX_HOSTS
+  end
+
+  # Remote grids add a full round trip per candidate, so classic is opt-in there.
+  private def closed_shadow_classic_allowed?(driver)
+    return true if ENV['PERCY_CLOSED_SHADOW_CLASSIC'] == 'true'
+    return true if LOCAL_HOSTS.include?(command_executor_host(driver))
+
+    unless @closed_shadow_remote_logged
+      @closed_shadow_remote_logged = true
+      log('closed shadow roots skipped on remote session; start the session with ' \
+          'webSocketUrl: true or set PERCY_CLOSED_SHADOW_CLASSIC=true')
+    end
+    false
+  end
+
+  private def command_executor_host(driver)
+    return nil unless driver.respond_to?(:bridge, true)
+
+    URI.parse(driver.send(:bridge).http.send(:server_url).to_s).hostname
+  rescue StandardError
+    nil
   end
 
   private def selenium_browser(page)
