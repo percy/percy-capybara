@@ -50,7 +50,7 @@ jobs:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: v1/${{ runner.os }}/node-${{ matrix.node }}/${{ hashFiles('**/yarn.lock') }}
           restore-keys: v1/${{ runner.os }}/node-${{ matrix.node }}/
-      - run: yarn
+      - run: yarn install --frozen-lockfile
       - name: Set up @percy/cli from git
         if: ${{ github.event_name == 'workflow_dispatch' }}
         env:
